@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Jenkins (Có lưu trạng thái)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        .option-item:hover {
+            background-color: #e2e6ea;
+            border-color: #adb5bd;
+        }
+        .option-item.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .option-item.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        /* Style for user selected wrong answer */
+        .option-item.user-selected-wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        /* Opacity for unselected items when question is done */
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+        .btn-prev:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #adb5bd;
+        }
+        .btn-next {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #0056b3;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>Jenkins Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Back</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Next</button>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu câu hỏi
+    const quizData = [
+        // Page 1-3: Intro & History
+        {
+            q: "Jenkins là loại công cụ phần mềm nào?",
+            options: ["Hệ điều hành", "Automation server mã nguồn mở", "Cơ sở dữ liệu", "Trình biên dịch Java"],
+            a: 1,
+            explain: "Jenkins là một automation server mã nguồn mở được viết bằng Java.",
+            ref: "Page 2"
+        },
+        {
+            q: "Ngôn ngữ lập trình chính được sử dụng để viết Jenkins là gì?",
+            options: ["Python", "C++", "Java", "Go"],
+            a: 2,
+            explain: "Jenkins được viết bằng Java.",
+            ref: "Page 2"
+        },
+        {
+            q: "Tên ban đầu của Jenkins trước khi đổi tên là gì?",
+            options: ["Hudson", "Jeeves", "Butler", "Worker"],
+            a: 0,
+            explain: "Jenkins ban đầu được phát triển dưới tên gọi là Hudson tại Sun Microsystems vào năm 2004.",
+            ref: "Page 3"
+        },
+        {
+            q: "Jenkins xuất hiện sau cuộc tranh chấp với công ty nào vào năm 2011?",
+            options: ["Microsoft", "Google", "Oracle", "IBM"],
+            a: 2,
+            explain: "Jenkins xuất hiện sau một cuộc tranh chấp giữa Oracle và cộng đồng mã nguồn mở Hudson vào năm 2011.",
+            ref: "Page 3"
+        },
+        {
+            q: "Mục đích chính của Jenkins trong phát triển phần mềm là gì?",
+            options: ["Thiết kế giao diện người dùng", "Quản lý cơ sở dữ liệu", "Hỗ trợ CI/CD (Continuous Integration/Continuous Delivery)", "Viết code tự động"],
+            a: 2,
+            explain: "Jenkins giúp tự động hóa các phần của phát triển phần mềm liên quan đến xây dựng, kiểm thử và triển khai, hỗ trợ CI/CD.",
+            ref: "Page 2"
+        },
+
+        // Page 4-6: Key Concepts
+        {
+            q: "Trong Jenkins, một 'Pipeline' được định nghĩa là gì?",
+            options: ["Một plugin", "Một tập hợp các tác vụ tự động để build, test và deploy", "Một server chứa code", "Một lỗi trong quá trình build"],
+            a: 1,
+            explain: "Pipeline là một tập hợp các tác vụ được tự động hóa để build, test và deploy phần mềm.",
+            ref: "Page 4"
+        },
+        {
+            q: "Khái niệm 'Job' trong Jenkins đại diện cho điều gì?",
+            options: ["Một nhân viên", "Một task hoặc một bước trong pipeline", "Một server", "Một repository"],
+            a: 1,
+            explain: "Một job trong Jenkins đại diện cho một task hoặc một bước trong pipeline.",
+            ref: "Page 4"
+        },
+        {
+            q: "Kết quả của việc thực thi một Job được gọi là gì?",
+            options: ["Artifact", "Code", "Build", "Release"],
+            a: 2,
+            explain: "Một 'build' là kết quả của việc thực thi một job.",
+            ref: "Page 5"
+        },
+        {
+            q: "Kiến trúc mà Jenkins sử dụng để quản lý các máy thực thi job là gì?",
+            options: ["Peer-to-Peer", "Master-Slave", "Client-Server đơn giản", "Microservices"],
+            a: 1,
+            explain: "Jenkins sử dụng kiến trúc master-slave để quản lý các máy khác nhau thực thi jobs.",
+            ref: "Page 5"
+        },
+        {
+            q: "Vai trò của Master Node trong Jenkins là gì?",
+            options: ["Chỉ chạy test", "Xử lý lập lịch (scheduling) và điều phối (orchestration) jobs", "Lưu trữ source code", "Tạo giao diện đồ họa"],
+            a: 1,
+            explain: "Master Node xử lý việc lập lịch và điều phối các jobs.",
+            ref: "Page 5"
+        },
+        {
+            q: "'Executors' trong Jenkins là gì?",
+            options: ["Người quản trị hệ thống", "Các plugin", "Các khe (slots) trên một node để thực thi job", "File cấu hình"],
+            a: 2,
+            explain: "Executors là các slots trên một node dùng để thực thi jobs. Bạn có thể cấu hình số lượng job chạy đồng thời.",
+            ref: "Page 5"
+        },
+        {
+            q: "Jenkins tích hợp với các công cụ phát triển khác chủ yếu thông qua cơ chế nào?",
+            options: ["API", "Plugins", "Command Line", "Database"],
+            a: 1,
+            explain: "Jenkins có kiến trúc dựa trên plugin cho phép nó tích hợp với hầu hết các công cụ phát triển.",
+            ref: "Page 6"
+        },
+        {
+            q: "Plugin nào dùng để tích hợp mã nguồn?",
+            options: ["Maven Plugin", "Docker Plugin", "Git Plugin", "Slack Plugin"],
+            a: 2,
+            explain: "Git Plugin được dùng để tích hợp mã nguồn (source code integration).",
+            ref: "Page 6"
+        },
+
+        // Page 7-9: Setup
+        {
+            q: "Để cài đặt Jenkins, máy của bạn bắt buộc phải có phần mềm nào?",
+            options: ["Python", "Java (JDK)", "Node.js", "C#"],
+            a: 1,
+            explain: "Jenkins chạy trên Java, nên bạn cần cài đặt Java (khuyên dùng JDK 17).",
+            ref: "Page 7"
+        },
+        {
+            q: "Cổng mặc định mà Jenkins chạy sau khi cài đặt là bao nhiêu?",
+            options: ["80", "443", "8080", "3000"],
+            a: 2,
+            explain: "Sau khi cài đặt, Jenkins chạy trên http://localhost:8080.",
+            ref: "Page 9"
+        },
+        {
+            q: "Trên Linux (Ubuntu/Debian), file chứa mật khẩu quản trị ban đầu (initial admin password) nằm ở đâu?",
+            options: ["/etc/jenkins/password", "/var/lib/jenkins/secrets/initialAdminPassword", "/home/user/jenkins.pass", "/usr/local/jenkins/secret"],
+            a: 1,
+            explain: "Mật khẩu nằm tại /var/lib/jenkins/secrets/initialAdminPassword.",
+            ref: "Page 9"
+        },
+        {
+            q: "Lệnh nào dùng để khởi động dịch vụ Jenkins trên Linux?",
+            options: ["jenkins start", "service jenkins run", "sudo systemctl start jenkins", "start jenkins.exe"],
+            a: 2,
+            explain: "Lệnh: sudo systemctl start jenkins.",
+            ref: "Page 8"
+        },
+
+        // Page 10-13: Freestyle Projects
+        {
+            q: "Loại job đơn giản nhất trong Jenkins là gì?",
+            options: ["Pipeline Project", "Freestyle Project", "Multibranch Pipeline", "Folder"],
+            a: 1,
+            explain: "Freestyle Project là loại job đơn giản nhất của Jenkins.",
+            ref: "Page 10"
+        },
+        {
+            q: "Trong Freestyle Project, các bước build (build steps) được thực thi như thế nào?",
+            options: ["Song song (Parallel)", "Ngẫu nhiên", "Tuần tự (Serially)", "Ngược lại"],
+            a: 2,
+            explain: "Freestyle project thực thi các bước build một cách tuần tự (serially).",
+            ref: "Page 10"
+        },
+        {
+            q: "Mục 'Branch Specifier' trong cấu hình Git mặc định thường là gì nếu để trống?",
+            options: ["*/main", "*/dev", "*/master", "Bất kỳ nhánh nào"],
+            a: 3,
+            explain: "Trong ảnh minh họa cấu hình Git, nếu để trống hoặc đặt */master, nó sẽ build nhánh đó. Chú thích: 'blank for any'.",
+            ref: "Page 11"
+        },
+        {
+            q: "Tùy chọn 'Poll SCM' trong Build Triggers có tác dụng gì?",
+            options: ["Xây dựng định kỳ bất kể có thay đổi hay không", "Jenkins kiểm tra repository định kỳ để tìm thay đổi", "Chờ người dùng bấm nút build", "Nhận tín hiệu từ GitHub"],
+            a: 1,
+            explain: "Poll SCM: Jenkins định kỳ kiểm tra repository xem có thay đổi không.",
+            ref: "Page 12"
+        },
+        {
+            q: "Ký tự 'H' trong cú pháp lập lịch (Schedule) của Jenkins có ý nghĩa gì?",
+            options: ["Hour (Giờ)", "Hash (Băm - để phân tải)", "Hard", "Home"],
+            a: 1,
+            explain: "Trong cảnh báo ở trang 12, Jenkins gợi ý dùng 'H' để phân tải (hash) thay vì chạy chính xác mọi phút.",
+            ref: "Page 12"
+        },
+        {
+            q: "Hành động nào sau đây là 'Post-build Action'?",
+            options: ["Execute shell", "Maven build", "E-mail Notification", "Git checkout"],
+            a: 2,
+            explain: "Gửi thông báo E-mail (E-mail Notification) là một Post-build Action.",
+            ref: "Page 13"
+        },
+
+        // Page 14-16: Pipelines
+        {
+            q: "File văn bản nào dùng để định nghĩa Jenkins Pipeline?",
+            options: ["Pipeline.txt", "Jenkinsfile", "Config.xml", "Build.yaml"],
+            a: 1,
+            explain: "Bạn định nghĩa pipelines sử dụng Jenkinsfile.",
+            ref: "Page 14"
+        },
+        {
+            q: "Hai loại cú pháp Pipeline trong Jenkins là gì?",
+            options: ["Java & Python", "Declarative & Scripted", "Simple & Advanced", "XML & JSON"],
+            a: 1,
+            explain: "Declarative Pipelines và Scripted Pipelines.",
+            ref: "Page 14"
+        },
+        {
+            q: "Đặc điểm của Declarative Pipeline là gì?",
+            options: ["Sử dụng cú pháp Groovy nâng cao", "Cấu trúc đơn giản hơn, dễ đọc", "Khó học hơn Scripted", "Không hỗ trợ Docker"],
+            a: 1,
+            explain: "Declarative Pipelines: Một cách đơn giản hơn, có cấu trúc để định nghĩa pipeline.",
+            ref: "Page 14"
+        },
+        {
+            q: "Scripted Pipeline sử dụng cú pháp của ngôn ngữ nào?",
+            options: ["Java", "Python", "Groovy", "Ruby"],
+            a: 2,
+            explain: "Scripted Pipelines sử dụng cú pháp Groovy nâng cao.",
+            ref: "Page 14"
+        },
+        {
+            q: "Trong cú pháp Pipeline, 'agent any' nghĩa là gì?",
+            options: ["Chạy trên bất kỳ máy nào khả dụng", "Không chạy trên máy nào cả", "Chỉ chạy trên Docker", "Chạy trên máy Master"],
+            a: 0,
+            explain: "agent any: Chỉ định job có thể chạy trên bất kỳ agent nào có sẵn.",
+            ref: "Page 16"
+        },
+        {
+            q: "Khối lệnh nào chứa các bước thực thi chính trong Pipeline?",
+            options: ["environment", "tools", "stages", "post"],
+            a: 2,
+            explain: "Các giai đoạn (stages) chứa các bước (steps) thực thi.",
+            ref: "Page 16"
+        },
+
+        // Page 17-21: CI/CD & Advanced
+        {
+            q: "Continuous Integration (CI) đạt được khi nào?",
+            options: ["Chạy test thủ công", "Tự động build và test khi code được push", "Deploy code lên production", "Viết tài liệu"],
+            a: 1,
+            explain: "Jenkins kích hoạt CI bằng cách chạy build và test tự động khi code được push vào version control.",
+            ref: "Page 17"
+        },
+        {
+            q: "Trong quy trình CI/CD cơ bản, bước 'Deploy' thường diễn ra khi nào?",
+            options: ["Ngay sau khi commit", "Trước khi build", "Nếu build và test thành công", "Vào mỗi cuối tuần"],
+            a: 2,
+            explain: "Nếu tests pass (thành công), Jenkins có thể deploy ứng dụng.",
+            ref: "Page 18"
+        },
+        {
+            q: "Cơ chế 'Webhooks' kích hoạt build như thế nào?",
+            options: ["Jenkins tự hỏi GitHub mỗi 5 phút", "GitHub gửi sự kiện đến Jenkins khi có thay đổi", "Người dùng bấm nút trên Jenkins", "Chạy theo lịch cố định"],
+            a: 1,
+            explain: "Webhooks: Jenkins kích hoạt build khi GitHub/Bitbucket gửi một sự kiện webhook.",
+            ref: "Page 19"
+        },
+        {
+            q: "Dynamic agents (Node động) là gì?",
+            options: ["Máy ảo được cấu hình sẵn", "Agent có thể được tạo theo nhu cầu (on-demand) như Docker container", "Máy Master", "Máy tính cá nhân của developer"],
+            a: 1,
+            explain: "Dynamic agents: Có thể được spin up on-demand (ví dụ: Docker containers, Kubernetes pods).",
+            ref: "Page 20"
+        },
+        {
+            q: "Distributed Builds (Build phân tán) giúp ích gì?",
+            options: ["Làm chậm quá trình build", "Cân bằng tải và tăng tốc độ build", "Tăng độ phức tạp không cần thiết", "Chỉ dùng cho dự án nhỏ"],
+            a: 1,
+            explain: "Distributed Builds giúp cân bằng tải và tăng tốc độ quá trình build.",
+            ref: "Page 21"
+        },
+        {
+            q: "Lợi ích chính của 'Pipeline as Code' là gì?",
+            options: ["Không cần viết code", "Cho phép version control (quản lý phiên bản) cho pipeline", "Chạy nhanh hơn", "Giao diện đẹp hơn"],
+            a: 1,
+            explain: "Nó cho phép version control cho pipeline của bạn và giúp dễ bảo trì hơn.",
+            ref: "Page 21"
+        },
+        
+        // Page 22-26: Plugins & Docker Integration
+        {
+            q: "Plugin nào cung cấp giao diện UI hiện đại cho Jenkins?",
+            options: ["Green Ocean", "Blue Ocean", "Red Sea", "Modern UI"],
+            a: 1,
+            explain: "Blue Ocean: Cung cấp giao diện UI hiện đại cho Jenkins.",
+            ref: "Page 22"
+        },
+        {
+            q: "Plugin nào dùng để hiển thị kết quả test?",
+            options: ["Git Plugin", "Docker Plugin", "JUnit Plugin", "Pipeline Plugin"],
+            a: 2,
+            explain: "JUnit Plugin: Hiển thị kết quả test bên trong Jenkins.",
+            ref: "Page 22"
+        },
+        {
+            q: "Jenkins và Docker thường được kết hợp để làm gì?",
+            options: ["Build Docker images", "Deploy ứng dụng dùng containers", "Chạy Jenkins trong Docker", "Tất cả các ý trên"],
+            a: 3,
+            explain: "Jenkins và Docker dùng để Build images, Deploy containers, và chạy chính Jenkins trong container.",
+            ref: "Page 23"
+        },
+        {
+            q: "Để build và push Docker images, bạn cần cài plugin nào?",
+            options: ["Docker Pipeline plugin", "Maven plugin", "Git plugin", "Slack plugin"],
+            a: 0,
+            explain: "Cần cài đặt Docker Pipeline plugin.",
+            ref: "Page 24"
+        },
+        {
+            q: "Trong Docker Pipeline, lệnh `docker.build('my-app-image')` làm gì?",
+            options: ["Tải image về", "Xóa image", "Build Docker image từ Dockerfile", "Chạy container"],
+            a: 2,
+            explain: "Lệnh này dùng để build Docker image.",
+            ref: "Page 24"
+        },
+        {
+            q: "Lệnh `docker.withRegistry(...)` dùng để làm gì?",
+            options: ["Xác thực với Docker Hub để push image", "Tải Docker về máy", "Tạo file Dockerfile", "Kiểm tra lỗi image"],
+            a: 0,
+            explain: "Nó dùng để xác thực với registry (như Docker Hub) sử dụng credentials.",
+            ref: "Page 24"
+        },
+
+        // Page 27-32: Complete CI/CD Example
+        {
+            q: "Plugin nào cho phép tích hợp Jenkins với Slack?",
+            options: ["Slack Notification Plugin", "Chat Plugin", "Messenger Plugin", "Alert Plugin"],
+            a: 0,
+            explain: "Slack Notification Plugin tích hợp Jenkins với Slack.",
+            ref: "Page 28"
+        },
+        {
+            q: "Trong Jenkinsfile ví dụ, khối `tools` dùng để định nghĩa gì?",
+            options: ["Các công cụ cần thiết như Maven và JDK", "Các plugin cần cài", "Các biến môi trường", "Các server deploy"],
+            a: 0,
+            explain: "Khối tools định nghĩa Maven và JDK phiên bản cụ thể.",
+            ref: "Page 30"
+        },
+        {
+            q: "Trong ví dụ, thông tin xác thực (credentials) DockerHub được lưu ở đâu?",
+            options: ["Trong file code", "Trong biến môi trường (environment variables) lấy từ Jenkins credentials", "Trong file text trên máy chủ", "Không cần xác thực"],
+            a: 1,
+            explain: "Được định nghĩa trong khối environment bằng hàm `credentials('docker-hub-access-token')`.",
+            ref: "Page 30"
+        },
+        {
+            q: "Điều kiện `when { expression { return currentBuild.resultIsBetterOrEqualTo('SUCCESS') } }` nghĩa là gì?",
+            options: ["Luôn chạy", "Chỉ chạy khi build trước đó thành công", "Chạy khi build thất bại", "Chạy ngẫu nhiên"],
+            a: 1,
+            explain: "Nó chỉ chạy stage đó (ví dụ Build Docker Image) nếu các bước trước (Tests) đã thành công.",
+            ref: "Page 31"
+        },
+        {
+            q: "Khối `post { success { ... } }` sẽ thực thi khi nào?",
+            options: ["Khi pipeline bắt đầu", "Khi pipeline thất bại", "Khi pipeline hoàn thành thành công", "Luôn luôn thực thi"],
+            a: 2,
+            explain: "Nó thực thi script bên trong khi pipeline thành công (ví dụ gửi Slack báo thành công).",
+            ref: "Page 32"
+        },
+        {
+            q: "Khối `post { failure { ... } }` thường dùng để làm gì?",
+            options: ["Gửi thông báo lỗi (màu đỏ) tới Slack", "Xóa code", "Tắt server", "Build lại từ đầu"],
+            a: 0,
+            explain: "Gửi thông báo thất bại (Build failed) tới Slack.",
+            ref: "Page 32"
+        },
+
+        // Page 33-38: Webhooks & Dockerfile
+        {
+            q: "Để GitHub thông báo cho Jenkins, bạn cần cấu hình gì trên GitHub?",
+            options: ["Pull Request", "Webhook", "Fork", "Star"],
+            a: 1,
+            explain: "Bạn cần thiết lập một Webhook trên GitHub.",
+            ref: "Page 33"
+        },
+        {
+            q: "Định dạng Payload URL chuẩn cho GitHub Webhook tới Jenkins là gì?",
+            options: ["http://jenkins-url/github-webhook/", "http://jenkins-url/api/", "http://jenkins-url/login/", "http://jenkins-url/trigger/"],
+            a: 0,
+            explain: "Payload URL: http://<JENKINS_URL>:<PORT>/github-webhook/",
+            ref: "Page 35"
+        },
+        {
+            q: "Content type cho Webhook nên đặt là gì?",
+            options: ["text/plain", "application/xml", "application/json", "text/html"],
+            a: 2,
+            explain: "Set Content type to application/json.",
+            ref: "Page 35"
+        },
+        {
+            q: "Sự kiện (Event) nào thường được chọn để trigger webhook cho CI?",
+            options: ["Fork", "Push", "Star", "Watch"],
+            a: 1,
+            explain: "Chọn 'Just the push event' hoặc select individual events -> Push.",
+            ref: "Page 35"
+        },
+        {
+            q: "Trong Dockerfile ví dụ, lệnh `FROM openjdk:17` có ý nghĩa gì?",
+            options: ["Copy file", "Mở cổng 17", "Xác định base image là OpenJDK 17", "Chạy lệnh java"],
+            a: 2,
+            explain: "FROM openjdk:17 xác định base image.",
+            ref: "Page 37"
+        },
+        {
+            q: "Lệnh `COPY target/jenkins.jar /app/jenkins.jar` làm gì?",
+            options: ["Xóa file jar", "Sao chép file jar từ máy host vào container", "Tải file từ mạng", "Đổi tên file"],
+            a: 1,
+            explain: "Copy file application JAR vào container.",
+            ref: "Page 37"
+        },
+        {
+            q: "Để Jenkins có thể SSH vào remote server mà không cần mật khẩu, cần thiết lập gì?",
+            options: ["Tắt tường lửa", "SSH keys", "Mở mọi cổng", "Cài Telnet"],
+            a: 1,
+            explain: "Set up SSH keys so Jenkins can SSH into your server without a password.",
+            ref: "Page 38"
+        },
+
+        // Page 39-47: Notifications, K8s, Best Practices
+        {
+            q: "Để cấu hình Slack Notification, bạn cần lấy thông tin gì từ Slack?",
+            options: ["Số điện thoại", "Webhook URL hoặc Token", "Địa chỉ email", "Mật khẩu Facebook"],
+            a: 1,
+            explain: "Cần tạo Slack Webhook hoặc dùng TokenCredentialId.",
+            ref: "Page 39"
+        },
+        {
+            q: "Nếu build thành công, Slack notification thường được cấu hình màu gì?",
+            options: ["danger (đỏ)", "good (xanh lá)", "warning (vàng)", "black (đen)"],
+            a: 1,
+            explain: "Color: 'good' (thường là xanh lá) cho success.",
+            ref: "Page 32"
+        },
+        {
+            q: "Jenkins tích hợp với Kubernetes để làm gì?",
+            options: ["Lưu trữ database", "Tạo Jenkins agents (pods) động", "Thay thế Git", "Viết code Java"],
+            a: 1,
+            explain: "Dynamically create Jenkins agents (pods) in Kubernetes clusters.",
+            ref: "Page 42"
+        },
+        {
+            q: "Ưu điểm 'Extensibility' của Jenkins nghĩa là gì?",
+            options: ["Chạy nhanh", "Có hơn 1800 plugins để tích hợp với mọi công cụ", "Dễ cài đặt", "Miễn phí"],
+            a: 1,
+            explain: "Extensibility: Với hơn 1,800 plugins, Jenkins có thể tích hợp với hầu hết mọi công cụ.",
+            ref: "Page 43"
+        },
+        {
+            q: "Ưu điểm 'Cross-Platform' nghĩa là Jenkins chạy được trên?",
+            options: ["Chỉ Windows", "Chỉ Linux", "Bất kỳ hệ điều hành nào (Windows, Linux, macOS)", "Chỉ Cloud"],
+            a: 2,
+            explain: "Can run on any operating system.",
+            ref: "Page 43"
+        },
+        {
+            q: "Best Practice: Nên ưu tiên dùng loại project nào?",
+            options: ["Freestyle Projects", "Jenkins Pipelines (via Jenkinsfile)", "Manual Builds", "Shell scripts rời"],
+            a: 1,
+            explain: "Always prefer Jenkins Pipelines (via Jenkinsfile) over Freestyle Projects.",
+            ref: "Page 44"
+        },
+        {
+            q: "Để tăng tốc độ build, bạn nên tận dụng điều gì?",
+            options: ["Chạy tuần tự", "Parallelism (Song song)", "Chạy trên Master node", "Tắt test"],
+            a: 1,
+            explain: "Leverage Parallelism: Run different stages of the pipeline in parallel.",
+            ref: "Page 44"
+        },
+        {
+            q: "Thông tin nhạy cảm (token, password) nên được lưu ở đâu?",
+            options: ["Ghi cứng trong code (Hardcode)", "Trong file text", "Jenkins Credentials", "Ghi ra giấy"],
+            a: 2,
+            explain: "Store sensitive information using Jenkins credentials.",
+            ref: "Page 44"
+        },
+        {
+            q: "Tại sao nên build trên các Agents riêng biệt thay vì Master?",
+            options: ["Để Master nghỉ ngơi", "Tránh làm quá tải (overloading) Master node", "Master không biết build", "Agents rẻ hơn"],
+            a: 1,
+            explain: "Distribute your builds on different nodes to avoid overloading the master node.",
+            ref: "Page 44"
+        },
+        {
+            q: "Bạn nên sao lưu (backup) những gì của Jenkins?",
+            options: ["Chỉ file jenkins.war", "Configs, pipelines, plugins, credentials", "Chỉ log file", "Không cần backup"],
+            a: 1,
+            explain: "Backup Jenkins configurations, pipelines, plugins, and credentials.",
+            ref: "Page 45"
+        },
+        {
+            q: "Để theo dõi hiệu năng Jenkins, nên làm gì?",
+            options: ["Ngồi nhìn màn hình", "Sử dụng monitoring tools và plugins", "Hỏi chatGPT", "Chờ server sập"],
+            a: 1,
+            explain: "Use monitoring tools and plugins to keep an eye on Jenkins performance.",
+            ref: "Page 45"
+        },
+        {
+            q: "Kết luận: Jenkins cung cấp nền tảng cho điều gì?",
+            options: ["Viết code nhanh hơn", "Robust CI/CD pipelines", "Quản lý nhân sự", "Bảo mật mạng"],
+            a: 1,
+            explain: "Jenkins provides the foundation for robust CI/CD pipelines.",
+            ref: "Page 46"
+        },
+        // Additional generic questions
+        {
+            q: "Lệnh `mvn clean package` thường dùng để làm gì trong Pipeline?",
+            options: ["Xóa code", "Build và đóng gói ứng dụng Java", "Chạy Docker", "Gửi email"],
+            a: 1,
+            explain: "Đây là lệnh Maven để dọn dẹp và đóng gói ứng dụng (tạo file jar/war).",
+            ref: "Page 16"
+        },
+        {
+            q: "Trong Pipeline, `sh 'scp ...'` là lệnh gì?",
+            options: ["Shell script để copy file an toàn qua mạng", "Lệnh Java", "Lệnh Docker", "Lệnh Git"],
+            a: 0,
+            explain: "sh là gọi shell, scp là secure copy để deploy file.",
+            ref: "Page 16"
+        },
+        {
+            q: "Stage 'Checkout' trong pipeline thường làm gì?",
+            options: ["Thanh toán tiền", "Lấy source code từ Git về", "Kiểm tra lỗi", "Đăng xuất"],
+            a: 1,
+            explain: "Checkout: Clones repository from GitHub.",
+            ref: "Page 30"
+        },
+        {
+            q: "Biến môi trường `BUILD_NUMBER` trong Jenkins cho biết gì?",
+            options: ["Số lượng server", "Số thứ tự của lần build hiện tại", "Số lượng lỗi", "Số lượng plugin"],
+            a: 1,
+            explain: "Đây là biến mặc định của Jenkins chỉ số thứ tự build.",
+            ref: "Page 5 (Implied by 'Builds')"
+        },
+        {
+            q: "Blue Ocean khác gì giao diện cổ điển (Classic UI)?",
+            options: ["Khó dùng hơn", "Trực quan hơn, tập trung vào Pipeline", "Chỉ dùng dòng lệnh", "Không có gì khác"],
+            a: 1,
+            explain: "Blue Ocean Provides a modern UI (trực quan, hiện đại).",
+            ref: "Page 22"
+        },
+        {
+            q: "Nếu bạn muốn build project Maven, bạn cần cấu hình gì trong Global Tool Configuration?",
+            options: ["Đường dẫn cài đặt Maven", "Đường dẫn Facebook", "Đường dẫn MP3", "Không cần gì"],
+            a: 0,
+            explain: "Cần định nghĩa Maven version và đường dẫn (như trong khối tools của Pipeline).",
+            ref: "Page 30"
+        },
+        {
+            q: "Lệnh `echo` trong pipeline step dùng để làm gì?",
+            options: ["Tạo tiếng vang", "In ra thông báo log", "Xóa file", "Dừng pipeline"],
+            a: 1,
+            explain: "Ví dụ: echo 'Building...' dùng để in thông báo.",
+            ref: "Page 16"
+        },
+        {
+            q: "File `pom.xml` liên quan đến công cụ nào?",
+            options: ["Gradle", "Maven", "NPM", "Pip"],
+            a: 1,
+            explain: "pom.xml là file cấu hình của Maven (xuất hiện trong ảnh danh sách file).",
+            ref: "Page 29"
+        },
+        {
+            q: "Lệnh `sudo apt-get install jenkins` dùng cho hệ điều hành nào?",
+            options: ["Windows", "MacOS", "Ubuntu/Debian", "CentOS"],
+            a: 2,
+            explain: "Lệnh cài đặt gói apt thường dùng cho Debian/Ubuntu.",
+            ref: "Page 8"
+        },
+        {
+            q: "JDK viết tắt của từ gì?",
+            options: ["Java Development Kit", "Jenkins Development Kit", "Just Do Kit", "Java Deploy Key"],
+            a: 0,
+            explain: "Prerequisites: Java (JDK) - Java Development Kit.",
+            ref: "Page 7"
+        },
+        {
+            q: "SCM viết tắt của từ gì?",
+            options: ["Source Code Management", "System Control Mode", "Server Config Manager", "Simple Code Maker"],
+            a: 0,
+            explain: "Source Code Management (e.g., Git).",
+            ref: "Page 11"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    
+    // Mảng lưu trạng thái câu trả lời của người dùng. 
+    // null: chưa trả lời, number: index của option đã chọn
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        // Update progress
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        // Update question text
+        questionEl.textContent = qData.q;
+        
+        // Reset UI
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; // reset classes
+        optionsEl.className = 'options-list';
+        
+        // Create options
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Kiểm tra xem câu này đã làm chưa, nếu rồi thì hiển thị lại
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        // Update buttons state
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    // Hàm hiển thị kết quả (tách riêng để dùng lại khi load history)
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        // Disable all options
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        // Add class to container to fade out unselected
+        optionsEl.classList.add('answered');
+
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            // Correct
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            // Wrong
+            options[selectedIndex].classList.add('user-selected-wrong'); // Style riêng cho cái sai user chọn
+            // Highlight correct answer
+            options[qData.a].classList.add('correct');
+            
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref} trong tài liệu PDF)`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        // Prevent re-clicking if already answered (UI disabled via CSS, but check logic too)
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+
+        // Lưu trạng thái
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        // Cập nhật điểm (chỉ tính lần đầu chọn)
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        // Hiển thị giao diện
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+            // Reset nếu muốn (optional)
+            // currentQuestionIndex = 0;
+            // score = 0;
+            // userAnswers.fill(null);
+            // loadQuestion();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
