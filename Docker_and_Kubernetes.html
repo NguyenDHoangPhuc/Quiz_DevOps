@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Docker & Kubernetes (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f8fe;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 850px;
+            padding: 35px;
+            overflow: hidden;
+            border-top: 6px solid #326ce5; /* K8s Blue */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #2496ed; /* Docker Blue */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #fff;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        .option-item:hover {
+            background-color: #f6f8fa;
+            border-color: #326ce5;
+        }
+        .option-item.correct {
+            background-color: #dff6dd;
+            border-color: #107c10;
+            color: #107c10;
+        }
+        .option-item.wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            background-color: #dff6dd;
+            color: #107c10;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #fde7e9;
+            color: #a80000;
+            border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+        .btn-prev:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #adb5bd;
+        }
+        .btn-next {
+            background-color: #326ce5;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #2654b5;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #326ce5;
+        }
+        .section-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+        }
+        .tag-docker { background-color: #2496ed; }
+        .tag-k8s { background-color: #326ce5; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>Docker & Kubernetes Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span id="section-tag" class="section-tag tag-docker">DOCKER</span>
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Quay lại</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- DOCKER & SWARM (File: Docker & Docker Swarm.pdf) ---
+        {
+            category: "DOCKER",
+            q: "Nhược điểm chính của kiến trúc Monolithic (nguyên khối) là gì?",
+            options: ["Dễ triển khai", "Khó debug và trace lỗi", "Thời gian khởi động lâu, một lỗi nhỏ có thể làm sập toàn bộ hệ thống, khó mở rộng (scale)", "Sử dụng ít tài nguyên"],
+            a: 2,
+            explain: "Kiến trúc Monolithic gặp khó khăn khi ứng dụng lớn dần: khởi động lâu, lỗi ảnh hưởng toàn bộ, và khó mở rộng từng phần riêng biệt.",
+            ref: "Docker PDF - Page 4-5"
+        },
+        {
+            q: "Sự khác biệt chính giữa Virtual Machine (VM) và Container là gì?",
+            options: ["VM chia sẻ kernel của OS, Container có OS riêng", "Container nhẹ hơn vì chia sẻ kernel của Host OS, trong khi VM ảo hóa cả phần cứng và chạy Guest OS đầy đủ", "VM khởi động nhanh hơn Container", "Container bảo mật hơn VM"],
+            a: 1,
+            explain: "Container ảo hóa ở cấp hệ điều hành (chia sẻ kernel), nhẹ hơn và khởi động nhanh hơn VM (ảo hóa phần cứng).",
+            ref: "Docker PDF - Page 7-9"
+        },
+        {
+            q: "Docker Image là gì?",
+            options: ["Một máy ảo đang chạy", "Một template chỉ đọc (read-only) chứa mã nguồn, thư viện, và dependencies cần thiết để chạy ứng dụng", "Một database", "Một file log"],
+            a: 1,
+            explain: "Docker Image là một gói thực thi nhẹ, độc lập, chứa mọi thứ cần thiết để chạy phần mềm.",
+            ref: "Docker PDF - Page 14"
+        },
+        {
+            q: "Docker Container là gì?",
+            options: ["Nơi lưu trữ code", "Một instance đang chạy (runnable instance) của Docker Image", "Công cụ quản lý mạng", "Một server vật lý"],
+            a: 1,
+            explain: "Container là một instance sống được tạo ra từ Docker Image.",
+            ref: "Docker PDF - Page 14"
+        },
+        {
+            q: "Docker Hub đóng vai trò gì?",
+            options: ["Máy chủ chạy container", "Registry (kho lưu trữ) trên cloud để chia sẻ và lưu trữ Docker Images", "Công cụ biên dịch code", "Hệ điều hành"],
+            a: 1,
+            explain: "Docker Hub là dịch vụ registry công cộng để tìm kiếm và chia sẻ container images.",
+            ref: "Docker PDF - Page 14"
+        },
+        {
+            q: "Trong Dockerfile, chỉ thị `FROM` dùng để làm gì?",
+            options: ["Copy file", "Chạy lệnh cài đặt", "Xác định Base Image (ảnh nền) cho quá trình build", "Mở cổng mạng"],
+            a: 2,
+            explain: "Mọi Dockerfile hợp lệ đều phải bắt đầu bằng lệnh FROM để chỉ định base image.",
+            ref: "Docker PDF - Page 18"
+        },
+        {
+            q: "Sự khác biệt giữa `RUN` và `CMD` trong Dockerfile?",
+            options: ["Giống hệt nhau", "`RUN` thực thi khi build image (tạo layer mới), `CMD` xác định lệnh mặc định khi container khởi chạy", "`CMD` chạy khi build, `RUN` chạy khi start container", "`RUN` chỉ dùng cho Linux"],
+            a: 1,
+            explain: "`RUN` dùng để cài đặt gói/cấu hình trong lúc build image. `CMD` chỉ định lệnh mặc định sẽ chạy khi container start.",
+            ref: "Docker PDF - Page 18"
+        },
+        {
+            q: "Lệnh `COPY` trong Dockerfile làm gì?",
+            options: ["Sao chép file từ Container ra Host", "Sao chép file từ Host vào filesystem của Image", "Sao chép file từ Internet", "Sao chép file giữa 2 container"],
+            a: 1,
+            explain: "COPY <src> <dest>: Sao chép file/thư mục từ máy host vào image.",
+            ref: "Docker PDF - Page 18"
+        },
+        {
+            q: "Chỉ thị `EXPOSE` trong Dockerfile có tác dụng gì?",
+            options: ["Mở cổng trên máy host", "Khai báo cổng mà container sẽ lắng nghe (dùng để thông tin)", "Chặn cổng", "Tắt tường lửa"],
+            a: 1,
+            explain: "EXPOSE thông báo cho Docker biết container sẽ lắng nghe trên cổng nào lúc chạy.",
+            ref: "Docker PDF - Page 18"
+        },
+        {
+            q: "Để build một Docker Image từ Dockerfile, ta dùng lệnh gì?",
+            options: ["docker create", "docker run", "docker build -t <tên_image> .", "docker compile"],
+            a: 2,
+            explain: "Lệnh `docker build` dùng để tạo image từ Dockerfile.",
+            ref: "Docker PDF - Page 20"
+        },
+        {
+            q: "Lệnh `docker run -d -p 8080:80 nginx` có ý nghĩa gì?",
+            options: ["Chạy nginx và xóa ngay lập tức", "Chạy nginx ở chế độ detached (nền), map cổng 8080 của host vào cổng 80 của container", "Chạy nginx và vào trong terminal", "Chỉ tải image nginx"],
+            a: 1,
+            explain: "`-d`: detached mode. `-p 8080:80`: map port host:container.",
+            ref: "Docker PDF - Page 23"
+        },
+        {
+            q: "Lệnh nào để liệt kê các container đang chạy?",
+            options: ["docker images", "docker ps", "docker ls", "docker info"],
+            a: 1,
+            explain: "`docker ps` liệt kê các container đang hoạt động.",
+            ref: "Docker PDF - Page 24"
+        },
+        {
+            q: "Docker Volume dùng để làm gì?",
+            options: ["Tăng tốc độ mạng", "Lưu trữ dữ liệu liên tục (persist data) độc lập với vòng đời của container", "Tạo ram ảo", "Quản lý CPU"],
+            a: 1,
+            explain: "Volume là cơ chế ưu tiên để lưu trữ dữ liệu liên tục (persistent data) được tạo bởi container.",
+            ref: "Docker PDF - Page 30"
+        },
+        {
+            q: "Bind Mount khác Volume ở điểm nào?",
+            options: ["Bind Mount lưu dữ liệu trên cloud", "Bind Mount map một đường dẫn file/thư mục cụ thể từ máy Host vào Container", "Bind Mount chỉ dùng cho Windows", "Không có gì khác"],
+            a: 1,
+            explain: "Bind mounts có thể được lưu trữ ở bất kỳ đâu trên hệ thống host (người dùng quản lý đường dẫn), trong khi Volume do Docker quản lý.",
+            ref: "Docker PDF - Page 30"
+        },
+        {
+            q: "Docker Network driver mặc định khi chạy container là gì?",
+            options: ["host", "overlay", "bridge", "none"],
+            a: 2,
+            explain: "Bridge là network driver mặc định cho container độc lập.",
+            ref: "Docker PDF - Page 33"
+        },
+        {
+            q: "Docker Compose là công cụ để làm gì?",
+            options: ["Soạn thảo văn bản", "Định nghĩa và chạy các ứng dụng Docker đa container (multi-container applications)", "Tạo máy ảo", "Quản lý Swarm"],
+            a: 1,
+            explain: "Docker Compose dùng file YAML để định nghĩa và chạy ứng dụng gồm nhiều container.",
+            ref: "Docker PDF - Page 38"
+        },
+        {
+            q: "Tên file cấu hình mặc định của Docker Compose là gì?",
+            options: ["Dockerfile", "docker-compose.yml", "config.xml", "package.json"],
+            a: 1,
+            explain: "Mặc định Docker Compose tìm file `docker-compose.yml`.",
+            ref: "Docker PDF - Page 39"
+        },
+        {
+            q: "Lệnh `docker-compose up -d` dùng để làm gì?",
+            options: ["Tắt ứng dụng", "Khởi tạo và chạy các services được định nghĩa trong file compose ở chế độ nền", "Update docker", "Upload file"],
+            a: 1,
+            explain: "`up` tạo và start containers, `-d` chạy trong nền.",
+            ref: "Docker PDF - Page 40"
+        },
+        {
+            q: "Docker Swarm là gì?",
+            options: ["Một loại virus", "Công cụ điều phối container (Container Orchestration) native của Docker", "Công cụ monitor", "IDE lập trình"],
+            a: 1,
+            explain: "Docker Swarm là công cụ clustering và orchestration được tích hợp sẵn trong Docker Engine.",
+            ref: "Docker PDF - Page 46"
+        },
+        {
+            q: "Trong kiến trúc Swarm, Manager Node có nhiệm vụ gì?",
+            options: ["Chỉ chạy container", "Quản lý trạng thái cluster, lập lịch (schedule) các services", "Lưu trữ log", "Không làm gì cả"],
+            a: 1,
+            explain: "Manager Nodes chịu trách nhiệm về các hoạt động quản lý cluster (duy trì trạng thái, scheduling).",
+            ref: "Docker PDF - Page 47"
+        },
+        {
+            q: "Worker Node trong Swarm có nhiệm vụ gì?",
+            options: ["Ra lệnh cho Manager", "Thực thi các tasks (containers) được giao bởi Manager", "Quản lý API", "Lưu trữ database"],
+            a: 1,
+            explain: "Worker Nodes nhận và thực thi các tasks từ Manager Node.",
+            ref: "Docker PDF - Page 47"
+        },
+        {
+            q: "Để khởi tạo một Swarm cluster, ta dùng lệnh gì?",
+            options: ["docker init", "docker swarm init", "docker cluster create", "docker swarm start"],
+            a: 1,
+            explain: "Lệnh `docker swarm init` chuyển Docker Engine sang chế độ Swarm và tạo Manager đầu tiên.",
+            ref: "Docker PDF - Page 49"
+        },
+        {
+            q: "Khái niệm 'Service' trong Docker Swarm là gì?",
+            options: ["Một container đơn lẻ", "Định nghĩa về trạng thái mong muốn (desired state) của ứng dụng (số replicas, image, port...)", "Dịch vụ khách hàng", "Network driver"],
+            a: 1,
+            explain: "Service định nghĩa image nào sẽ chạy, số lượng replicas, và các cấu hình khác.",
+            ref: "Docker PDF - Page 51"
+        },
+        {
+            q: "Routing Mesh trong Docker Swarm giúp ích gì?",
+            options: ["Vẽ bản đồ mạng", "Cân bằng tải (Load balancing) các request đến service trên bất kỳ node nào trong cluster", "Chặn kết nối", "Tăng tốc CPU"],
+            a: 1,
+            explain: "Routing Mesh cho phép truy cập service từ bất kỳ node nào trong swarm, tự động route đến node đang chạy container.",
+            ref: "Docker PDF - Page 58"
+        },
+        {
+            q: "Overlay Network được sử dụng để làm gì trong Swarm?",
+            options: ["Kết nối Internet", "Kết nối các container chạy trên các Docker host (nodes) khác nhau", "Kết nối chuột và bàn phím", "Tạo file"],
+            a: 1,
+            explain: "Overlay network tạo ra mạng phân tán giữa nhiều Docker daemon hosts.",
+            ref: "Docker PDF - Page 57"
+        },
+        {
+            q: "Lệnh `docker stack deploy` dùng để làm gì?",
+            options: ["Triển khai một stack (ứng dụng đa dịch vụ) lên Swarm cluster từ file compose", "Xóa stack", "Build image", "Chạy container đơn lẻ"],
+            a: 0,
+            explain: "Dùng để deploy một stack (tập hợp các services) lên Swarm.",
+            ref: "Docker PDF - Page 62"
+        },
+        {
+            q: "Visualizer là công cụ gì thường dùng với Swarm?",
+            options: ["Công cụ đồ họa để trực quan hóa trạng thái cluster và containers", "Trình biên tập code", "Trình duyệt web", "Terminal"],
+            a: 0,
+            explain: "Visualizer giúp hiển thị trực quan các node và container đang chạy trong Swarm.",
+            ref: "Docker PDF - Page 50 (Example usage)"
+        },
+        {
+            q: "Để scale một service lên 5 bản sao (replicas), lệnh nào đúng?",
+            options: ["docker scale 5", "docker service scale <service_name>=5", "docker run 5", "docker swarm scale"],
+            a: 1,
+            explain: "Lệnh `docker service scale` dùng để thay đổi số lượng replicas.",
+            ref: "Docker PDF - Page 53"
+        },
+        {
+            q: "Docker Swarm sử dụng thuật toán đồng thuận (consensus algorithm) nào cho việc quản lý trạng thái?",
+            options: ["Paxos", "Raft", "Proof of Work", "Round Robin"],
+            a: 1,
+            explain: "Swarm Manager nodes sử dụng Raft Consensus Algorithm để quản lý trạng thái cluster.",
+            ref: "Docker PDF - Page 47"
+        },
+        {
+            q: "Lệnh `docker node ls` dùng để làm gì?",
+            options: ["Liệt kê các file", "Liệt kê các node (máy chủ) tham gia vào Swarm cluster", "Liệt kê network", "Xóa node"],
+            a: 1,
+            explain: "Hiển thị danh sách các nodes trong Swarm.",
+            ref: "Docker PDF - Page 49"
+        },
+        {
+            q: "Biến môi trường (Environment Variable) có thể được truyền vào container bằng cờ (flag) nào?",
+            options: ["-e hoặc --env", "-v", "-p", "-d"],
+            a: 0,
+            explain: "Sử dụng `-e` để thiết lập biến môi trường.",
+            ref: "Docker PDF - Page 23"
+        },
+        {
+            q: "`docker system prune` dùng để làm gì?",
+            options: ["Cập nhật hệ thống", "Dọn dẹp (xóa) tất cả các dữ liệu không dùng đến (stopped containers, unused networks, dangling images)", "Khởi động lại docker", "Backup dữ liệu"],
+            a: 1,
+            explain: "Lệnh prune giúp dọn dẹp tài nguyên rác của Docker.",
+            ref: "General Docker Knowledge (Implicit in commands section)"
+        },
+        {
+            q: "Để xem log của một container, ta dùng lệnh gì?",
+            options: ["docker log", "docker logs <container_id>", "docker history", "docker show"],
+            a: 1,
+            explain: "`docker logs` hiển thị output console của container.",
+            ref: "Docker PDF - Page 24"
+        },
+        {
+            q: "Entrypoint trong Dockerfile khác CMD ở điểm nào?",
+            options: ["Entrypoint khó bị ghi đè hơn bởi command line arguments khi chạy docker run", "CMD luôn chạy trước", "Entrypoint chỉ dùng cho Windows", "Không khác gì"],
+            a: 0,
+            explain: "Entrypoint cấu hình container để chạy như một file thực thi. Các tham số trong `docker run` sẽ được nối vào sau Entrypoint (thay vì thay thế nó như CMD).",
+            ref: "General Docker Knowledge (Docker Best Practices)"
+        },
+        {
+            q: "Docker Layer Caching giúp ích gì?",
+            options: ["Làm chậm quá trình build", "Tăng tốc độ build bằng cách tái sử dụng các layer không thay đổi", "Tiết kiệm RAM", "Mã hóa image"],
+            a: 1,
+            explain: "Docker cache các layer, nếu chỉ thị không đổi, nó sẽ dùng lại cache thay vì build lại.",
+            ref: "Docker PDF - Page 17 (Implied by Layers)"
+        },
+
+        // --- KUBERNETES (File: Introduction to Kubernetes.pdf) ---
+        {
+            category: "K8S",
+            q: "Kubernetes (K8s) là gì?",
+            options: ["Một hệ điều hành", "Nền tảng mã nguồn mở để tự động hóa việc triển khai, mở rộng và quản lý các ứng dụng container", "Một loại container", "Dịch vụ lưu trữ"],
+            a: 1,
+            explain: "Kubernetes là nền tảng Container Orchestration phổ biến nhất.",
+            ref: "K8s PDF - Page 2"
+        },
+        {
+            q: "Sự khác biệt chính giữa Docker Swarm và Kubernetes?",
+            options: ["Swarm khó cài đặt hơn", "Swarm đơn giản, dễ cài đặt nhưng ít tính năng hơn; Kubernetes phức tạp hơn nhưng mạnh mẽ và tùy biến cao", "Kubernetes chỉ chạy trên Google Cloud", "Swarm không hỗ trợ scaling"],
+            a: 1,
+            explain: "Swarm dễ setup nhưng K8s mạnh mẽ và được hỗ trợ rộng rãi hơn cho enterprise.",
+            ref: "K8s PDF - Page 3"
+        },
+        {
+            q: "Thành phần nào là 'bộ não' của Kubernetes Cluster (Control Plane)?",
+            options: ["Worker Node", "Master Node", "Pod", "Service"],
+            a: 1,
+            explain: "Master Node điều khiển và quản lý toàn bộ cluster.",
+            ref: "K8s PDF - Page 6"
+        },
+        {
+            q: "kube-apiserver có vai trò gì?",
+            options: ["Lưu trữ dữ liệu", "Thành phần giao tiếp trung tâm (Front-end), xử lý các request REST API", "Chạy container", "Quản lý mạng"],
+            a: 1,
+            explain: "API Server là frontend của K8s control plane, mọi giao tiếp đều qua đây.",
+            ref: "K8s PDF - Page 7"
+        },
+        {
+            q: "etcd là gì trong kiến trúc Kubernetes?",
+            options: ["Database SQL", "Kho lưu trữ key-value phân tán, nhất quán để lưu trữ tất cả dữ liệu cluster", "File log", "Web server"],
+            a: 1,
+            explain: "etcd là backing store cho tất cả dữ liệu cluster.",
+            ref: "K8s PDF - Page 7"
+        },
+        {
+            q: "kube-scheduler có nhiệm vụ gì?",
+            options: ["Lập lịch họp", "Theo dõi các Pod mới tạo và gán chúng vào các Node phù hợp để chạy", "Xóa Pod lỗi", "Cập nhật ứng dụng"],
+            a: 1,
+            explain: "Scheduler quyết định pod sẽ chạy trên node nào dựa trên tài nguyên và ràng buộc.",
+            ref: "K8s PDF - Page 7"
+        },
+        {
+            q: "kube-controller-manager làm gì?",
+            options: ["Quản lý chuột", "Chạy các tiến trình controller (như Node Controller, Replication Controller) để duy trì trạng thái mong muốn", "Quản lý user", "Giao diện đồ họa"],
+            a: 1,
+            explain: "Controller Manager chạy các controllers để điều chỉnh trạng thái thực tế về trạng thái mong muốn.",
+            ref: "K8s PDF - Page 7"
+        },
+        {
+            q: "Thành phần nào chạy trên mỗi Worker Node và quản lý các container?",
+            options: ["Docker", "Kubelet", "Kube-proxy", "API Server"],
+            a: 1,
+            explain: "Kubelet là agent chạy trên mỗi node, đảm bảo container đang chạy trong Pod.",
+            ref: "K8s PDF - Page 8"
+        },
+        {
+            q: "Kube-proxy chịu trách nhiệm gì?",
+            options: ["Quản lý network rules trên mỗi node, cho phép giao tiếp mạng", "Proxy web", "Lưu trữ cache", "Tải image"],
+            a: 0,
+            explain: "Kube-proxy duy trì network rules trên node, hỗ trợ Service networking.",
+            ref: "K8s PDF - Page 8"
+        },
+        {
+            q: "Pod là gì?",
+            options: ["Một container đơn lẻ", "Đơn vị nhỏ nhất và đơn giản nhất trong Kubernetes, chứa một hoặc nhiều container chia sẻ storage/network", "Một máy chủ ảo", "Một node"],
+            a: 1,
+            explain: "Pod là đơn vị triển khai nhỏ nhất (atomic unit), có thể chứa 1 hoặc nhiều container.",
+            ref: "K8s PDF - Page 10"
+        },
+        {
+            q: "Công cụ dòng lệnh chính để tương tác với Kubernetes Cluster là gì?",
+            options: ["docker", "kubectl", "kubeadm", "minikube"],
+            a: 1,
+            explain: "kubectl là CLI tool để giao tiếp với K8s API Server.",
+            ref: "K8s PDF - Page 13"
+        },
+        {
+            q: "Minikube dùng để làm gì?",
+            options: ["Triển khai production", "Chạy một Kubernetes cluster đơn node (single-node) trên máy cá nhân để học tập/test", "Quản lý cluster lớn", "Tạo file YAML"],
+            a: 1,
+            explain: "Minikube là công cụ để chạy K8s cục bộ (local).",
+            ref: "K8s PDF - Page 12"
+        },
+        {
+            q: "ReplicaSet đảm bảo điều gì?",
+            options: ["Đảm bảo một số lượng bản sao (replicas) của Pod luôn chạy tại mọi thời điểm", "Đảm bảo Pod chạy nhanh nhất", "Đảm bảo bảo mật", "Đảm bảo Pod không bao giờ chết"],
+            a: 0,
+            explain: "ReplicaSet duy trì số lượng pod replicas ổn định.",
+            ref: "K8s PDF - Page 21"
+        },
+        {
+            q: "Deployment là gì và tại sao nên dùng nó thay vì ReplicaSet trực tiếp?",
+            options: ["Deployment là phiên bản cũ của Pod", "Deployment quản lý ReplicaSets và cung cấp tính năng cập nhật declarative (Rolling Updates, Rollbacks)", "Deployment rẻ hơn", "Deployment chạy nhanh hơn"],
+            a: 1,
+            explain: "Deployment cung cấp quản lý cập nhật (updates) cho Pods và ReplicaSets.",
+            ref: "K8s PDF - Page 23"
+        },
+        {
+            q: "Service trong Kubernetes dùng để làm gì?",
+            options: ["Chạy ứng dụng", "Định nghĩa một bộ các Pod và chính sách truy cập chúng (thường là qua mạng/load balancing)", "Lưu trữ dữ liệu", "Quản lý node"],
+            a: 1,
+            explain: "Service là một trừu tượng giúp expose một ứng dụng chạy trên một tập hợp các Pods.",
+            ref: "K8s PDF - Page 26"
+        },
+        {
+            q: "Loại Service 'ClusterIP' có đặc điểm gì?",
+            options: ["Mặc định, chỉ cho phép truy cập từ bên trong cluster", "Cho phép truy cập từ Internet", "Dùng cho database lớn", "Không có IP"],
+            a: 0,
+            explain: "ClusterIP exposes Service trên một IP nội bộ của cluster. Chỉ truy cập được từ trong cluster.",
+            ref: "K8s PDF - Page 27"
+        },
+        {
+            q: "Loại Service 'NodePort' làm gì?",
+            options: ["Mở một cổng cụ thể trên mỗi Node IP để truy cập từ bên ngoài", "Chặn cổng", "Chuyển tiếp nội bộ", "Chỉ dùng cho master"],
+            a: 0,
+            explain: "NodePort mở port tĩnh trên mỗi Node IP để truy cập từ ngoài.",
+            ref: "K8s PDF - Page 27"
+        },
+        {
+            q: "Loại Service 'LoadBalancer' thường dùng ở đâu?",
+            options: ["Trên máy cá nhân", "Trên Cloud Providers (AWS, Azure, GCP) để cấp phát Load Balancer vật lý/cloud", "Trong mạng LAN kín", "Không dùng được"],
+            a: 1,
+            explain: "LoadBalancer expose Service ra ngoài sử dụng load balancer của Cloud Provider.",
+            ref: "K8s PDF - Page 27"
+        },
+        {
+            q: "Namespace trong Kubernetes dùng để làm gì?",
+            options: ["Đặt tên cho vui", "Tạo các cluster ảo (virtual clusters) trên cùng một cluster vật lý để phân tách tài nguyên (ví dụ: dev, prod)", "Tạo mạng ảo", "Lưu trữ code"],
+            a: 1,
+            explain: "Namespace cung cấp cơ chế phân tách tài nguyên và tên (scope names).",
+            ref: "K8s PDF - Page 17"
+        },
+        {
+            q: "Lệnh `kubectl get pods` dùng để làm gì?",
+            options: ["Tải pod về máy", "Liệt kê danh sách các Pod trong namespace hiện tại", "Xóa pod", "Tạo pod mới"],
+            a: 1,
+            explain: "Hiển thị danh sách pods.",
+            ref: "K8s PDF - Page 18"
+        },
+        {
+            q: "Lệnh `kubectl apply -f file.yaml` dùng để làm gì?",
+            options: ["Xóa file", "Tạo hoặc cập nhật tài nguyên dựa trên định nghĩa trong file YAML", "Đọc file", "Validate file"],
+            a: 1,
+            explain: "`apply` quản lý ứng dụng thông qua file cấu hình (declarative).",
+            ref: "K8s PDF - Page 24"
+        },
+        {
+            q: "Lệnh `kubectl describe pod <pod_name>` giúp ích gì?",
+            options: ["Xem chi tiết cấu hình và trạng thái (events, lỗi) của Pod", "Xóa Pod", "Sửa Pod", "Copy Pod"],
+            a: 0,
+            explain: "`describe` hiển thị thông tin chi tiết, rất hữu ích để debug.",
+            ref: "K8s PDF - Page 19"
+        },
+        {
+            q: "ConfigMap dùng để làm gì?",
+            options: ["Lưu trữ mật khẩu", "Tách biệt cấu hình (configuration data) khỏi container image", "Vẽ bản đồ", "Định tuyến mạng"],
+            a: 1,
+            explain: "ConfigMap lưu trữ dữ liệu cấu hình dưới dạng key-value.",
+            ref: "K8s PDF - Page 30"
+        },
+        {
+            q: "Secret khác ConfigMap ở điểm nào?",
+            options: ["Secret dùng cho dữ liệu lớn", "Secret dùng để lưu trữ dữ liệu nhạy cảm (passwords, tokens, keys) và được mã hóa (base64 encoded mặc định)", "Secret công khai", "Không khác gì"],
+            a: 1,
+            explain: "Secret tương tự ConfigMap nhưng dành cho dữ liệu nhạy cảm.",
+            ref: "K8s PDF - Page 30"
+        },
+        {
+            q: "Ingress là gì?",
+            options: ["Cửa ra vào", "API object quản lý truy cập từ bên ngoài vào services trong cluster (thường là HTTP/HTTPS routes)", "Tường lửa", "Database"],
+            a: 1,
+            explain: "Ingress expose HTTP/HTTPS routes từ bên ngoài cluster tới services bên trong.",
+            ref: "K8s PDF - Page 29"
+        },
+        {
+            q: "PersistentVolume (PV) và PersistentVolumeClaim (PVC) giải quyết vấn đề gì?",
+            options: ["Tốc độ CPU", "Lưu trữ dữ liệu lâu dài (Persistent Storage) cho Pods, độc lập với vòng đời của Pod", "Bảo mật mạng", "Quản lý RAM"],
+            a: 1,
+            explain: "PV/PVC cung cấp cơ chế lưu trữ bền vững (persistent storage).",
+            ref: "K8s PDF - Page 31"
+        },
+        {
+            q: "Helm là gì?",
+            options: ["Cái mũ bảo hiểm", "Package manager cho Kubernetes (quản lý Charts)", "Công cụ giám sát", "Hệ điều hành"],
+            a: 1,
+            explain: "Helm giúp quản lý các ứng dụng K8s phức tạp thông qua Charts.",
+            ref: "K8s PDF - Page 33"
+        },
+        {
+            q: "StatefulSet dùng cho loại ứng dụng nào?",
+            options: ["Stateless (Web server)", "Stateful (Database, Zookeeper) cần định danh mạng ổn định và lưu trữ bền vững", "Job chạy 1 lần", "DaemonSet"],
+            a: 1,
+            explain: "StatefulSet quản lý deployment và scaling của một bộ Pods, đảm bảo thứ tự và tính duy nhất.",
+            ref: "K8s PDF - Page 25"
+        },
+        {
+            q: "DaemonSet đảm bảo điều gì?",
+            options: ["Chỉ chạy 1 pod trên toàn cluster", "Chạy một bản sao của Pod trên TẤT CẢ (hoặc một số) Node", "Chạy pod ngẫu nhiên", "Không chạy gì cả"],
+            a: 1,
+            explain: "DaemonSet đảm bảo tất cả các Nodes đều chạy một bản sao của Pod (ví dụ: log collector).",
+            ref: "K8s PDF - Page 25"
+        },
+        {
+            q: "Lệnh `kubectl exec -it <pod_name> -- /bin/bash` dùng để làm gì?",
+            options: ["Xóa pod", "Truy cập vào shell (terminal) bên trong container của Pod", "Xem log", "Restart pod"],
+            a: 1,
+            explain: "`exec` cho phép chạy lệnh bên trong container đang chạy.",
+            ref: "K8s PDF - Page 19"
+        },
+        {
+            q: "Kubeadm dùng để làm gì?",
+            options: ["Quản lý gói", "Công cụ giúp bootstrap (cài đặt) một Kubernetes cluster chuẩn", "Xóa cluster", "Tạo file config"],
+            a: 1,
+            explain: "Kubeadm là tool để dựng cụm K8s nhanh chóng (kubeadm init, kubeadm join).",
+            ref: "K8s PDF - Page 12"
+        },
+        {
+            q: "Label và Selector có vai trò gì?",
+            options: ["Trang trí", "Label là key/value gắn vào object; Selector giúp lọc/chọn các object dựa trên Label đó (ví dụ Service chọn Pod nào để route traffic)", "Không quan trọng", "Chỉ dùng cho Node"],
+            a: 1,
+            explain: "Labels/Selectors là cơ chế cốt lõi để nhóm và chọn các tài nguyên trong K8s.",
+            ref: "K8s PDF - Page 16"
+        },
+        {
+            q: "HPA (Horizontal Pod Autoscaler) làm gì?",
+            options: ["Tăng RAM cho pod", "Tự động tăng/giảm số lượng Pods dựa trên CPU/Memory usage", "Tự động tắt cluster", "Tự động update code"],
+            a: 1,
+            explain: "HPA tự động scale số lượng pods trong deployment/replicaset.",
+            ref: "K8s PDF - Page 32"
+        },
+        {
+            q: "Để xóa một deployment, lệnh nào đúng?",
+            options: ["kubectl remove deploy <name>", "kubectl delete deployment <name>", "kubectl stop deploy <name>", "kubectl erase <name>"],
+            a: 1,
+            explain: "`kubectl delete` xóa tài nguyên.",
+            ref: "K8s PDF - Page 24"
+        },
+        {
+            q: "Trong file YAML, `kind: Pod` nghĩa là gì?",
+            options: ["Loại tài nguyên cần tạo là Pod", "Tên của Pod", "Phiên bản API", "Metadata"],
+            a: 0,
+            explain: "Trường `kind` xác định loại object muốn tạo.",
+            ref: "K8s PDF - Page 15"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const sectionTagEl = document.getElementById('section-tag');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        // Update Tag
+        sectionTagEl.textContent = qData.category;
+        sectionTagEl.className = `section-tag tag-${qData.category === 'DOCKER' ? 'docker' : 'k8s'}`;
+
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Load saved state
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
