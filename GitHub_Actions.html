@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm GitHub Actions (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        .option-item:hover {
+            background-color: #e2e6ea;
+            border-color: #adb5bd;
+        }
+        .option-item.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .option-item.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+        .btn-prev:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #adb5bd;
+        }
+        .btn-next {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #0056b3;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>GitHub Actions Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Back</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Next</button>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu 70 câu hỏi từ 2 file GitHub_Actions.pdf và Learn GitHub Actions.pdf
+    const quizData = [
+        // --- PHẦN 1: TỔNG QUAN & KHÁI NIỆM (Learn GitHub Actions.pdf) ---
+        {
+            q: "GitHub Actions là gì?",
+            options: ["Một ngôn ngữ lập trình mới", "Nền tảng tích hợp và triển khai liên tục (CI/CD) cho phép tự động hóa quy trình build, test, deploy", "Một công cụ quản lý dự án Scrum", "Một IDE để viết code"],
+            a: 1,
+            explain: "GitHub Actions là nền tảng CI/CD cho phép tự động hóa quy trình build, test và deployment pipeline.",
+            ref: "Learn GitHub Actions.pdf - Page 1"
+        },
+        {
+            q: "Thành phần nào sau đây KHÔNG phải là một thành phần chính của GitHub Actions?",
+            options: ["Workflows", "Events", "Runners", "Compilers"],
+            a: 3,
+            explain: "Các thành phần chính bao gồm Workflows, Events, Jobs, Steps, Actions, và Runners. Compilers không phải là thành phần của GitHub Actions.",
+            ref: "Learn GitHub Actions.pdf - Page 2"
+        },
+        {
+            q: "Một 'Workflow' trong GitHub Actions được định nghĩa là gì?",
+            options: ["Một file mã nguồn C++", "Một quy trình tự động hóa có thể cấu hình, chạy một hoặc nhiều jobs", "Một máy chủ ảo để chạy code", "Một sự kiện kích hoạt"],
+            a: 1,
+            explain: "Workflow là một quy trình tự động hóa có thể cấu hình, chạy một hoặc nhiều jobs.",
+            ref: "Learn GitHub Actions.pdf - Page 2"
+        },
+        {
+            q: "File cấu hình Workflow được định nghĩa bằng định dạng nào?",
+            options: ["JSON", "XML", "YAML", "HTML"],
+            a: 2,
+            explain: "Workflow được định nghĩa bằng file YAML.",
+            ref: "Learn GitHub Actions.pdf - Page 2"
+        },
+        {
+            q: "File YAML của workflow phải được lưu trữ trong thư mục nào của repository?",
+            options: ["/src/workflows", "/.github/workflows", "/config/actions", "/bin/workflows"],
+            a: 1,
+            explain: "Workflow files được lưu trong thư mục .github/workflows của repository.",
+            ref: "Learn GitHub Actions.pdf - Page 2"
+        },
+        {
+            q: "'Event' trong GitHub Actions là gì?",
+            options: ["Một lỗi xảy ra khi chạy code", "Hoạt động cụ thể trong repository kích hoạt workflow chạy", "Một loại biến môi trường", "Tên của một action"],
+            a: 1,
+            explain: "Event là một hoạt động cụ thể trong repository kích hoạt workflow chạy (ví dụ: push, pull request).",
+            ref: "Learn GitHub Actions.pdf - Page 2"
+        },
+        {
+            q: "'Runner' là gì?",
+            options: ["Người viết code", "Server chạy các jobs trong workflow", "Một plugin của VS Code", "Tên gọi khác của GitHub Actions"],
+            a: 1,
+            explain: "Runner là một server chạy workflow của bạn khi được kích hoạt.",
+            ref: "Learn GitHub Actions.pdf - Page 2"
+        },
+        
+        // --- PHẦN 2: CẤU TRÚC WORKFLOW & SYNTAX (GitHub_Actions.pdf & Learn GitHub Actions.pdf) ---
+        {
+            q: "Từ khóa nào dùng để đặt tên cho Workflow?",
+            options: ["title:", "name:", "id:", "label:"],
+            a: 1,
+            explain: "Sử dụng từ khóa 'name' để đặt tên cho workflow.",
+            ref: "GitHub_Actions.pdf - Page 7"
+        },
+        {
+            q: "Mặc định, các Jobs trong một Workflow chạy như thế nào?",
+            options: ["Tuần tự (Sequential)", "Song song (Parallel)", "Ngẫu nhiên", "Chỉ chạy job đầu tiên"],
+            a: 1,
+            explain: "Mặc định, các jobs chạy song song (parallel). Lưu ý: Nếu muốn chạy tuần tự cần dùng `needs`.",
+            ref: "Learn GitHub Actions.pdf - Page 3"
+        },
+        {
+            q: "Để tạo sự phụ thuộc giữa các jobs (job B chỉ chạy sau khi job A xong), ta dùng từ khóa nào?",
+            options: ["depends_on:", "after:", "needs:", "requires:"],
+            a: 2,
+            explain: "Sử dụng từ khóa `needs` để định nghĩa dependency giữa các jobs.",
+            ref: "GitHub_Actions.pdf - Page 18"
+        },
+        {
+            q: "Một 'Step' trong Job có thể làm gì?",
+            options: ["Chỉ chạy shell script", "Chỉ chạy action", "Chạy shell script hoặc chạy một action", "Chỉ khai báo biến"],
+            a: 2,
+            explain: "Mỗi step có thể là một shell script sẽ được thực thi hoặc một action sẽ được chạy.",
+            ref: "Learn GitHub Actions.pdf - Page 3"
+        },
+        {
+            q: "Từ khóa `on:` trong file YAML dùng để làm gì?",
+            options: ["Bật workflow", "Định nghĩa events kích hoạt workflow", "Chỉ định runner", "Định nghĩa biến môi trường"],
+            a: 1,
+            explain: "Từ khóa `on` định nghĩa các events tự động kích hoạt workflow.",
+            ref: "GitHub_Actions.pdf - Page 7"
+        },
+        {
+            q: "Làm thế nào để kích hoạt workflow thủ công (manually)?",
+            options: ["Sử dụng `on: push`", "Sử dụng `on: workflow_dispatch`", "Sử dụng `on: schedule`", "Không thể kích hoạt thủ công"],
+            a: 1,
+            explain: "Sử dụng `workflow_dispatch` để cho phép kích hoạt workflow thủ công.",
+            ref: "GitHub_Actions.pdf - Page 10"
+        },
+        {
+            q: "Cú pháp để chạy workflow theo lịch trình (scheduled) sử dụng định dạng nào?",
+            options: ["POSIX cron syntax", "Windows Task Scheduler", "XML Duration", "JSON time"],
+            a: 0,
+            explain: "Bạn có thể lên lịch chạy workflow sử dụng cú pháp POSIX cron.",
+            ref: "GitHub_Actions.pdf - Page 10"
+        },
+        {
+            q: "Ví dụ: `cron: '30 5,17 * * *'` nghĩa là gì?",
+            options: ["Chạy mỗi 30 phút", "Chạy vào 5:30 và 17:30 mỗi ngày", "Chạy vào ngày 5 và 17 hàng tháng", "Chạy 30 lần mỗi ngày"],
+            a: 1,
+            explain: "Phút 30, Giờ 5 và 17. Nghĩa là 5:30 và 17:30 mỗi ngày.",
+            ref: "GitHub_Actions.pdf - Page 10"
+        },
+
+        // --- PHẦN 3: ACTIONS & RUNNERS (GitHub_Actions.pdf) ---
+        {
+            q: "Actions là gì?",
+            options: ["File log", "Ứng dụng tùy chỉnh cho nền tảng GitHub Actions thực hiện các task phức tạp nhưng lặp lại thường xuyên", "Tên gọi của repository", "Một loại database"],
+            a: 1,
+            explain: "Action là ứng dụng tùy chỉnh cho nền tảng GitHub Actions thực hiện nhiệm vụ phức tạp nhưng lặp đi lặp lại.",
+            ref: "Learn GitHub Actions.pdf - Page 3"
+        },
+        {
+            q: "Từ khóa `uses:` trong step dùng để làm gì?",
+            options: ["Sử dụng một biến", "Sử dụng một action đã được tạo sẵn", "Sử dụng một runner", "Sử dụng một file bí mật"],
+            a: 1,
+            explain: "`uses` chọn một action để chạy như một phần của step trong job. Ví dụ: `actions/checkout@v4`.",
+            ref: "Learn GitHub Actions.pdf - Page 5"
+        },
+        {
+            q: "Action `actions/checkout` có tác dụng gì?",
+            options: ["Kiểm tra lỗi code", "Checkout repository của bạn vào runner để chạy script hoặc action khác", "Deploy code lên server", "Gửi thông báo"],
+            a: 1,
+            explain: "Đây là action tiêu chuẩn để checkout code repository vào runner.",
+            ref: "Learn GitHub Actions.pdf - Page 5"
+        },
+        {
+            q: "Từ khóa `runs-on:` dùng để xác định điều gì?",
+            options: ["Thời gian chạy job", "Loại runner (OS) mà job sẽ chạy trên đó", "Người được quyền chạy job", "Các action sẽ chạy"],
+            a: 1,
+            explain: "`runs-on` cấu hình job chạy trên loại runner nào (ví dụ: `ubuntu-latest`, `windows-latest`).",
+            ref: "Learn GitHub Actions.pdf - Page 5"
+        },
+        {
+            q: "GitHub-hosted runners là gì?",
+            options: ["Server riêng của bạn tự quản lý", "Máy ảo mới được GitHub cung cấp để chạy job", "Máy tính cá nhân của developer", "Server của công ty"],
+            a: 1,
+            explain: "GitHub-hosted runners là các máy ảo mới được GitHub chuẩn bị để chạy jobs.",
+            ref: "GitHub_Actions.pdf - Page 27"
+        },
+        {
+            q: "Self-hosted runners là gì?",
+            options: ["Runner do GitHub quản lý", "Runner do bạn tự quản lý và bảo trì", "Runner chạy trên trình duyệt", "Runner không cần cài đặt"],
+            a: 1,
+            explain: "Self-hosted runners là runner mà bạn tự quản lý và bảo trì.",
+            ref: "GitHub_Actions.pdf - Page 27"
+        },
+        {
+            q: "Để chạy lệnh shell trong một step, ta dùng từ khóa nào?",
+            options: ["cmd:", "exec:", "run:", "shell:"],
+            a: 2,
+            explain: "Sử dụng từ khóa `run` để thực thi lệnh shell.",
+            ref: "Learn GitHub Actions.pdf - Page 5"
+        },
+
+        // --- PHẦN 4: VARIABLES & SECRETS (GitHub_Actions.pdf) ---
+        {
+            q: "Làm thế nào để truy cập biến môi trường (environment variables) trong workflow?",
+            options: ["$VARIABLE", "${{ env.VARIABLE_NAME }}", "%VARIABLE%", "var(VARIABLE)"],
+            a: 1,
+            explain: "Sử dụng cú pháp context `${{ env.VARIABLE_NAME }}`.",
+            ref: "GitHub_Actions.pdf - Page 14"
+        },
+        {
+            q: "Secrets (bí mật) trong GitHub Actions được dùng để lưu trữ gì?",
+            options: ["Code nguồn", "Thông tin nhạy cảm như password, token, key", "Tên của workflow", "Log lỗi"],
+            a: 1,
+            explain: "Secrets là biến môi trường được mã hóa dùng để chứa thông tin nhạy cảm.",
+            ref: "GitHub_Actions.pdf - Page 14"
+        },
+        {
+            q: "Cú pháp để truy cập một secret trong workflow là gì?",
+            options: ["${{ secret.NAME }}", "${{ secrets.NAME }}", "$SECRET_NAME", "env.SECRET_NAME"],
+            a: 1,
+            explain: "Cú pháp: `${{ secrets.SECRET_NAME }}`.",
+            ref: "GitHub_Actions.pdf - Page 14"
+        },
+        {
+            q: "`GITHUB_TOKEN` là gì?",
+            options: ["Một token bạn phải tự tạo thủ công", "Một secret được GitHub tự động tạo để xác thực trong workflow run", "Một loại phí sử dụng GitHub", "Mật khẩu đăng nhập GitHub"],
+            a: 1,
+            explain: "GitHub tự động tạo `GITHUB_TOKEN` secret để sử dụng trong workflow run nhằm xác thực.",
+            ref: "GitHub_Actions.pdf - Page 14"
+        },
+        {
+            q: "Biến môi trường mặc định nào chứa tên của người kích hoạt workflow?",
+            options: ["GITHUB_USER", "GITHUB_ACTOR", "GITHUB_TRIGGER", "GITHUB_NAME"],
+            a: 1,
+            explain: "`GITHUB_ACTOR` là tên người hoặc app đã kích hoạt workflow.",
+            ref: "GitHub_Actions.pdf - Page 14"
+        },
+
+        // --- PHẦN 5: ADVANCED WORKFLOW (Matrix, Artifacts, Docker) ---
+        {
+            q: "Chiến lược 'Matrix' (Matrix Strategy) cho phép làm gì?",
+            options: ["Tạo ma trận toán học", "Chạy job trên nhiều biến thể khác nhau (OS, language versions) cùng lúc", "Vẽ đồ thị workflow", "Chặn các job chạy song song"],
+            a: 1,
+            explain: "Matrix Strategy cho phép sử dụng biến để tạo nhiều workflow runs dựa trên sự kết hợp các biến (ví dụ chạy test trên nhiều phiên bản Node.js).",
+            ref: "GitHub_Actions.pdf - Page 19"
+        },
+        {
+            q: "Action `actions/upload-artifact` dùng để làm gì?",
+            options: ["Tải code lên GitHub", "Lưu trữ dữ liệu (files) được tạo ra bởi job để dùng sau hoặc tải về", "Xóa dữ liệu cũ", "Tải docker image"],
+            a: 1,
+            explain: "Dùng để upload artifacts (ví dụ file build, log) để lưu trữ hoặc chia sẻ giữa các jobs.",
+            ref: "GitHub_Actions.pdf - Page 24"
+        },
+        {
+            q: "Artifacts được lưu trữ trong bao lâu mặc định (trên repository công khai)?",
+            options: ["1 ngày", "90 ngày", "Vĩnh viễn", "30 ngày"],
+            a: 1,
+            explain: "Mặc định GitHub lưu trữ artifacts trong 90 ngày.",
+            ref: "GitHub_Actions.pdf - Page 24"
+        },
+        {
+            q: "Action `actions/download-artifact` dùng để làm gì?",
+            options: ["Tải artifacts đã được upload trước đó xuống runner", "Tải source code", "Tải plugin", "Tải repo khác"],
+            a: 1,
+            explain: "Dùng để tải các artifacts đã upload để job khác có thể sử dụng.",
+            ref: "GitHub_Actions.pdf - Page 24"
+        },
+        {
+            q: "Bạn có thể chạy workflow bên trong một Docker container không?",
+            options: ["Không", "Có, sử dụng từ khóa `container:`", "Chỉ trên Linux", "Chỉ trên Windows"],
+            a: 1,
+            explain: "Có, sử dụng từ khóa `container:` để định nghĩa container mà job sẽ chạy bên trong.",
+            ref: "GitHub_Actions.pdf - Page 22"
+        },
+        {
+            q: "Khi sử dụng `container: node:18`, job sẽ chạy ở đâu?",
+            options: ["Trực tiếp trên máy host", "Bên trong container Node.js phiên bản 18", "Trên cloud của Node.js", "Không chạy được"],
+            a: 1,
+            explain: "Job sẽ chạy các bước bên trong container được chỉ định (node:18).",
+            ref: "GitHub_Actions.pdf - Page 22"
+        },
+        {
+            q: "Service containers (từ khóa `services`) thường được dùng để làm gì trong workflow?",
+            options: ["Chạy ứng dụng chính", "Cung cấp các dịch vụ phụ trợ như Database hoặc Redis để test", "Thay thế runner", "Lưu trữ code"],
+            a: 1,
+            explain: "Services containers dùng để host các dịch vụ cần thiết cho job, như databases (Postgres, Redis...).",
+            ref: "GitHub_Actions.pdf - Page 22"
+        },
+
+        // --- PHẦN 6: EXPRESSIONS & CONTEXTS (GitHub_Actions.pdf) ---
+        {
+            q: "Cú pháp để sử dụng Expression trong GitHub Actions là gì?",
+            options: ["(( expression ))", "${{ expression }}", "[[ expression ]]", "{{ expression }}"],
+            a: 1,
+            explain: "Expression được đặt trong `${{ }}`.",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+        {
+            q: "Hàm `hashFiles()` thường được dùng để làm gì trong Caching?",
+            options: ["Mã hóa file", "Tạo mã băm duy nhất cho tập hợp các file (như package-lock.json) để làm key cho cache", "Xóa file", "Đổi tên file"],
+            a: 1,
+            explain: "`hashFiles` trả về mã băm MD5, thường dùng để tạo cache key dựa trên file dependency.",
+            ref: "GitHub_Actions.pdf - Page 25"
+        },
+        {
+            q: "Điều kiện `if: github.event_name == 'pull_request'` nghĩa là gì?",
+            options: ["Job sẽ luôn chạy", "Job chỉ chạy khi sự kiện kích hoạt là pull request", "Job không bao giờ chạy", "Job chạy khi push code"],
+            a: 1,
+            explain: "Kiểm tra ngữ cảnh sự kiện, chỉ chạy nếu là pull request.",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+        {
+            q: "Context `github` chứa thông tin gì?",
+            options: ["Thông tin về runner", "Thông tin về workflow run và sự kiện kích hoạt", "Thông tin về các biến secret", "Thông tin về các steps"],
+            a: 1,
+            explain: "Context `github` chứa thông tin về workflow run, event, repository...",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+        {
+            q: "Trạng thái `failure()` trong hàm điều kiện trả về true khi nào?",
+            options: ["Khi step trước đó thành công", "Khi bất kỳ step nào trước đó trong job bị thất bại", "Khi job bị hủy", "Luôn luôn true"],
+            a: 1,
+            explain: "`failure()` trả về true khi job có status là failure (có step trước đó thất bại).",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+        {
+            q: "Trạng thái `always()` dùng để làm gì?",
+            options: ["Luôn chạy step này bất kể trạng thái của các step trước đó", "Chỉ chạy khi thành công", "Chỉ chạy khi thất bại", "Chạy vô hạn"],
+            a: 0,
+            explain: "`always()` đảm bảo step luôn chạy, ngay cả khi cancelled hoặc failed.",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+
+        // --- PHẦN 7: CUSTOM ACTIONS (GitHub_Actions.pdf) ---
+        {
+            q: "Có mấy loại Custom Actions chính?",
+            options: ["1 loại (Docker)", "2 loại (Docker, JS)", "3 loại (Docker container, JavaScript, Composite)", "4 loại"],
+            a: 2,
+            explain: "Có 3 loại: Docker container actions, JavaScript actions, và Composite actions.",
+            ref: "GitHub_Actions.pdf - Page 28"
+        },
+        {
+            q: "Loại action nào chạy nhanh hơn trên GitHub-hosted runners?",
+            options: ["Docker container actions", "JavaScript actions", "Cả hai bằng nhau", "Composite actions"],
+            a: 1,
+            explain: "JavaScript actions chạy trực tiếp trên máy runner nên thường nhanh hơn Docker actions (phải build/pull image).",
+            ref: "GitHub_Actions.pdf - Page 28"
+        },
+        {
+            q: "File metadata định nghĩa cho một action tên là gì?",
+            options: ["package.json", "action.yml hoặc action.yaml", "config.yml", "docker-compose.yml"],
+            a: 1,
+            explain: "File `action.yml` (hoặc .yaml) định nghĩa metadata cho action (input, output, runs...).",
+            ref: "GitHub_Actions.pdf - Page 28"
+        },
+        {
+            q: "Composite actions cho phép bạn làm gì?",
+            options: ["Viết code Java", "Kết hợp nhiều bước (steps) workflow thành một action duy nhất", "Tạo Docker image", "Quản lý user"],
+            a: 1,
+            explain: "Composite actions cho phép gộp nhiều steps vào một action để tái sử dụng.",
+            ref: "GitHub_Actions.pdf - Page 28"
+        },
+        {
+            q: "Docker container actions chỉ chạy được trên hệ điều hành nào?",
+            options: ["Windows", "macOS", "Linux", "Tất cả"],
+            a: 2,
+            explain: "Docker container actions chỉ chạy được trên môi trường Linux.",
+            ref: "GitHub_Actions.pdf - Page 28"
+        },
+
+        // --- PHẦN 8: CI/CD & DEPLOYMENT (Thực hành từ slides) ---
+        {
+            q: "Action `actions/setup-node` dùng để làm gì?",
+            options: ["Cài đặt Docker", "Cài đặt môi trường Node.js trên runner", "Tải artifact", "Kiểm tra code"],
+            a: 1,
+            explain: "Dùng để cài đặt Node.js (version cụ thể) cho runner.",
+            ref: "GitHub_Actions.pdf - Page 16"
+        },
+        {
+            q: "Để build một Docker image và push lên Docker Hub, ta thường dùng action nào của Docker?",
+            options: ["docker/login-action và docker/build-push-action", "actions/checkout", "actions/upload-artifact", "docker/run"],
+            a: 0,
+            explain: "Kết hợp `login-action` để đăng nhập và `build-push-action` để build và push image.",
+            ref: "GitHub_Actions.pdf - Page 22"
+        },
+        {
+            q: "Trong ví dụ CI/CD, tại sao cần dùng `docker/login-action`?",
+            options: ["Để chạy container", "Để xác thực với Docker Registry (như Docker Hub) trước khi push", "Để cài đặt docker", "Để tải image"],
+            a: 1,
+            explain: "Cần login để có quyền push image lên registry.",
+            ref: "GitHub_Actions.pdf - Page 22"
+        },
+        {
+            q: "Biến `${{ github.sha }}` đại diện cho cái gì?",
+            options: ["Tên branch", "ID commit (mã băm SHA) kích hoạt workflow", "Tên repository", "Thời gian commit"],
+            a: 1,
+            explain: "`github.sha` là commit SHA kích hoạt workflow run.",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+        
+        // --- PHẦN 9: CHI TIẾT CẤU HÌNH KHÁC (Bổ sung từ nội dung 2 file) ---
+        {
+            q: "Concurrency trong GitHub Actions giúp giải quyết vấn đề gì?",
+            options: ["Tăng tốc độ chạy", "Đảm bảo chỉ 1 job hoặc workflow chạy tại một thời điểm cho cùng một nhóm (tránh conflict deploy)", "Cho phép chạy nhiều job hơn", "Không có tác dụng"],
+            a: 1,
+            explain: "Concurrency groups đảm bảo chỉ một run đang chạy cho group đó, các run cũ sẽ bị hủy hoặc chờ.",
+            ref: "GitHub_Actions.pdf - Page 10"
+        },
+        {
+            q: "Permissions (quyền) trong workflow dùng để làm gì?",
+            options: ["Cấp quyền truy cập cho người dùng", "Kiểm soát quyền hạn của GITHUB_TOKEN (đọc/ghi repository, issues...)", "Chặn người dùng", "Mở khóa file"],
+            a: 1,
+            explain: "Dùng để sửa đổi quyền hạn mặc định của `GITHUB_TOKEN`.",
+            ref: "GitHub_Actions.pdf - Page 7"
+        },
+        {
+            q: "`continue-on-error: true` có ý nghĩa gì?",
+            options: ["Dừng workflow nếu lỗi", "Cho phép job/step tiếp tục chạy ngay cả khi step đó bị lỗi", "Bỏ qua step đó", "Lặp lại step nếu lỗi"],
+            a: 1,
+            explain: "Cho phép workflow tiếp tục thực thi ngay cả khi step đó thất bại.",
+            ref: "GitHub_Actions.pdf - Page 18"
+        },
+        {
+            q: "`timeout-minutes` dùng để làm gì?",
+            options: ["Hẹn giờ chạy job", "Giới hạn thời gian tối đa job được phép chạy trước khi bị GitHub hủy", "Thời gian nghỉ giữa các jobs", "Thời gian chờ input"],
+            a: 1,
+            explain: "Đặt giới hạn thời gian chạy cho job để tránh treo vô hạn.",
+            ref: "GitHub_Actions.pdf - Page 18"
+        },
+        {
+            q: "GitHub Actions tính phí như thế nào đối với public repositories?",
+            options: ["Tính phí theo phút", "Miễn phí hoàn toàn", "Tính phí theo dung lượng", "Tính phí theo số lượng user"],
+            a: 1,
+            explain: "GitHub Actions miễn phí cho các public repositories tiêu chuẩn.",
+            ref: "GitHub_Actions.pdf - Page 3"
+        },
+        
+        // --- CÁC CÂU HỎI THỰC HÀNH TỔNG HỢP ---
+        {
+            q: "Để lọc branch, chỉ chạy workflow khi push vào branch 'main', ta cấu hình thế nào?",
+            options: ["on: push: branches: [ 'main' ]", "on: main", "branches: main", "push: main"],
+            a: 0,
+            explain: "Cú pháp: `on: push: branches: [ 'main' ]`.",
+            ref: "Learn GitHub Actions.pdf - Page 4"
+        },
+        {
+            q: "Cấu trúc thư mục `.github/workflows/main.yml` là đúng hay sai?",
+            options: ["Đúng", "Sai, phải là `.github/main.yml`", "Sai, phải là `workflows/main.yml`", "Sai, file phải tên workflow.yml"],
+            a: 0,
+            explain: "Đúng, file workflow phải nằm trong `.github/workflows/`.",
+            ref: "Learn GitHub Actions.pdf - Page 2"
+        },
+        {
+            q: "Lệnh `actions/cache` dùng để làm gì?",
+            options: ["Xóa cache", "Lưu và phục hồi các dependencies (như node_modules) để tăng tốc độ build", "Lưu docker image", "Lưu code"],
+            a: 1,
+            explain: "Dùng để cache dependencies và các file thường dùng để giảm thời gian chạy workflow.",
+            ref: "GitHub_Actions.pdf - Page 25"
+        },
+        {
+            q: "Inputs trong `workflow_dispatch` cho phép làm gì?",
+            options: ["Nhập dữ liệu đầu vào thủ công khi kích hoạt workflow", "Tự động điền form", "Lấy dữ liệu từ database", "Không làm gì cả"],
+            a: 0,
+            explain: "Cho phép người dùng nhập các tham số đầu vào khi trigger workflow thủ công.",
+            ref: "GitHub_Actions.pdf - Page 10"
+        },
+        {
+            q: "Trong `matrix`, từ khóa `exclude` dùng để làm gì?",
+            options: ["Loại bỏ một job khỏi ma trận cấu hình cụ thể", "Loại bỏ file", "Loại bỏ biến", "Dừng workflow"],
+            a: 0,
+            explain: "Dùng để loại trừ một cấu hình cụ thể nào đó được sinh ra từ matrix.",
+            ref: "GitHub_Actions.pdf - Page 19"
+        },
+        {
+            q: "Từ khóa `include` trong `matrix` dùng để làm gì?",
+            options: ["Thêm một cấu hình cụ thể hoặc thêm biến vào cấu hình hiện có", "Thêm file", "Thêm action", "Thêm runner"],
+            a: 0,
+            explain: "Dùng để thêm cấu hình jobs cụ thể vào matrix.",
+            ref: "GitHub_Actions.pdf - Page 19"
+        },
+        {
+            q: "Biến `${{ runner.os }}` trả về giá trị gì?",
+            options: ["Tên người chạy", "Hệ điều hành của runner hiện tại (Linux, Windows, macOS)", "Phiên bản GitHub", "Thời gian hiện tại"],
+            a: 1,
+            explain: "Trả về hệ điều hành của runner đang chạy job.",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+        {
+            q: "Để sử dụng biến secret trong lệnh run shell, cách nào an toàn nhất?",
+            options: ["echo ${{ secrets.TOKEN }}", "Gán vào biến môi trường: `env: SUPER_SECRET: ${{ secrets.SUPER_SECRET }}`", "Viết trực tiếp trong script", "Không thể dùng"],
+            a: 1,
+            explain: "Nên map secret vào biến môi trường (env) thay vì dùng trực tiếp trong dòng lệnh để tránh lộ trong log.",
+            ref: "GitHub_Actions.pdf - Page 14"
+        },
+        {
+            q: "Starter Workflows là gì?",
+            options: ["Workflow cho người mới bắt đầu", "Các template workflow mẫu do GitHub cung cấp cho nhiều ngôn ngữ và công cụ", "Workflow bị lỗi", "Workflow chạy chậm"],
+            a: 1,
+            explain: "GitHub cung cấp các starter workflows (template) để bạn bắt đầu nhanh chóng.",
+            ref: "Learn GitHub Actions.pdf - Page 7"
+        },
+        {
+            q: "Chế độ 'Visual Graph' trong tab Actions trên GitHub hiển thị gì?",
+            options: ["Biểu đồ giá cổ phiếu", "Biểu diễn trực quan các jobs và dependencies của workflow run", "Biểu đồ sử dụng CPU", "Không hiển thị gì"],
+            a: 1,
+            explain: "Hiển thị sơ đồ trực quan mối quan hệ giữa các jobs trong workflow run.",
+            ref: "Learn GitHub Actions.pdf - Page 6"
+        },
+        {
+            q: "File `README.md` trong một Action repository có vai trò gì?",
+            options: ["Không quan trọng", "Tài liệu hướng dẫn cách sử dụng Action (inputs, outputs, examples)", "Chứa code chạy action", "Chứa cấu hình build"],
+            a: 1,
+            explain: "Cung cấp tài liệu hướng dẫn sử dụng action cho người dùng khác.",
+            ref: "GitHub_Actions.pdf - Page 28"
+        },
+        {
+            q: "Output của một step có thể được step khác sử dụng thông qua cú pháp nào?",
+            options: ["${{ steps.step_id.outputs.output_name }}", "$OUTPUT_NAME", "var.output", "return output"],
+            a: 0,
+            explain: "Truy cập output của step khác bằng id và context steps.",
+            ref: "GitHub_Actions.pdf - Page 12"
+        },
+        {
+            q: "Để đặt ID cho một step (để tham chiếu sau này), ta dùng từ khóa nào?",
+            options: ["key:", "name:", "id:", "tag:"],
+            a: 2,
+            explain: "Sử dụng `id:` để định danh cho step.",
+            ref: "GitHub_Actions.pdf - Page 7"
+        },
+        {
+            q: "Biến môi trường được định nghĩa ở mức `workflow` (top level) có phạm vi ảnh hưởng như thế nào?",
+            options: ["Chỉ job đầu tiên", "Tất cả các jobs và steps trong workflow đó", "Chỉ runner", "Không có tác dụng"],
+            a: 1,
+            explain: "Biến env ở top level có sẵn cho mọi job và step trong workflow.",
+            ref: "GitHub_Actions.pdf - Page 14"
+        },
+        {
+            q: "Làm thế nào để bỏ qua (skip) việc chạy workflow cho một commit cụ thể?",
+            options: ["Xóa file workflow", "Thêm `[skip ci]` vào commit message", "Tắt mạng", "Không thể bỏ qua"],
+            a: 1,
+            explain: "Thêm `[skip ci]` hoặc `[ci skip]` vào commit message sẽ ngăn workflow kích hoạt (Kiến thức chung thường gặp trong CI/CD).",
+            ref: "Context GitHub Actions chung"
+        },
+        {
+            q: "GitHub Actions Marketplace là nơi để làm gì?",
+            options: ["Mua bán máy tính", "Tìm kiếm và chia sẻ các Actions do cộng đồng phát triển", "Tuyển dụng lập trình viên", "Lưu trữ code"],
+            a: 1,
+            explain: "Nơi tìm kiếm các actions có sẵn để sử dụng trong workflow của bạn.",
+            ref: "Learn GitHub Actions.pdf - Page 5"
+        },
+        {
+            q: "Trong file YAML, dấu gạch ngang `-` biểu thị điều gì?",
+            options: ["Một comment", "Một phần tử trong danh sách (list/array)", "Một key", "Kết thúc file"],
+            a: 1,
+            explain: "Trong YAML, `-` biểu thị một item trong list.",
+            ref: "GitHub_Actions.pdf - Page 7"
+        },
+        {
+            q: "Bạn có thể dùng GitHub Actions để deploy lên cloud nào?",
+            options: ["AWS", "Azure", "Google Cloud", "Bất kỳ cloud nào có hỗ trợ API/CLI"],
+            a: 3,
+            explain: "GitHub Actions hỗ trợ deploy lên bất kỳ nền tảng nào thông qua CLI hoặc Actions tương ứng.",
+            ref: "GitHub_Actions.pdf - Page 3"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    
+    // Mảng lưu trạng thái câu trả lời của người dùng. 
+    // null: chưa trả lời, number: index của option đã chọn
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        // Update progress
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        // Update question text
+        questionEl.textContent = qData.q;
+        
+        // Reset UI
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; // reset classes
+        optionsEl.className = 'options-list';
+        
+        // Create options
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Kiểm tra xem câu này đã làm chưa, nếu rồi thì hiển thị lại
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        // Update buttons state
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    // Hàm hiển thị kết quả (tách riêng để dùng lại khi load history)
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        // Disable all options
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        // Add class to container to fade out unselected
+        optionsEl.classList.add('answered');
+
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            // Correct
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            // Wrong
+            options[selectedIndex].classList.add('user-selected-wrong'); // Style riêng cho cái sai user chọn
+            // Highlight correct answer
+            options[qData.a].classList.add('correct');
+            
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        // Prevent re-clicking if already answered
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+
+        // Lưu trạng thái
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        // Cập nhật điểm (chỉ tính lần đầu chọn)
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        // Hiển thị giao diện
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
