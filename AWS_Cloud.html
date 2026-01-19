@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm AWS Cloud Overview (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #232f3e; /* AWS Dark Blue */
+            margin: 0;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        .option-item:hover {
+            background-color: #e2e6ea;
+            border-color: #ff9900; /* AWS Orange border on hover */
+        }
+        .option-item.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .option-item.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #adb5bd;
+        }
+        .btn-next {
+            background-color: #ff9900; /* AWS Orange */
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #ec8b00;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #ff9900;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>AWS Cloud Overview Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Back</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Next</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- PHẦN 1: KHÁI NIỆM CLOUD COMPUTING (CONCEPTS) ---
+        {
+            q: "Cloud Computing (Điện toán đám mây) là gì?",
+            options: ["Việc mua sắm phần cứng vật lý và đặt tại văn phòng", "Việc phân phối tài nguyên CNTT theo nhu cầu qua Internet với chính sách thanh toán theo mức sử dụng (pay-as-you-go)", "Một loại phần mềm diệt virus", "Hệ thống mạng nội bộ LAN"],
+            a: 1,
+            explain: "Cloud Computing là việc cung cấp tài nguyên CNTT (compute, storage, database...) qua Internet với mô hình pay-as-you-go.",
+            ref: "AWS Cloud Overview - Introduction"
+        },
+        {
+            q: "Lợi ích nào sau đây KHÔNG phải là một trong 6 lợi ích chính của Cloud Computing?",
+            options: ["Đánh đổi chi phí cố định (Capital Expense) lấy chi phí biến đổi (Variable Expense)", "Ngừng việc đoán trước dung lượng hạ tầng (Stop guessing capacity)", "Tăng tốc độ và sự linh hoạt (Agility)", "Tăng chi phí quản lý trung tâm dữ liệu"],
+            a: 3,
+            explain: "Lợi ích đúng là 'Ngừng việc tốn tiền chạy và bảo trì trung tâm dữ liệu', không phải tăng chi phí quản lý.",
+            ref: "AWS Cloud Overview - Six Advantages of Cloud Computing"
+        },
+        {
+            q: "Mô hình định giá 'Pay-as-you-go' mang lại lợi ích gì?",
+            options: ["Bạn phải trả trước một khoản tiền lớn", "Bạn chỉ trả tiền cho những gì bạn sử dụng mà không cần cam kết dài hạn", "Bạn phải trả phí cố định hàng tháng bất kể có dùng hay không", "Miễn phí hoàn toàn"],
+            a: 1,
+            explain: "Pay-as-you-go nghĩa là bạn chỉ trả cho tài nguyên khi bạn sử dụng chúng.",
+            ref: "AWS Cloud Overview - Pricing"
+        },
+        {
+            q: "Khái niệm 'High Availability' (Tính sẵn sàng cao) trong AWS nghĩa là gì?",
+            options: ["Hệ thống luôn hoạt động và có thể truy cập được, giảm thiểu thời gian ngừng hoạt động (downtime)", "Hệ thống chạy rất nhanh", "Hệ thống bảo mật tuyệt đối", "Hệ thống giá rẻ"],
+            a: 0,
+            explain: "High Availability đảm bảo hệ thống hoạt động liên tục và giảm thiểu downtime bằng cách sử dụng nhiều Availability Zones.",
+            ref: "AWS Cloud Overview - Reliability"
+        },
+        {
+            q: "Khái niệm 'Elasticity' (Tính đàn hồi) đề cập đến điều gì?",
+            options: ["Khả năng mở rộng tài nguyên ra (scale out) hoặc thu vào (scale in) dựa trên nhu cầu thực tế", "Khả năng chống hack", "Khả năng lưu trữ vĩnh viễn", "Khả năng chạy trên mọi hệ điều hành"],
+            a: 0,
+            explain: "Elasticity là khả năng tự động điều chỉnh tài nguyên (tăng/giảm) để khớp với nhu cầu tải hiện tại.",
+            ref: "AWS Cloud Overview - Scalability & Elasticity"
+        },
+        {
+            q: "Mô hình triển khai nào là 'Hybrid Cloud'?",
+            options: ["Chỉ sử dụng AWS", "Chỉ sử dụng on-premises (tại chỗ)", "Kết hợp giữa Cloud công cộng (như AWS) và cơ sở hạ tầng tại chỗ (on-premises)", "Sử dụng giấy bút"],
+            a: 2,
+            explain: "Hybrid Cloud kết nối hạ tầng và ứng dụng giữa tài nguyên đám mây và tài nguyên hiện có tại trung tâm dữ liệu (on-premises).",
+            ref: "AWS Cloud Overview - Deployment Models"
+        },
+
+        // --- PHẦN 2: HẠ TẦNG TOÀN CẦU (GLOBAL INFRASTRUCTURE) ---
+        {
+            q: "Một AWS Region (Vùng) là gì?",
+            options: ["Một trung tâm dữ liệu đơn lẻ", "Một vị trí địa lý vật lý trên thế giới bao gồm nhiều Availability Zones", "Một máy chủ ảo", "Một văn phòng của Amazon"],
+            a: 1,
+            explain: "Region là một khu vực địa lý chứa ít nhất 2 (thường là 3) Availability Zones.",
+            ref: "AWS Cloud Overview - Global Infrastructure"
+        },
+        {
+            q: "Một Availability Zone (AZ) bao gồm những gì?",
+            options: ["Một hoặc nhiều trung tâm dữ liệu rời rạc với nguồn điện, mạng và kết nối riêng biệt", "Một Region", "Một quốc gia", "Một Edge Location"],
+            a: 0,
+            explain: "Availability Zone bao gồm một hoặc nhiều data center, được thiết kế để cách ly lỗi.",
+            ref: "AWS Cloud Overview - Global Infrastructure"
+        },
+        {
+            q: "Edge Locations (Vị trí biên) được sử dụng chủ yếu cho dịch vụ nào?",
+            options: ["Amazon EC2", "Amazon RDS", "Amazon CloudFront (CDN)", "Amazon Glacier"],
+            a: 2,
+            explain: "Edge Locations được sử dụng bởi CloudFront để phân phối nội dung (cache) đến người dùng cuối với độ trễ thấp nhất.",
+            ref: "AWS Cloud Overview - Global Infrastructure"
+        },
+        {
+            q: "Tại sao nên chọn Region gần khách hàng nhất?",
+            options: ["Để giảm chi phí", "Để giảm độ trễ (Latency) cho người dùng cuối", "Để tuân thủ luật pháp Mỹ", "Vì AWS bắt buộc"],
+            a: 1,
+            explain: "Chọn Region gần người dùng giúp giảm độ trễ mạng (latency) và cải thiện hiệu năng.",
+            ref: "AWS Cloud Overview - Global Infrastructure"
+        },
+
+        // --- PHẦN 3: DỊCH VỤ TÍNH TOÁN (COMPUTE) ---
+        {
+            q: "Amazon EC2 là viết tắt của gì?",
+            options: ["Elastic Compute Cloud", "Electronic Computer Center", "Easy Cloud Computing", "Elastic Computer Cost"],
+            a: 0,
+            explain: "EC2 = Elastic Compute Cloud, cung cấp máy chủ ảo (instances) có thể thay đổi kích thước.",
+            ref: "AWS Cloud Overview - Compute Services"
+        },
+        {
+            q: "Loại hình mua EC2 nào phù hợp nhất cho các ứng dụng có lưu lượng ổn định và cam kết sử dụng 1-3 năm để giảm giá?",
+            options: ["On-Demand Instances", "Spot Instances", "Reserved Instances (RI)", "Dedicated Hosts"],
+            a: 2,
+            explain: "Reserved Instances cung cấp mức giảm giá đáng kể (lên đến 75%) so với On-Demand khi cam kết sử dụng 1 hoặc 3 năm.",
+            ref: "AWS Cloud Overview - EC2 Pricing Models"
+        },
+        {
+            q: "AWS Lambda là dịch vụ thuộc loại nào?",
+            options: ["Infrastructure as a Service (IaaS)", "Serverless Computing (Điện toán phi máy chủ)", "Database", "Operating System"],
+            a: 1,
+            explain: "AWS Lambda cho phép chạy code mà không cần cung cấp hay quản lý máy chủ (Serverless).",
+            ref: "AWS Cloud Overview - Compute Services"
+        },
+        {
+            q: "Amazon Elastic Beanstalk giúp bạn làm gì?",
+            options: ["Lưu trữ file", "Triển khai và quản lý ứng dụng web một cách dễ dàng mà không cần lo về hạ tầng", "Mua tên miền", "Chống DDoS"],
+            a: 1,
+            explain: "Elastic Beanstalk là dịch vụ PaaS giúp deploy và scale ứng dụng web nhanh chóng.",
+            ref: "AWS Cloud Overview - Compute Services"
+        },
+        {
+            q: "Amazon EC2 Auto Scaling có tác dụng gì?",
+            options: ["Tự động cài đặt lại Windows", "Tự động thêm hoặc xóa bớt EC2 instances dựa trên nhu cầu tải", "Tự động sao lưu dữ liệu", "Tự động giảm giá"],
+            a: 1,
+            explain: "Auto Scaling giúp duy trì tính sẵn sàng của ứng dụng bằng cách tự động scale in/scale out số lượng instances.",
+            ref: "AWS Cloud Overview - Compute Services"
+        },
+        {
+            q: "Loại instance 'Spot Instances' có đặc điểm gì về giá?",
+            options: ["Giá đắt nhất", "Giá cố định", "Giá rẻ nhất (giảm tới 90%) nhưng có thể bị AWS thu hồi bất cứ lúc nào", "Miễn phí"],
+            a: 2,
+            explain: "Spot Instances tận dụng dung lượng dư thừa của AWS với giá rất rẻ nhưng có thể bị gián đoạn.",
+            ref: "AWS Cloud Overview - EC2 Pricing Models"
+        },
+
+        // --- PHẦN 4: DỊCH VỤ LƯU TRỮ (STORAGE) ---
+        {
+            q: "Amazon S3 (Simple Storage Service) lưu trữ dữ liệu dưới dạng gì?",
+            options: ["Block", "File", "Object (Đối tượng)", "Record"],
+            a: 2,
+            explain: "S3 là dịch vụ lưu trữ dạng Object (Object storage), lưu dữ liệu trong các Buckets.",
+            ref: "AWS Cloud Overview - Storage Services"
+        },
+        {
+            q: "Dịch vụ nào cung cấp lưu trữ dạng khối (block storage) để gắn vào EC2 instances?",
+            options: ["Amazon S3", "Amazon EBS (Elastic Block Store)", "Amazon Glacier", "Amazon EFS"],
+            a: 1,
+            explain: "EBS cung cấp block level storage volumes để sử dụng với EC2 instances (giống như ổ cứng máy tính).",
+            ref: "AWS Cloud Overview - Storage Services"
+        },
+        {
+            q: "Amazon S3 Glacier được thiết kế cho mục đích gì?",
+            options: ["Lưu trữ web hosting", "Lưu trữ dữ liệu truy cập thường xuyên", "Lưu trữ dữ liệu dài hạn (Archiving) và backup với chi phí cực thấp", "Chạy database"],
+            a: 2,
+            explain: "S3 Glacier là giải pháp lưu trữ chi phí thấp dành cho việc lưu trữ dữ liệu (archive) và sao lưu lâu dài.",
+            ref: "AWS Cloud Overview - Storage Services"
+        },
+        {
+            q: "Amazon EFS (Elastic File System) cung cấp loại lưu trữ nào?",
+            options: ["Object Storage", "Block Storage", "Managed Network File System (NFS) có thể chia sẻ giữa nhiều EC2", "Database Storage"],
+            a: 2,
+            explain: "EFS cung cấp hệ thống file (NFS) có thể mount đồng thời vào nhiều EC2 instances.",
+            ref: "AWS Cloud Overview - Storage Services"
+        },
+        {
+            q: "AWS Storage Gateway dùng để làm gì?",
+            options: ["Kết nối lưu trữ tại chỗ (on-premises) với lưu trữ đám mây AWS", "Tăng tốc độ wifi", "Lưu trữ ram", "Chặn virus"],
+            a: 0,
+            explain: "Storage Gateway là dịch vụ hybrid cloud storage cho phép ứng dụng on-premise sử dụng lưu trữ AWS.",
+            ref: "AWS Cloud Overview - Storage Services"
+        },
+
+        // --- PHẦN 5: CƠ SỞ DỮ LIỆU (DATABASES) ---
+        {
+            q: "Amazon RDS (Relational Database Service) hỗ trợ các engine nào?",
+            options: ["Chỉ MySQL", "Chỉ Oracle", "MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Amazon Aurora", "Excel"],
+            a: 2,
+            explain: "RDS là dịch vụ quản lý cơ sở dữ liệu quan hệ hỗ trợ 6 engines phổ biến trên.",
+            ref: "AWS Cloud Overview - Database Services"
+        },
+        {
+            q: "Amazon DynamoDB là loại cơ sở dữ liệu nào?",
+            options: ["Quan hệ (Relational)", "NoSQL (Key-Value)", "Graph", "In-memory"],
+            a: 1,
+            explain: "DynamoDB là dịch vụ cơ sở dữ liệu NoSQL dạng key-value và document nhanh và linh hoạt.",
+            ref: "AWS Cloud Overview - Database Services"
+        },
+        {
+            q: "Dịch vụ kho dữ liệu (Data Warehouse) của AWS là gì?",
+            options: ["Amazon RDS", "Amazon Redshift", "Amazon DynamoDB", "Amazon ElastiCache"],
+            a: 1,
+            explain: "Amazon Redshift là dịch vụ Data Warehouse nhanh và được quản lý hoàn toàn.",
+            ref: "AWS Cloud Overview - Database Services"
+        },
+        {
+            q: "Amazon ElastiCache được sử dụng để làm gì?",
+            options: ["Lưu trữ file lâu dài", "Cải thiện hiệu suất ứng dụng web bằng cách lấy dữ liệu từ bộ nhớ cache in-memory", "Chạy máy ảo", "Quản lý DNS"],
+            a: 1,
+            explain: "ElastiCache cung cấp bộ nhớ đệm trong bộ nhớ (in-memory caching) như Redis hoặc Memcached để giảm tải cho DB.",
+            ref: "AWS Cloud Overview - Database Services"
+        },
+        {
+            q: "Amazon Aurora là gì?",
+            options: ["Một trình duyệt web", "Một cơ sở dữ liệu quan hệ tương thích MySQL và PostgreSQL được xây dựng cho đám mây", "Một dịch vụ AI", "Một công cụ đồ họa"],
+            a: 1,
+            explain: "Aurora là database quan hệ do AWS thiết kế, nhanh gấp 5 lần MySQL chuẩn và giá thành thấp hơn.",
+            ref: "AWS Cloud Overview - Database Services"
+        },
+
+        // --- PHẦN 6: MẠNG (NETWORKING) ---
+        {
+            q: "Amazon VPC (Virtual Private Cloud) cho phép bạn làm gì?",
+            options: ["Tạo một website miễn phí", "Thiết lập một mạng ảo riêng biệt (isolated network) trong AWS cloud", "Mua máy tính vật lý", "Kết nối bluetooth"],
+            a: 1,
+            explain: "VPC cho phép bạn khởi chạy tài nguyên AWS vào một mạng ảo do bạn định nghĩa.",
+            ref: "AWS Cloud Overview - Networking Services"
+        },
+        {
+            q: "Security Groups trong VPC đóng vai trò gì?",
+            options: ["Tường lửa ảo kiểm soát lưu lượng truy cập ở cấp độ Instance (EC2)", "Tường lửa ở cấp độ Subnet", "Phần mềm diệt virus", "Nhóm người dùng bảo mật"],
+            a: 0,
+            explain: "Security Groups hoạt động như một tường lửa ảo cho EC2 instances để kiểm soát traffic inbound và outbound.",
+            ref: "AWS Cloud Overview - Networking Services"
+        },
+        {
+            q: "Amazon Route 53 là dịch vụ gì?",
+            options: ["Dịch vụ tính toán", "Dịch vụ lưu trữ", "Dịch vụ DNS (Domain Name System) có khả năng mở rộng cao", "Dịch vụ định tuyến xe"],
+            a: 2,
+            explain: "Route 53 là dịch vụ DNS đám mây có khả năng mở rộng và độ sẵn sàng cao.",
+            ref: "AWS Cloud Overview - Networking Services"
+        },
+        {
+            q: "AWS Direct Connect dùng để làm gì?",
+            options: ["Kết nối 2 máy tính với nhau", "Thiết lập kết nối mạng riêng (dedicated network connection) từ on-premises đến AWS", "Kết nối wifi công cộng", "Chat trực tiếp với hỗ trợ"],
+            a: 1,
+            explain: "Direct Connect giúp thiết lập kết nối mạng riêng, ổn định từ trung tâm dữ liệu của bạn đến AWS, bỏ qua Internet công cộng.",
+            ref: "AWS Cloud Overview - Networking Services"
+        },
+        {
+            q: "Elastic Load Balancing (ELB) có chức năng gì?",
+            options: ["Lưu trữ dữ liệu", "Phân phối lưu lượng truy cập ứng dụng đến nhiều đích (như EC2 instances)", "Tăng tốc CPU", "Giảm giá tiền"],
+            a: 1,
+            explain: "ELB tự động phân phối lưu lượng truy cập đến (incoming traffic) qua nhiều mục tiêu như EC2 instances.",
+            ref: "AWS Cloud Overview - Networking Services"
+        },
+
+        // --- PHẦN 7: BẢO MẬT & ĐỊNH DANH (SECURITY & IDENTITY) ---
+        {
+            q: "Mô hình 'Shared Responsibility Model' (Trách nhiệm chia sẻ) định nghĩa trách nhiệm của AWS là gì?",
+            options: ["Bảo mật TRONG đám mây (Security IN the cloud)", "Bảo mật CỦA đám mây (Security OF the cloud)", "Tất cả mọi thứ", "Không chịu trách nhiệm gì"],
+            a: 1,
+            explain: "AWS chịu trách nhiệm bảo mật cơ sở hạ tầng (Security OF the cloud). Khách hàng chịu trách nhiệm bảo mật dữ liệu và ứng dụng (Security IN the cloud).",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "Trong mô hình Trách nhiệm chia sẻ, khách hàng chịu trách nhiệm về điều gì?",
+            options: ["Bảo vệ các trung tâm dữ liệu vật lý", "Quản lý hệ điều hành, cài đặt bản vá, và mã hóa dữ liệu", "Hệ thống mạng vật lý", "Phần cứng máy chủ"],
+            a: 1,
+            explain: "Khách hàng chịu trách nhiệm quản lý OS, firewall, data encryption, user access, v.v.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "AWS IAM (Identity and Access Management) dùng để làm gì?",
+            options: ["Quản lý kết nối internet", "Quản lý quyền truy cập vào các dịch vụ và tài nguyên AWS một cách an toàn", "Quản lý thanh toán", "Quản lý database"],
+            a: 1,
+            explain: "IAM cho phép quản lý users, groups, roles và policies để kiểm soát quyền truy cập.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "IAM 'Role' khác với IAM 'User' ở điểm nào?",
+            options: ["Role có mật khẩu, User thì không", "Role không gắn liền với một người cụ thể mà có thể được 'nhận' (assume) bởi bất kỳ ai hoặc dịch vụ nào được phép", "User là cho máy, Role là cho người", "Không có gì khác"],
+            a: 1,
+            explain: "IAM Role là một danh tính với quyền hạn cụ thể không gắn với một người dùng cố định mà có thể được assume bởi user hoặc service.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "AWS Shield là dịch vụ bảo vệ chống lại tấn công nào?",
+            options: ["SQL Injection", "DDoS (Distributed Denial of Service)", "Phishing", "Virus"],
+            a: 1,
+            explain: "AWS Shield là dịch vụ bảo vệ chống DDoS được quản lý.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "Amazon Inspector giúp bạn làm gì?",
+            options: ["Kiểm tra hóa đơn", "Đánh giá tự động các lỗ hổng bảo mật và sự tuân thủ trong ứng dụng", "Kiểm tra tốc độ mạng", "Giám sát nhân viên"],
+            a: 1,
+            explain: "Amazon Inspector tự động đánh giá các lỗ hổng bảo mật của ứng dụng triển khai trên AWS.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "AWS WAF (Web Application Firewall) bảo vệ ứng dụng khỏi cái gì?",
+            options: ["Mất điện", "Các cuộc tấn công web phổ biến (như SQL injection, XSS) có thể ảnh hưởng đến tính sẵn sàng hoặc bảo mật", "Lỗi phần cứng", "Người dùng quên mật khẩu"],
+            a: 1,
+            explain: "WAF giúp bảo vệ ứng dụng web khỏi các khai thác web phổ biến.",
+            ref: "AWS Cloud Overview - Security"
+        },
+
+        // --- PHẦN 8: QUẢN LÝ & GIÁM SÁT (MANAGEMENT & GOVERNANCE) ---
+        {
+            q: "Amazon CloudWatch là dịch vụ gì?",
+            options: ["Dịch vụ xem phim", "Dịch vụ giám sát và quan sát (monitoring) tài nguyên và ứng dụng AWS", "Dịch vụ đồng hồ", "Dịch vụ bảo mật"],
+            a: 1,
+            explain: "CloudWatch thu thập dữ liệu giám sát và log files, đặt cảnh báo (alarms) cho tài nguyên.",
+            ref: "AWS Cloud Overview - Management Tools"
+        },
+        {
+            q: "AWS CloudTrail dùng để làm gì?",
+            options: ["Dẫn đường leo núi", "Ghi lại (audit) các lời gọi API và hoạt động của người dùng trong tài khoản AWS", "Tăng tốc độ EC2", "Backup dữ liệu"],
+            a: 1,
+            explain: "CloudTrail theo dõi hoạt động của người dùng và việc sử dụng API để phục vụ mục đích kiểm toán (audit).",
+            ref: "AWS Cloud Overview - Management Tools"
+        },
+        {
+            q: "AWS Trusted Advisor cung cấp điều gì?",
+            options: ["Lời khuyên về tình cảm", "Các khuyến nghị thời gian thực để giúp tối ưu hóa hạ tầng AWS (về chi phí, hiệu năng, bảo mật...)", "Dịch vụ tư vấn pháp lý", "Mã giảm giá"],
+            a: 1,
+            explain: "Trusted Advisor kiểm tra môi trường AWS và đưa ra khuyến nghị để tiết kiệm chi phí, cải thiện hiệu năng và bảo mật.",
+            ref: "AWS Cloud Overview - Management Tools"
+        },
+        {
+            q: "AWS CloudFormation là dịch vụ giúp thực hiện mô hình nào?",
+            options: ["Infrastructure as Code (IaC)", "Platform as a Service", "Software as a Service", "Function as a Service"],
+            a: 0,
+            explain: "CloudFormation cho phép mô hình hóa và thiết lập tài nguyên AWS bằng code (templates).",
+            ref: "AWS Cloud Overview - Management Tools"
+        },
+
+        // --- PHẦN 9: CHI PHÍ & HỖ TRỢ (COST & SUPPORT) ---
+        {
+            q: "Công cụ nào giúp bạn ước tính chi phí tiết kiệm được khi chuyển từ on-premises sang AWS?",
+            options: ["AWS Cost Explorer", "AWS TCO (Total Cost of Ownership) Calculator", "AWS Budgets", "Simple Monthly Calculator"],
+            a: 1,
+            explain: "TCO Calculator giúp so sánh chi phí chạy ứng dụng trong môi trường on-premise so với AWS.",
+            ref: "AWS Cloud Overview - Cost Management"
+        },
+        {
+            q: "AWS Cost Explorer dùng để làm gì?",
+            options: ["Khám phá thế giới", "Trực quan hóa, hiểu và quản lý chi phí cũng như mức sử dụng AWS của bạn theo thời gian", "Tính toán giá trước khi mua", "Thanh toán hóa đơn"],
+            a: 1,
+            explain: "Cost Explorer cung cấp giao diện để xem và phân tích chi phí và mức sử dụng AWS.",
+            ref: "AWS Cloud Overview - Cost Management"
+        },
+        {
+            q: "AWS Budgets giúp bạn làm gì?",
+            options: ["Vay tiền AWS", "Thiết lập ngân sách tùy chỉnh và nhận cảnh báo khi chi phí hoặc mức sử dụng vượt quá ngưỡng", "Tự động trả tiền", "Giảm giá dịch vụ"],
+            a: 1,
+            explain: "AWS Budgets cho phép đặt ngân sách và cảnh báo khi chi phí vượt quá mức định trước.",
+            ref: "AWS Cloud Overview - Cost Management"
+        },
+        {
+            q: "Gói hỗ trợ (Support Plan) nào của AWS cung cấp quyền truy cập vào Technical Account Manager (TAM)?",
+            options: ["Basic", "Developer", "Business", "Enterprise"],
+            a: 3,
+            explain: "Chỉ gói Enterprise Support mới cung cấp chỉ định một Technical Account Manager (TAM) hỗ trợ trực tiếp.",
+            ref: "AWS Cloud Overview - Support Plans"
+        },
+        {
+            q: "Gói hỗ trợ nào cung cấp hỗ trợ kỹ thuật qua email trong giờ hành chính?",
+            options: ["Basic", "Developer", "Business", "Enterprise"],
+            a: 1,
+            explain: "Gói Developer cho phép truy cập hỗ trợ kỹ thuật qua email trong giờ làm việc.",
+            ref: "AWS Cloud Overview - Support Plans"
+        },
+        {
+            q: "Gói hỗ trợ Basic (cơ bản) bao gồm những gì?",
+            options: ["Hỗ trợ kỹ thuật 24/7", "Chỉ truy cập vào dịch vụ khách hàng (Customer Service), tài liệu, và diễn đàn hỗ trợ", "Truy cập TAM", "Phản hồi trong 1 giờ"],
+            a: 1,
+            explain: "Gói Basic miễn phí cho mọi khách hàng, chỉ hỗ trợ các vấn đề về tài khoản và thanh toán, không hỗ trợ kỹ thuật sâu.",
+            ref: "AWS Cloud Overview - Support Plans"
+        },
+
+        // --- PHẦN 10: KIẾN THỨC MỞ RỘNG & WELL-ARCHITECTED ---
+        {
+            q: "AWS Well-Architected Framework bao gồm mấy trụ cột (pillars)?",
+            options: ["3", "4", "5 (hoặc 6 trong phiên bản mới nhất)", "10"],
+            a: 2,
+            explain: "Framework này ban đầu có 5 trụ cột: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization (và mới thêm Sustainability).",
+            ref: "AWS Cloud Overview - Well-Architected Framework"
+        },
+        {
+            q: "Trụ cột 'Cost Optimization' tập trung vào điều gì?",
+            options: ["Chạy hệ thống nhanh nhất có thể", "Tránh chi tiêu không cần thiết và sử dụng tài nguyên hiệu quả về chi phí", "Bảo mật dữ liệu", "Phục hồi sau thảm họa"],
+            a: 1,
+            explain: "Cost Optimization tập trung vào việc hiểu và kiểm soát tiền chi cho cloud, chọn đúng loại tài nguyên.",
+            ref: "AWS Cloud Overview - Well-Architected Framework"
+        },
+        {
+            q: "Dịch vụ AWS Organizations giúp gì cho doanh nghiệp?",
+            options: ["Tổ chức tiệc công ty", "Quản lý và quản trị tập trung nhiều tài khoản AWS, hợp nhất thanh toán (consolidated billing)", "Tạo website công ty", "Quản lý nhân sự"],
+            a: 1,
+            explain: "AWS Organizations giúp quản lý nhiều tài khoản AWS, áp dụng chính sách chung và gộp hóa đơn thanh toán.",
+            ref: "AWS Cloud Overview - Management Tools"
+        },
+        {
+            q: "S3 Standard-IA (Infrequent Access) phù hợp cho dữ liệu nào?",
+            options: ["Dữ liệu truy cập hàng ngày", "Dữ liệu ít truy cập nhưng cần truy xuất nhanh khi cần thiết", "Dữ liệu lưu trữ 10 năm không cần đọc", "Dữ liệu tạm thời"],
+            a: 1,
+            explain: "S3 Standard-IA dành cho dữ liệu ít truy cập nhưng yêu cầu truy xuất tức thì (mili giây).",
+            ref: "AWS Cloud Overview - Storage Services"
+        },
+        {
+            q: "Lambda tính phí dựa trên yếu tố nào?",
+            options: ["Số lượng server", "Thời gian chạy code (compute time) và số lượng requests", "Dung lượng ổ cứng", "Băng thông mạng"],
+            a: 1,
+            explain: "Lambda tính phí dựa trên số lần request và thời gian thực thi code (tính theo mili giây).",
+            ref: "AWS Cloud Overview - Compute Services"
+        },
+        {
+            q: "Để di chuyển một lượng dữ liệu exabyte lên AWS, bạn nên dùng thiết bị nào?",
+            options: ["Internet thông thường", "AWS Snowmobile", "AWS Snowball", "USB"],
+            a: 1,
+            explain: "AWS Snowmobile là một chiếc xe container chở dữ liệu, dùng để di chuyển exabytes dữ liệu. Snowball dùng cho petabytes.",
+            ref: "AWS Cloud Overview - Migration"
+        },
+        {
+            q: "Amazon CloudFront là dịch vụ gì?",
+            options: ["Lưu trữ đám mây", "Content Delivery Network (CDN)", "Quản lý DNS", "Tường lửa"],
+            a: 1,
+            explain: "CloudFront là mạng phân phối nội dung (CDN) toàn cầu giúp truyền tải dữ liệu, video, ứng dụng đến người dùng với tốc độ cao.",
+            ref: "AWS Cloud Overview - Networking Services"
+        },
+        {
+            q: "Dịch vụ nào giúp gửi thông báo (Push Notification, Email, SMS) từ ứng dụng?",
+            options: ["Amazon SNS (Simple Notification Service)", "Amazon SQS (Simple Queue Service)", "Amazon SES", "Amazon Connect"],
+            a: 0,
+            explain: "SNS là dịch vụ nhắn tin pub/sub dùng để gửi thông báo đến người dùng hoặc dịch vụ khác.",
+            ref: "AWS Cloud Overview - Application Integration"
+        },
+        {
+            q: "Amazon SQS (Simple Queue Service) dùng để làm gì?",
+            options: ["Gửi email", "Lưu trữ hàng đợi tin nhắn (message queue) để tách rời (decouple) các thành phần của ứng dụng", "Lưu trữ database", "Chạy code"],
+            a: 1,
+            explain: "SQS giúp decouple và scale các microservices, distributed systems bằng cách dùng hàng đợi tin nhắn.",
+            ref: "AWS Cloud Overview - Application Integration"
+        },
+        {
+            q: "IAM Policy là gì?",
+            options: ["Một văn bản pháp lý", "Một tài liệu định dạng JSON định nghĩa quyền hạn (permissions)", "Một mật khẩu", "Một khóa bí mật"],
+            a: 1,
+            explain: "IAM Policy là file JSON định nghĩa những hành động nào được phép hoặc bị từ chối đối với tài nguyên nào.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "MFA (Multi-Factor Authentication) là gì?",
+            options: ["Mua hàng nhanh", "Xác thực đa yếu tố, yêu cầu thêm một mã từ thiết bị khác ngoài mật khẩu để đăng nhập", "Một loại database", "Dịch vụ mạng"],
+            a: 1,
+            explain: "MFA tăng cường bảo mật bằng cách yêu cầu người dùng cung cấp thêm mã xác thực (từ điện thoại, token) ngoài user/password.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "AWS Marketplace là gì?",
+            options: ["Chợ bán đồ cũ", "Danh mục kỹ thuật số để tìm, mua và triển khai phần mềm của bên thứ ba chạy trên AWS", "Nơi bán cổ phiếu Amazon", "Siêu thị Amazon"],
+            a: 1,
+            explain: "AWS Marketplace cho phép tìm và mua các phần mềm, AMI được cấu hình sẵn từ các nhà cung cấp bên thứ ba.",
+            ref: "AWS Cloud Overview - General"
+        },
+        {
+            q: "Để mã hóa dữ liệu, AWS cung cấp dịch vụ quản lý khóa nào?",
+            options: ["AWS KMS (Key Management Service)", "AWS IAM", "AWS Shield", "AWS WAF"],
+            a: 0,
+            explain: "KMS giúp tạo và quản lý các khóa mã hóa (encryption keys) để bảo vệ dữ liệu.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "Penetration Testing (Kiểm tra xâm nhập) trên AWS có được phép không?",
+            options: ["Không bao giờ", "Được phép đối với một số dịch vụ nhất định mà không cần xin phép trước, nhưng có quy định cụ thể", "Phải xin phép Jeff Bezos", "Chỉ hacker mới làm được"],
+            a: 1,
+            explain: "AWS cho phép khách hàng thực hiện pen-testing trên tài nguyên của họ đối với một số dịch vụ (như EC2, RDS) mà không cần phê duyệt trước.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "CloudWatch Alarms dùng để làm gì?",
+            options: ["Đánh thức bạn dậy", "Tự động thực hiện hành động (như gửi SNS, Auto Scaling) khi một chỉ số (metric) vượt ngưỡng", "Báo giờ ăn trưa", "Tắt máy tính"],
+            a: 1,
+            explain: "CloudWatch Alarms giám sát metrics và kích hoạt hành động tự động khi điều kiện được thỏa mãn.",
+            ref: "AWS Cloud Overview - Management Tools"
+        },
+        {
+            q: "Amazon Lightsail được thiết kế cho đối tượng nào?",
+            options: ["Doanh nghiệp lớn", "Người dùng cần máy chủ ảo đơn giản, giá cố định, dễ sử dụng (VPS)", "Chạy Big Data", "Lưu trữ exabytes"],
+            a: 1,
+            explain: "Lightsail là dịch vụ VPS dễ dùng nhất, cung cấp mọi thứ cần thiết (compute, storage, network) với giá tháng cố định.",
+            ref: "AWS Cloud Overview - Compute Services"
+        },
+        {
+            q: "Khái niệm 'Decoupling' trong kiến trúc cloud nghĩa là gì?",
+            options: ["Gộp tất cả vào một khối", "Tách rời các thành phần của hệ thống để chúng hoạt động độc lập, giảm thiểu rủi ro lỗi dây chuyền", "Ngắt kết nối mạng", "Tắt server"],
+            a: 1,
+            explain: "Decoupling (sử dụng SQS, SNS) giúp các component không bị phụ thuộc chặt chẽ, tăng tính ổn định.",
+            ref: "AWS Cloud Overview - Cloud Architecture"
+        },
+        {
+            q: "AWS Config giúp bạn làm gì?",
+            options: ["Cấu hình máy tính cá nhân", "Ghi lại và đánh giá cấu hình tài nguyên AWS theo thời gian (Configuration history)", "Cài đặt Windows", "Tạo database"],
+            a: 1,
+            explain: "AWS Config theo dõi sự thay đổi cấu hình của tài nguyên AWS, giúp kiểm tra tuân thủ (compliance).",
+            ref: "AWS Cloud Overview - Management Tools"
+        },
+        {
+            q: "AMI (Amazon Machine Image) là gì?",
+            options: ["Một loại robot", "Bản mẫu (template) chứa cấu hình phần mềm (OS, app server) để khởi tạo EC2 instance", "Một dịch vụ AI", "Tên một nhân viên Amazon"],
+            a: 1,
+            explain: "AMI cung cấp thông tin cần thiết (như hệ điều hành, ứng dụng cài sẵn) để launch một instance.",
+            ref: "AWS Cloud Overview - Compute Services"
+        },
+        {
+            q: "Để kết nối database on-premises với AWS mà không dùng internet công cộng, nên dùng?",
+            options: ["VPN", "Direct Connect", "Wifi", "Cáp quang biển"],
+            a: 1,
+            explain: "Direct Connect cung cấp đường truyền riêng (dedicated line), bảo mật và ổn định hơn VPN qua internet công cộng.",
+            ref: "AWS Cloud Overview - Networking Services"
+        },
+        {
+            q: "Quyền 'Least Privilege' (Quyền tối thiểu) trong IAM nghĩa là gì?",
+            options: ["Cấp quyền Admin cho tất cả", "Chỉ cấp những quyền hạn cần thiết nhất để thực hiện công việc, không cấp dư", "Không cấp quyền gì cả", "Cấp quyền ngẫu nhiên"],
+            a: 1,
+            explain: "Nguyên tắc Least Privilege là best practice bảo mật: chỉ cấp quyền vừa đủ để làm việc.",
+            ref: "AWS Cloud Overview - Security"
+        },
+        {
+            q: "Khi tạo một tài khoản AWS mới, user đầu tiên được gọi là gì?",
+            options: ["IAM User", "Root User", "Admin User", "Power User"],
+            a: 1,
+            explain: "Tài khoản đầu tiên là Root User, có toàn quyền truy cập. Best practice là khóa nó lại và dùng IAM User.",
+            ref: "AWS Cloud Overview - Security"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
