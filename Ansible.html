@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Ansible (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            overflow: hidden;
+            border-top: 6px solid #EE0000; /* Ansible Red */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #000;
+            margin: 0;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        .option-item:hover {
+            background-color: #f9f9f9;
+            border-color: #EE0000;
+        }
+        .option-item.correct {
+            background-color: #dff6dd;
+            border-color: #107c10;
+            color: #107c10;
+        }
+        .option-item.wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            background-color: #dff6dd;
+            color: #107c10;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #fde7e9;
+            color: #a80000;
+            border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #777;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #555;
+        }
+        .btn-prev:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-next {
+            background-color: #EE0000;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #cc0000;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #EE0000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>Ansible Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Quay lại</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- PHẦN 1: TỔNG QUAN & KIẾN TRÚC (INTRODUCTION & ARCHITECTURE) ---
+        {
+            q: "Ansible là gì?",
+            options: ["Một hệ điều hành Linux", "Công cụ tự động hóa CNTT mã nguồn mở (IT automation tool) dùng để quản lý cấu hình, triển khai ứng dụng và điều phối tác vụ", "Một loại cơ sở dữ liệu", "Phần mềm giám sát mạng"],
+            a: 1,
+            explain: "Ansible là công cụ tự động hóa mã nguồn mở giúp quản lý cấu hình, deployment và orchestration.",
+            ref: "Ansible.pdf - Introduction"
+        },
+        {
+            q: "Ansible được viết bằng ngôn ngữ lập trình nào?",
+            options: ["Java", "C++", "Python", "Ruby"],
+            a: 2,
+            explain: "Ansible được phát triển dựa trên Python.",
+            ref: "Ansible.pdf - Introduction"
+        },
+        {
+            q: "Kiến trúc của Ansible có đặc điểm gì nổi bật?",
+            options: ["Agent-based (Cần cài agent trên mọi máy)", "Agentless (Không cần cài agent trên máy đích)", "Master-Slave phức tạp", "Peer-to-Peer"],
+            a: 1,
+            explain: "Ansible là 'Agentless', nghĩa là không cần cài đặt phần mềm (agent) nào trên các node được quản lý.",
+            ref: "Ansible.pdf - Architecture"
+        },
+        {
+            q: "Ansible giao tiếp với các máy chủ Linux được quản lý (Managed Nodes) thông qua giao thức nào?",
+            options: ["Telnet", "SSH (Secure Shell)", "FTP", "HTTP"],
+            a: 1,
+            explain: "Ansible sử dụng giao thức SSH để kết nối và quản lý các máy chủ Linux/Unix.",
+            ref: "Ansible.pdf - Architecture"
+        },
+        {
+            q: "Thành phần 'Control Node' trong Ansible là gì?",
+            options: ["Máy chủ bị quản lý", "Máy tính cài đặt Ansible dùng để chạy các lệnh và playbook quản lý các máy khác", "Một router mạng", "Cơ sở dữ liệu lưu trữ"],
+            a: 1,
+            explain: "Control Node là máy cài đặt Ansible và từ đó bạn thực thi các lệnh điều khiển.",
+            ref: "Ansible.pdf - Architecture"
+        },
+        {
+            q: "Cơ chế hoạt động của Ansible là gì?",
+            options: ["Pull-based (Máy con tự kéo cấu hình về)", "Push-based (Máy chủ đẩy cấu hình xuống máy con)", "Hybrid", "Không có cơ chế cụ thể"],
+            a: 1,
+            explain: "Ansible sử dụng mô hình Push-based: Control node đẩy (push) các cấu hình và module xuống các managed nodes.",
+            ref: "Ansible.pdf - Architecture"
+        },
+
+        // --- PHẦN 2: INVENTORY & AD-HOC COMMANDS ---
+        {
+            q: "Inventory trong Ansible dùng để làm gì?",
+            options: ["Lưu trữ log", "Định nghĩa danh sách các máy chủ (hosts) mà Ansible sẽ quản lý", "Lưu trữ module", "Cấu hình mạng"],
+            a: 1,
+            explain: "Inventory là file chứa thông tin về các host và nhóm host mà Ansible quản lý.",
+            ref: "Ansible.pdf - Inventory"
+        },
+        {
+            q: "Đường dẫn mặc định của file Inventory trong Linux là gì?",
+            options: ["/etc/hosts", "/etc/ansible/hosts", "/var/lib/ansible/hosts", "/usr/bin/ansible/hosts"],
+            a: 1,
+            explain: "File Inventory mặc định thường nằm ở `/etc/ansible/hosts`.",
+            ref: "Ansible.pdf - Inventory"
+        },
+        {
+            q: "Lệnh Ad-hoc là gì?",
+            options: ["Một kịch bản dài", "Các lệnh Ansible chạy trực tiếp từ dòng lệnh để thực hiện một tác vụ nhanh chóng (một lần)", "Lệnh cài đặt Ansible", "Lệnh khởi động lại máy"],
+            a: 1,
+            explain: "Ad-hoc commands là các lệnh chạy một lần từ CLI để thực hiện tác vụ nhanh mà không cần viết playbook.",
+            ref: "Ansible.pdf - Ad-hoc Commands"
+        },
+        {
+            q: "Lệnh nào sau đây dùng để kiểm tra kết nối (ping) tới tất cả các host trong inventory?",
+            options: ["ping all", "ansible all -m ping", "ansible-playbook ping.yml", "ssh all ping"],
+            a: 1,
+            explain: "Cú pháp đúng: `ansible <host-pattern> -m <module>`. Ở đây là `ansible all -m ping`.",
+            ref: "Ansible.pdf - Ad-hoc Commands"
+        },
+        {
+            q: "Trong lệnh `ansible webservers -m yum -a 'name=httpd state=present'`, tham số `-m` nghĩa là gì?",
+            options: ["Machine", "Module", "Mode", "Method"],
+            a: 1,
+            explain: "`-m` được dùng để chỉ định tên module cần sử dụng (ở đây là module `yum`).",
+            ref: "Ansible.pdf - Ad-hoc Commands"
+        },
+        {
+            q: "Tham số `-a` trong lệnh Ad-hoc dùng để làm gì?",
+            options: ["Chỉ định module", "Cung cấp các đối số (arguments) cho module", "Xác thực (Authentication)", "Hỏi mật khẩu (Ask pass)"],
+            a: 1,
+            explain: "`-a` (arguments) dùng để truyền các tham số cụ thể cho module đang chạy.",
+            ref: "Ansible.pdf - Ad-hoc Commands"
+        },
+
+        // --- PHẦN 3: PLAYBOOKS & YAML ---
+        {
+            q: "Ansible Playbook được viết bằng định dạng nào?",
+            options: ["XML", "JSON", "YAML", "HTML"],
+            a: 2,
+            explain: "Playbooks được viết bằng định dạng YAML (Yet Another Markup Language), dễ đọc và dễ viết.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Một Playbook bắt đầu bằng ký tự gì (theo chuẩn YAML)?",
+            options: ["///", "---", "###", ">>>"],
+            a: 1,
+            explain: "File YAML thường bắt đầu bằng ba dấu gạch ngang `---` để đánh dấu sự bắt đầu của tài liệu.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Trong Playbook, 'Tasks' là gì?",
+            options: ["Danh sách các máy chủ", "Danh sách các hành động (sử dụng modules) sẽ được thực thi trên managed nodes", "Biến môi trường", "Tên của playbook"],
+            a: 1,
+            explain: "Tasks là danh sách các bước thực thi, mỗi task gọi một module để thực hiện một hành động cụ thể.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Lệnh dùng để chạy một Playbook là gì?",
+            options: ["ansible-run playbook.yml", "ansible-playbook playbook.yml", "ansible start playbook.yml", "python playbook.yml"],
+            a: 1,
+            explain: "Lệnh `ansible-playbook` được dùng để thực thi một file playbook.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Khái niệm 'Idempotency' (Tính lũy đẳng) trong Ansible nghĩa là gì?",
+            options: ["Chạy lệnh nhiều lần sẽ gây lỗi", "Chạy lệnh nhiều lần nhưng kết quả cuối cùng không đổi (chỉ thay đổi nếu cần thiết)", "Lệnh chạy rất nhanh", "Lệnh tự động xóa chính nó"],
+            a: 1,
+            explain: "Idempotency đảm bảo rằng việc chạy playbook nhiều lần sẽ không gây ra tác dụng phụ ngoài ý muốn; nó chỉ thay đổi hệ thống nếu trạng thái hiện tại khác với trạng thái mong muốn.",
+            ref: "Ansible.pdf - Concepts"
+        },
+        {
+            q: "Trong Playbook, từ khóa `become: yes` dùng để làm gì?",
+            options: ["Trở thành người dùng khác", "Thực thi task với quyền ưu tiên (privilege escalation), thường là root/sudo", "Bỏ qua task", "Chạy task ở chế độ nền"],
+            a: 1,
+            explain: "`become: yes` kích hoạt privilege escalation (như sudo) để thực hiện các tác vụ yêu cầu quyền root.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+
+        // --- PHẦN 4: MODULES (CÁC MODULE PHỔ BIẾN) ---
+        {
+            q: "Module nào dùng để quản lý các gói phần mềm trên hệ điều hành Debian/Ubuntu?",
+            options: ["yum", "apt", "dnf", "pacman"],
+            a: 1,
+            explain: "Module `apt` được dùng để quản lý packages trên các hệ thống dựa trên Debian/Ubuntu.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module nào dùng để quản lý các gói phần mềm trên hệ điều hành RHEL/CentOS?",
+            options: ["apt", "yum (hoặc dnf)", "pkg", "get-apt"],
+            a: 1,
+            explain: "Module `yum` (hoặc `dnf` cho bản mới) dùng cho RHEL/CentOS.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `service` dùng để làm gì?",
+            options: ["Tạo file", "Quản lý trạng thái dịch vụ (start, stop, restart, enable)", "Cài đặt phần mềm", "Tạo user"],
+            a: 1,
+            explain: "Module `service` dùng để quản lý services trên hệ thống (ví dụ: khởi động httpd).",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `copy` khác module `fetch` ở điểm nào?",
+            options: ["Copy dùng để xóa file", "Copy đẩy file từ Control Node sang Managed Node, Fetch kéo file từ Managed Node về Control Node", "Fetch nhanh hơn Copy", "Giống hệt nhau"],
+            a: 1,
+            explain: "`copy` sao chép file TỪ control node ĐẾN remote host. `fetch` làm ngược lại.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `file` thường được dùng để làm gì?",
+            options: ["Tải file từ internet", "Thiết lập thuộc tính file (phân quyền, owner, group) hoặc tạo thư mục/symlink", "Đọc nội dung file", "Mã hóa file"],
+            a: 1,
+            explain: "Module `file` dùng để quản lý file và thuộc tính file (chmod, chown, mkdir...).",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `template` trong Ansible sử dụng engine nào để xử lý file mẫu?",
+            options: ["Mustache", "Jinja2", "EJS", "Handlebars"],
+            a: 1,
+            explain: "Ansible sử dụng Jinja2 templating engine của Python để xử lý các file template dynamic.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `user` dùng để làm gì?",
+            options: ["Đăng nhập vào hệ thống", "Quản lý tài khoản người dùng (tạo, xóa, sửa user)", "Liệt kê người dùng đang online", "Thay đổi mật khẩu root"],
+            a: 1,
+            explain: "Module `user` dùng để quản lý các user accounts trên remote hosts.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `command` và `shell` khác nhau chính ở điểm nào?",
+            options: ["`command` an toàn hơn và không hỗ trợ các ký tự đặc biệt của shell (như pipes `|`, redirect `>`), còn `shell` thì có", "`command` chạy trên Windows, `shell` chạy trên Linux", "`shell` nhanh hơn", "Không có gì khác"],
+            a: 0,
+            explain: "Module `command` thực thi lệnh trực tiếp, không thông qua shell nên không hỗ trợ pipes/redirects. `shell` chạy lệnh qua /bin/sh nên hỗ trợ đầy đủ tính năng shell.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `git` dùng để làm gì?",
+            options: ["Cài đặt git", "Clone hoặc checkout source code từ git repository", "Tạo git server", "Xóa git repo"],
+            a: 1,
+            explain: "Module `git` dùng để quản lý git checkouts của repositories để deploy code.",
+            ref: "Ansible.pdf - Modules"
+        },
+
+        // --- PHẦN 5: VARIABLES & FACTS (BIẾN & THÔNG TIN HỆ THỐNG) ---
+        {
+            q: "Cú pháp để tham chiếu (gọi) một biến trong Playbook hoặc Template là gì?",
+            options: ["$var", "{{ var }}", "%var%", "[var]"],
+            a: 1,
+            explain: "Ansible sử dụng cú pháp Jinja2 `{{ variable_name }}` để tham chiếu giá trị biến.",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Ansible Facts là gì?",
+            options: ["Các câu chuyện về Ansible", "Thông tin hệ thống của managed node (OS, IP, CPU...) được Ansible tự động thu thập khi chạy playbook", "Danh sách lỗi", "Thông tin người dùng"],
+            a: 1,
+            explain: "Facts là thông tin về remote system (IP address, OS version, disk info...) được thu thập bởi module `setup`.",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Module nào chịu trách nhiệm thu thập Facts?",
+            options: ["gather_facts", "setup", "info", "collect"],
+            a: 1,
+            explain: "Module `setup` được chạy tự động (implicit) ở đầu playbook để thu thập facts, trừ khi `gather_facts: no`.",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Để tắt việc thu thập Facts nhằm tăng tốc độ chạy Playbook, ta dùng lệnh gì trong Playbook?",
+            options: ["facts: off", "gather_facts: no", "setup: false", "no_facts: true"],
+            a: 1,
+            explain: "Đặt `gather_facts: no` ở đầu play để bỏ qua bước thu thập thông tin, giúp chạy nhanh hơn nếu không cần dùng facts.",
+            ref: "Ansible.pdf - Variables"
+        },
+
+        // --- PHẦN 6: CONDITIONALS, LOOPS & HANDLERS ---
+        {
+            q: "Từ khóa nào dùng để thực hiện điều kiện (If statement) trong task?",
+            options: ["if", "condition", "when", "check"],
+            a: 2,
+            explain: "Từ khóa `when` được sử dụng để kiểm tra điều kiện (ví dụ: `when: ansible_os_family == 'Debian'`).",
+            ref: "Ansible.pdf - Conditionals"
+        },
+        {
+            q: "Để lặp qua một danh sách các items (Vòng lặp), ta dùng từ khóa nào (phiên bản mới)?",
+            options: ["for", "repeat", "loop", "while"],
+            a: 2,
+            explain: "Từ khóa `loop` (thay thế cho `with_items` cũ) được dùng để lặp qua một danh sách.",
+            ref: "Ansible.pdf - Loops"
+        },
+        {
+            q: "Handlers trong Ansible là gì?",
+            options: ["Người xử lý lỗi", "Các task đặc biệt chỉ chạy khi được thông báo (notified) bởi một task khác có thay đổi (changed)", "Các biến đặc biệt", "Module quản lý file"],
+            a: 1,
+            explain: "Handlers là các tasks chỉ chạy khi được kích hoạt bởi từ khóa `notify` từ một task khác (ví dụ: restart service sau khi sửa file config).",
+            ref: "Ansible.pdf - Handlers"
+        },
+        {
+            q: "Từ khóa `notify` được dùng để làm gì?",
+            options: ["Gửi email", "Kích hoạt một Handler", "Thông báo ra màn hình", "Ghi log"],
+            a: 1,
+            explain: "`notify` dùng để gọi tên một handler cần chạy nếu task hiện tại có trạng thái 'changed'.",
+            ref: "Ansible.pdf - Handlers"
+        },
+
+        // --- PHẦN 7: ROLES & GALAXY ---
+        {
+            q: "Ansible Roles giúp giải quyết vấn đề gì?",
+            options: ["Tăng tốc độ mạng", "Tổ chức Playbook phức tạp thành các thành phần nhỏ, có cấu trúc, có thể tái sử dụng và chia sẻ", "Mã hóa dữ liệu", "Quản lý user"],
+            a: 1,
+            explain: "Roles cho phép tự động tải các vars_files, tasks, và handlers dựa trên cấu trúc file đã định sẵn, giúp tái sử dụng code.",
+            ref: "Ansible.pdf - Roles"
+        },
+        {
+            q: "Cấu trúc thư mục chuẩn của một Role bao gồm những gì?",
+            options: ["tasks, handlers, vars, files, templates, meta, defaults", "bin, src, lib", "input, output, process", "images, css, js"],
+            a: 0,
+            explain: "Một Role chuẩn có các thư mục con như `tasks` (chứa main.yml), `handlers`, `vars`, `files`, `templates`....",
+            ref: "Ansible.pdf - Roles"
+        },
+        {
+            q: "Ansible Galaxy là gì?",
+            options: ["Một game vũ trụ", "Kho lưu trữ (repository) cộng đồng trực tuyến để tìm kiếm, chia sẻ và tải về các Ansible Roles", "Tên mã của phiên bản Ansible", "Dịch vụ cloud"],
+            a: 1,
+            explain: "Ansible Galaxy là hub cộng đồng để chia sẻ và tải các roles được đóng gói sẵn.",
+            ref: "Ansible.pdf - Galaxy"
+        },
+        {
+            q: "Lệnh `ansible-galaxy init <role_name>` dùng để làm gì?",
+            options: ["Xóa role", "Tải role từ mạng", "Tạo cấu trúc thư mục xương sống (skeleton) cho một role mới", "Upload role"],
+            a: 2,
+            explain: "Lệnh này tạo ra cấu trúc thư mục mẫu cho một role mới để bạn bắt đầu phát triển.",
+            ref: "Ansible.pdf - Galaxy"
+        },
+
+        // --- PHẦN 8: VAULT & SECURITY ---
+        {
+            q: "Ansible Vault dùng để làm gì?",
+            options: ["Lưu trữ file backup", "Mã hóa các file dữ liệu nhạy cảm (như mật khẩu, key) trong Playbook", "Tạo tường lửa", "Quản lý user"],
+            a: 1,
+            explain: "Ansible Vault cho phép mã hóa dữ liệu nhạy cảm (passwords, keys) để có thể lưu trữ an toàn trong source control.",
+            ref: "Ansible.pdf - Vault"
+        },
+        {
+            q: "Lệnh để tạo một file mã hóa mới bằng Vault là gì?",
+            options: ["ansible-vault create secret.yml", "ansible encrypt secret.yml", "ansible-secure create secret.yml", "vault new secret.yml"],
+            a: 0,
+            explain: "Lệnh `ansible-vault create` dùng để tạo file mới được mã hóa.",
+            ref: "Ansible.pdf - Vault"
+        },
+        {
+            q: "Lệnh để chỉnh sửa một file đã bị mã hóa bởi Vault?",
+            options: ["nano secret.yml", "vim secret.yml", "ansible-vault edit secret.yml", "ansible-vault open secret.yml"],
+            a: 2,
+            explain: "`ansible-vault edit` sẽ giải mã file tạm thời, mở editor để bạn sửa, và mã hóa lại khi bạn lưu.",
+            ref: "Ansible.pdf - Vault"
+        },
+
+        // --- PHẦN 9: NÂNG CAO & KHÁC ---
+        {
+            q: "AWX / Red Hat Ansible Automation Platform (trước đây là Ansible Tower) là gì?",
+            options: ["Một module mới", "Giao diện người dùng (Web UI) và API để quản lý, lập lịch và mở rộng quy mô Ansible trong doanh nghiệp", "Phần mềm diệt virus", "Công cụ lập trình"],
+            a: 1,
+            explain: "AWX (bản open source) hay Tower là giao diện web giúp quản lý Ansible tập trung, quản lý quyền truy cập (RBAC), và job scheduling.",
+            ref: "Ansible.pdf - Tower/AWX"
+        },
+        {
+            q: "Trong Inventory, làm thế nào để định nghĩa một nhóm các host?",
+            options: ["Sử dụng ngoặc vuông: [webservers]", "Sử dụng ngoặc nhọn: {webservers}", "Sử dụng dấu thăng: #webservers", "Sử dụng dấu sao: *webservers"],
+            a: 0,
+            explain: "Trong file INI inventory, tên nhóm được đặt trong ngoặc vuông, ví dụ `[webservers]`.",
+            ref: "Ansible.pdf - Inventory"
+        },
+        {
+            q: "Biến `ansible_host` trong Inventory dùng để làm gì?",
+            options: ["Đặt tên host", "Chỉ định địa chỉ IP thực hoặc hostname để kết nối nếu khác với tên alias trong inventory", "Đặt mật khẩu", "Đặt cổng kết nối"],
+            a: 1,
+            explain: "`ansible_host` xác định IP hoặc FQDN thực tế để SSH tới nếu alias inventory khác với địa chỉ thực.",
+            ref: "Ansible.pdf - Inventory"
+        },
+        {
+            q: "Để chạy Playbook ở chế độ 'Dry Run' (chỉ kiểm tra xem có thay đổi gì không mà không thực hiện thật), ta dùng flag nào?",
+            options: ["--test", "--dry-run", "--check (hoặc -C)", "--fake"],
+            a: 2,
+            explain: "Flag `--check` hoặc `-C` dùng để chạy playbook ở chế độ kiểm tra (check mode), dự đoán các thay đổi.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Để xem chi tiết quá trình chạy (Debug/Verbose mode), ta dùng flag nào?",
+            options: ["-v, -vv, -vvv, -vvvv", "--debug", "--show-all", "--log"],
+            a: 0,
+            explain: "Thêm `-v` (verbose) để tăng mức độ chi tiết log. `-vvvv` là mức chi tiết nhất (connection debugging).",
+            ref: "Ansible.pdf - Ad-hoc Commands"
+        },
+        {
+            q: "Module `setup` trả về dữ liệu định dạng gì?",
+            options: ["XML", "JSON", "CSV", "Text"],
+            a: 1,
+            explain: "Module `setup` (gather facts) trả về thông tin hệ thống dưới dạng JSON.",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Trong Playbook, `connection: local` nghĩa là gì?",
+            options: ["Kết nối internet", "Thực thi task ngay trên máy Control Node (localhost) thay vì SSH tới remote host", "Kết nối qua mạng LAN", "Kết nối Bluetooth"],
+            a: 1,
+            explain: "`connection: local` bảo Ansible chạy task trên chính máy đang chạy ansible, không dùng SSH.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Mặc định, Ansible thực thi các task trên các host như thế nào?",
+            options: ["Tuần tự từng host một", "Song song (Parallel) trên tất cả các host (mặc định forks=5)", "Ngẫu nhiên", "Chỉ host đầu tiên"],
+            a: 1,
+            explain: "Ansible chạy song song trên các host. Số lượng song song mặc định được kiểm soát bởi tham số `forks` (mặc định là 5).",
+            ref: "Ansible.pdf - Architecture"
+        },
+        {
+            q: "Tham số `state: absent` trong các module (như yum, file, user) thường có ý nghĩa gì?",
+            options: ["Cài đặt/Tạo mới", "Gỡ bỏ/Xóa (Ensure it does NOT exist)", "Kiểm tra", "Cập nhật"],
+            a: 1,
+            explain: "`state: absent` đảm bảo đối tượng (gói, file, user) bị xóa bỏ hoặc không tồn tại trên hệ thống.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Module `lineinfile` dùng để làm gì?",
+            options: ["Đọc file từng dòng", "Đảm bảo một dòng văn bản cụ thể tồn tại (hoặc không) trong một file, hoặc thay thế dòng khớp với regex", "Xóa file", "Tạo file mới"],
+            a: 1,
+            explain: "Module `lineinfile` dùng để quản lý các dòng text bên trong một file cấu hình (thêm, sửa, xóa dòng).",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Ansible Configuration file (`ansible.cfg`) mặc định tìm ở đâu trước tiên?",
+            options: ["/etc/ansible/ansible.cfg", "Thư mục hiện tại (./ansible.cfg)", "Home directory (~/.ansible.cfg)", "Không có file config"],
+            a: 1,
+            explain: "Ansible ưu tiên tìm file `ansible.cfg` trong thư mục hiện tại đang chạy lệnh trước, sau đó mới đến home dir và /etc/ansible.",
+            ref: "Ansible.pdf - Configuration"
+        },
+        {
+            q: "Task `register` dùng để làm gì?",
+            options: ["Đăng ký user", "Lưu kết quả đầu ra (output) của một task vào một biến để sử dụng sau này", "Gửi email", "Ghi log"],
+            a: 1,
+            explain: "`register` capture output của task và lưu vào biến được đặt tên.",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Block trong Playbook dùng để làm gì?",
+            options: ["Chặn IP", "Nhóm các tasks lại với nhau để áp dụng chung điều kiện (when) hoặc xử lý lỗi (rescue/always)", "Tạo khối hình", "Không có tác dụng"],
+            a: 1,
+            explain: "`block` cho phép nhóm các task để xử lý lỗi (giống try/catch) hoặc áp dụng chung thuộc tính.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Cú pháp `delegate_to: localhost` dùng để làm gì?",
+            options: ["Chuyển quyền quản lý", "Ủy quyền thực thi task đó cho một host khác (thường là localhost) thay vì host trong inventory", "Xóa host", "Tắt máy"],
+            a: 1,
+            explain: "`delegate_to` cho phép chạy task trên một host cụ thể khác với host đang được loop qua trong play (ví dụ: gửi email từ localhost, xóa host khỏi load balancer).",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Dynamic Inventory là gì?",
+            options: ["File inventory tĩnh", "Một script (thường là Python) kết nối tới Cloud Provider (AWS, Azure...) hoặc DB để lấy danh sách host theo thời gian thực", "Inventory thay đổi màu sắc", "Không tồn tại"],
+            a: 1,
+            explain: "Dynamic Inventory là script truy vấn các nguồn bên ngoài (Cloud APIs) để lấy danh sách host động thay vì file tĩnh.",
+            ref: "Ansible.pdf - Inventory"
+        },
+        {
+            q: "Lệnh `ansible-doc -l` dùng để làm gì?",
+            options: ["Xem tài liệu hướng dẫn", "Liệt kê danh sách tất cả các module có sẵn", "Xóa tài liệu", "Tạo tài liệu"],
+            a: 1,
+            explain: "`ansible-doc -l` liệt kê (list) tất cả các module đã cài đặt.",
+            ref: "Ansible.pdf - Ad-hoc Commands"
+        },
+        {
+            q: "Để xem hướng dẫn sử dụng chi tiết của module `yum`, ta dùng lệnh gì?",
+            options: ["man yum", "ansible-doc yum", "help yum", "ansible yum --help"],
+            a: 1,
+            explain: "`ansible-doc <module_name>` hiển thị documentation và ví dụ sử dụng của module đó.",
+            ref: "Ansible.pdf - Ad-hoc Commands"
+        },
+        {
+            q: "Biến đặc biệt `item` được sử dụng khi nào?",
+            options: ["Luôn luôn", "Khi sử dụng vòng lặp (loop/with_items) để tham chiếu tới phần tử hiện tại đang lặp", "Khi dùng module file", "Khi khai báo host"],
+            a: 1,
+            explain: "Trong vòng lặp, `{{ item }}` đại diện cho giá trị của phần tử hiện tại trong danh sách lặp.",
+            ref: "Ansible.pdf - Loops"
+        },
+        {
+            q: "Jinja2 Filter `default` có tác dụng gì? Ví dụ: `{{ my_var | default('admin') }}`",
+            options: ["Xóa biến", "Đặt giá trị mặc định nếu biến `my_var` chưa được định nghĩa", "Bắt buộc biến phải có giá trị", "Mã hóa biến"],
+            a: 1,
+            explain: "Filter `default()` cung cấp giá trị dự phòng nếu biến không tồn tại hoặc rỗng.",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Trong file `group_vars/all.yml`, các biến được định nghĩa sẽ áp dụng cho ai?",
+            options: ["Chỉ nhóm webservers", "Tất cả các host trong inventory", "Không ai cả", "Chỉ localhost"],
+            a: 1,
+            explain: "`group_vars/all` chứa các biến áp dụng cho tất cả các host (scope global cho inventory).",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Ansible hỗ trợ hệ điều hành Windows thông qua giao thức nào?",
+            options: ["SSH", "WinRM (Windows Remote Management)", "RDP", "Telnet"],
+            a: 1,
+            explain: "Ansible quản lý Windows hosts thông qua giao thức WinRM thay vì SSH.",
+            ref: "Ansible.pdf - Architecture"
+        },
+        {
+            q: "Module `win_ping` dùng để làm gì?",
+            options: ["Ping máy Linux", "Kiểm tra kết nối tới máy chủ Windows", "Ping Google", "Chơi game Pong"],
+            a: 1,
+            explain: "`win_ping` là module tương đương với `ping` nhưng dành cho Windows hosts để kiểm tra kết nối WinRM.",
+            ref: "Ansible.pdf - Modules"
+        },
+        {
+            q: "Cấp độ ưu tiên của biến (Variable Precedence) từ thấp đến cao nào là đúng?",
+            options: ["Role defaults < Inventory vars < Playbook vars < Extra vars (-e)", "Extra vars < Role defaults", "Playbook vars < Role defaults", "Không có thứ tự"],
+            a: 0,
+            explain: "Extra vars (truyền dòng lệnh) có độ ưu tiên cao nhất, Role defaults thấp nhất. Thứ tự: defaults < inventory < playbook < extra vars.",
+            ref: "Ansible.pdf - Variables"
+        },
+        {
+            q: "Để gộp nhiều task từ một file khác vào playbook chính, ta dùng từ khóa nào?",
+            options: ["include_tasks hoặc import_tasks", "run_tasks", "call_tasks", "execute"],
+            a: 0,
+            explain: "`include_tasks` (dynamic) và `import_tasks` (static) dùng để chèn task từ file bên ngoài vào playbook.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Serial trong Playbook dùng để làm gì?",
+            options: ["Số seri phần mềm", "Kiểm soát số lượng host chạy task cùng lúc (rolling update), ví dụ: cập nhật từng 2 máy một", "Kết nối cổng Serial", "In ra màn hình"],
+            a: 1,
+            explain: "`serial` xác định số lượng host được thực thi song song trong một batch, hữu ích cho rolling updates.",
+            ref: "Ansible.pdf - Playbooks"
+        },
+        {
+            q: "Tags trong Playbook dùng để làm gì?",
+            options: ["Gắn giá tiền", "Dán nhãn cho task/play để có thể chọn chạy riêng lẻ hoặc bỏ qua các phần cụ thể khi chạy playbook", "Tạo comment", "Đánh dấu lỗi"],
+            a: 1,
+            explain: "Tags cho phép lọc và chỉ chạy các task cụ thể (ví dụ: `ansible-playbook -t install`).",
+            ref: "Ansible.pdf - Playbooks"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Load saved state
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
