@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Azure Cloud Overview (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f2f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            overflow: hidden;
+            border-top: 5px solid #0078D4; /* Azure Blue */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #0078D4;
+            margin: 0;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #f8f9fa;
+            border: 2px solid #e1dfdd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        .option-item:hover {
+            background-color: #edebe9;
+            border-color: #0078D4;
+        }
+        .option-item.correct {
+            background-color: #dff6dd;
+            border-color: #107c10;
+            color: #107c10;
+        }
+        .option-item.wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            background-color: #dff6dd;
+            color: #107c10;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #fde7e9;
+            color: #a80000;
+            border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #c8c6c4;
+            color: #323130;
+        }
+        .btn-prev:hover {
+            background-color: #8a8886;
+            color: white;
+        }
+        .btn-prev:disabled {
+            background-color: #edebe9;
+            cursor: not-allowed;
+            color: #a19f9d;
+        }
+        .btn-next {
+            background-color: #0078D4;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #005a9e;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #0078D4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>Azure Cloud Overview Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Quay lại</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- PHẦN 1: CLOUD CONCEPTS (Khái niệm cơ bản) ---
+        {
+            q: "Microsoft Azure là gì?",
+            options: ["Một hệ điều hành", "Một nền tảng điện toán đám mây cung cấp các dịch vụ tính toán, lưu trữ, mạng, v.v.", "Một phần mềm diệt virus", "Một mạng xã hội"],
+            a: 1,
+            explain: "Azure là nền tảng cloud của Microsoft, cung cấp hơn 200 sản phẩm và dịch vụ đám mây.",
+            ref: "Azure Cloud Overview - Introduction"
+        },
+        {
+            q: "Mô hình chi phí OpEx (Operational Expenditure) có đặc điểm gì?",
+            options: ["Trả trước một khoản tiền lớn để mua hạ tầng", "Không cần trả trước chi phí lớn, thanh toán theo mức sử dụng (pay-as-you-go)", "Giá cố định hàng năm", "Miễn phí hoàn toàn"],
+            a: 1,
+            explain: "OpEx là chi phí hoạt động, nơi bạn trả tiền cho dịch vụ hoặc sản phẩm khi sử dụng (pay-as-you-go), thay vì đầu tư vốn lớn ban đầu (CapEx).",
+            ref: "Azure Cloud Overview - Cloud Concepts"
+        },
+        {
+            q: "Mô hình triển khai 'Public Cloud' có đặc điểm gì?",
+            options: ["Tài nguyên được sở hữu và vận hành bởi bên thứ ba (như Microsoft) và chia sẻ qua Internet", "Tài nguyên dành riêng cho một tổ chức duy nhất", "Không kết nối Internet", "Kết hợp giữa Private và Public"],
+            a: 0,
+            explain: "Public Cloud là nơi hạ tầng thuộc sở hữu của nhà cung cấp dịch vụ cloud và được phân phối qua Internet.",
+            ref: "Azure Cloud Overview - Cloud Models"
+        },
+        {
+            q: "IaaS (Infrastructure as a Service) cung cấp những gì?",
+            options: ["Chỉ phần mềm ứng dụng", "Môi trường phát triển và triển khai", "Hạ tầng cơ bản như máy chủ ảo, mạng, hệ điều hành", "Chỉ lưu trữ email"],
+            a: 2,
+            explain: "IaaS cung cấp hạ tầng CNTT cơ bản (servers, VMs, storage, networks, OS) theo hình thức thuê.",
+            ref: "Azure Cloud Overview - Service Models"
+        },
+        {
+            q: "Trong mô hình PaaS (Platform as a Service), ai quản lý hệ điều hành (OS)?",
+            options: ["Khách hàng", "Nhà cung cấp dịch vụ Cloud (Microsoft)", "Người dùng cuối", "Không ai cả"],
+            a: 1,
+            explain: "Trong PaaS, nhà cung cấp quản lý cơ sở hạ tầng bên dưới (bao gồm phần cứng và OS), khách hàng chỉ tập trung vào triển khai và quản lý ứng dụng.",
+            ref: "Azure Cloud Overview - Service Models"
+        },
+        {
+            q: "SaaS (Software as a Service) là gì?",
+            options: ["Thuê máy chủ", "Phần mềm được lưu trữ và quản lý tập trung bởi nhà cung cấp, người dùng truy cập qua Internet (ví dụ: Office 365)", "Tự viết code ứng dụng", "Dịch vụ mạng riêng ảo"],
+            a: 1,
+            explain: "SaaS cung cấp giải pháp phần mềm hoàn chỉnh, bạn mua quyền sử dụng ứng dụng qua Internet (như Outlook, Office 365).",
+            ref: "Azure Cloud Overview - Service Models"
+        },
+
+        // --- PHẦN 2: CORE ARCHITECTURE (Kiến trúc cốt lõi) ---
+        {
+            q: "Azure Region (Vùng) là gì?",
+            options: ["Một tòa nhà duy nhất", "Một khu vực địa lý chứa một hoặc nhiều trung tâm dữ liệu được kết nối mạng độ trễ thấp", "Một quốc gia", "Một máy chủ"],
+            a: 1,
+            explain: "Region là một tập hợp các data centers được triển khai trong một vành đai xác định độ trễ và kết nối qua mạng dành riêng.",
+            ref: "Azure Cloud Overview - Core Architecture"
+        },
+        {
+            q: "Availability Zones (Vùng sẵn sàng) giúp bảo vệ khỏi sự cố nào?",
+            options: ["Lỗi phần mềm ứng dụng", "Sự cố tại một trung tâm dữ liệu (data center failure) trong một vùng", "Mất kết nối Internet toàn cầu", "Hacker tấn công"],
+            a: 1,
+            explain: "Availability Zones là các vị trí vật lý tách biệt trong một Region, giúp bảo vệ ứng dụng và dữ liệu khỏi sự cố trung tâm dữ liệu.",
+            ref: "Azure Cloud Overview - Core Architecture"
+        },
+        {
+            q: "Azure Region Pair (Cặp vùng) được thiết kế để làm gì?",
+            options: ["Tăng tốc độ mạng", "Đảm bảo tính liên tục kinh doanh và phục hồi sau thảm họa (BCDR) bằng cách sao chép dữ liệu sang vùng địa lý khác", "Giảm giá dịch vụ", "Kết nối hai máy tính"],
+            a: 1,
+            explain: "Mỗi Region được ghép cặp với một Region khác trong cùng khu vực địa lý (như East US và West US) để dự phòng thảm họa.",
+            ref: "Azure Cloud Overview - Core Architecture"
+        },
+        {
+            q: "Đơn vị quản lý cơ bản nhất để gom nhóm các tài nguyên Azure là gì?",
+            options: ["Management Group", "Subscription", "Resource Group", "Region"],
+            a: 2,
+            explain: "Resource Group là một container logic chứa các tài nguyên liên quan cho một giải pháp Azure.",
+            ref: "Azure Cloud Overview - Core Architecture"
+        },
+        {
+            q: "Một tài nguyên Azure có thể thuộc về bao nhiêu Resource Group?",
+            options: ["Nhiều nhóm", "Chỉ một nhóm duy nhất", "Không giới hạn", "Hai nhóm"],
+            a: 1,
+            explain: "Mỗi tài nguyên chỉ được tồn tại trong một Resource Group duy nhất.",
+            ref: "Azure Cloud Overview - Core Architecture"
+        },
+        {
+            q: "Azure Subscription (Gói đăng ký) dùng để làm gì?",
+            options: ["Đăng ký nhận tin tức", "Đơn vị thanh toán và quản lý truy cập (Access control) cho tài nguyên Azure", "Mua phần cứng", "Tạo tài khoản email"],
+            a: 1,
+            explain: "Subscription là một thỏa thuận với Microsoft để sử dụng nền tảng Azure, là ranh giới thanh toán và quản lý quyền truy cập.",
+            ref: "Azure Cloud Overview - Core Architecture"
+        },
+        {
+            q: "Management Groups dùng để quản lý cái gì?",
+            options: ["Quản lý người dùng", "Quản lý nhiều Subscriptions (chính sách, tuân thủ) một cách hiệu quả", "Quản lý máy ảo", "Quản lý database"],
+            a: 1,
+            explain: "Management Groups cung cấp mức độ phạm vi cao hơn Subscriptions để quản trị các chính sách và tuân thủ cho nhiều Subscriptions.",
+            ref: "Azure Cloud Overview - Governance"
+        },
+
+        // --- PHẦN 3: COMPUTE SERVICES (Dịch vụ tính toán) ---
+        {
+            q: "Azure Virtual Machines (VMs) thuộc loại dịch vụ nào?",
+            options: ["IaaS", "PaaS", "SaaS", "FaaS"],
+            a: 0,
+            explain: "Azure VM là dịch vụ IaaS cung cấp máy chủ ảo hóa theo yêu cầu.",
+            ref: "Azure Cloud Overview - Compute"
+        },
+        {
+            q: "Azure Virtual Machine Scale Sets (VMSS) có chức năng gì?",
+            options: ["Tạo một máy ảo duy nhất", "Tự động tạo và quản lý một nhóm các máy ảo cân bằng tải (load balanced VMs) để tự động mở rộng (autoscaling)", "Lưu trữ dữ liệu", "Chạy container"],
+            a: 1,
+            explain: "VM Scale Sets cho phép tạo và quản lý một nhóm các VMs giống hệt nhau, tự động tăng/giảm số lượng VM dựa trên nhu cầu.",
+            ref: "Azure Cloud Overview - Compute"
+        },
+        {
+            q: "Azure App Service là dịch vụ gì?",
+            options: ["IaaS để chạy máy ảo", "PaaS để xây dựng, triển khai và mở rộng ứng dụng web và API", "SaaS để gửi email", "Dịch vụ DNS"],
+            a: 1,
+            explain: "App Service là dịch vụ PaaS dựa trên HTTP để host web apps, REST APIs, và mobile back ends.",
+            ref: "Azure Cloud Overview - Compute"
+        },
+        {
+            q: "Azure Functions là ví dụ của mô hình điện toán nào?",
+            options: ["Serverless Computing (Điện toán phi máy chủ)", "Dedicated Hosting", "Bare Metal", "Mainframe"],
+            a: 0,
+            explain: "Azure Functions là giải pháp serverless cho phép bạn chạy code (functions) mà không cần quan tâm đến hạ tầng.",
+            ref: "Azure Cloud Overview - Compute"
+        },
+        {
+            q: "Azure Kubernetes Service (AKS) dùng để làm gì?",
+            options: ["Chạy máy ảo Windows", "Quản lý và điều phối các ứng dụng container (container orchestration) sử dụng Kubernetes", "Lưu trữ file", "Tạo mạng ảo"],
+            a: 1,
+            explain: "AKS đơn giản hóa việc triển khai cluster Kubernetes được quản lý trong Azure.",
+            ref: "Azure Cloud Overview - Containers"
+        },
+        {
+            q: "Azure Container Instances (ACI) phù hợp khi nào?",
+            options: ["Khi cần chạy một container đơn lẻ nhanh chóng mà không cần quản lý server hay cluster", "Khi cần quản lý hệ thống phức tạp", "Khi cần lưu trữ dài hạn", "Khi cần chạy máy ảo"],
+            a: 0,
+            explain: "ACI là cách nhanh nhất và đơn giản nhất để chạy container trên Azure mà không cần quản lý máy ảo hay công cụ điều phối.",
+            ref: "Azure Cloud Overview - Containers"
+        },
+        {
+            q: "Azure Virtual Desktop là gì?",
+            options: ["Màn hình máy tính", "Dịch vụ ảo hóa desktop và ứng dụng chạy trên cloud", "Phần mềm vẽ", "Máy chủ vật lý"],
+            a: 1,
+            explain: "Azure Virtual Desktop là dịch vụ desktop và app virtualization chạy trên cloud.",
+            ref: "Azure Cloud Overview - Compute"
+        },
+
+        // --- PHẦN 4: NETWORKING (Mạng) ---
+        {
+            q: "Azure Virtual Network (VNet) cho phép làm gì?",
+            options: ["Kết nối các tài nguyên Azure với nhau, với Internet, và với mạng on-premises một cách an toàn", "Tăng tốc độ CPU", "Lưu trữ dữ liệu", "Tạo website"],
+            a: 0,
+            explain: "VNet là khối xây dựng cơ bản cho mạng riêng trong Azure, cho phép các tài nguyên (như VM) giao tiếp an toàn.",
+            ref: "Azure Cloud Overview - Networking"
+        },
+        {
+            q: "VPN Gateway dùng để làm gì?",
+            options: ["Chặn virus", "Gửi lưu lượng mã hóa giữa Azure VNet và mạng on-premises qua Internet công cộng", "Kết nối trực tiếp không qua Internet", "Lưu trữ web"],
+            a: 1,
+            explain: "VPN Gateway gửi traffic được mã hóa giữa Azure VNet và vị trí on-premises qua Internet công cộng.",
+            ref: "Azure Cloud Overview - Networking"
+        },
+        {
+            q: "Azure ExpressRoute khác VPN Gateway ở điểm nào?",
+            options: ["Chậm hơn", "Sử dụng kết nối riêng (private connection) không đi qua Internet công cộng, tin cậy và nhanh hơn", "Miễn phí", "Chỉ dùng cho Linux"],
+            a: 1,
+            explain: "ExpressRoute mở rộng mạng on-premises vào Azure qua kết nối riêng tư (private connection) được cung cấp bởi nhà cung cấp kết nối.",
+            ref: "Azure Cloud Overview - Networking"
+        },
+        {
+            q: "VNet Peering dùng để làm gì?",
+            options: ["Kết nối hai VNet với nhau để tài nguyên trong đó giao tiếp như cùng một mạng", "Kết nối với Internet", "Kết nối với máy tính cá nhân", "Chặn kết nối"],
+            a: 0,
+            explain: "Peering kết nối hai VNets, cho phép traffic lưu thông giữa chúng thông qua hạ tầng mạng backbone của Microsoft.",
+            ref: "Azure Cloud Overview - Networking"
+        },
+        {
+            q: "Azure DNS cung cấp dịch vụ gì?",
+            options: ["Lưu trữ file", "Hosting tên miền và phân giải tên miền (Name Resolution)", "Bảo mật mạng", "Quản lý máy ảo"],
+            a: 1,
+            explain: "Azure DNS là dịch vụ hosting cho DNS domains, cung cấp phân giải tên sử dụng hạ tầng Microsoft Azure.",
+            ref: "Azure Cloud Overview - Networking"
+        },
+
+        // --- PHẦN 5: STORAGE (Lưu trữ) ---
+        {
+            q: "Azure Blob Storage được thiết kế để lưu trữ loại dữ liệu nào?",
+            options: ["Dữ liệu có cấu trúc (SQL)", "Dữ liệu phi cấu trúc số lượng lớn (Object storage) như văn bản, hình ảnh, video", "File hệ thống cho VM", "Tin nhắn hàng đợi"],
+            a: 1,
+            explain: "Blob Storage tối ưu cho việc lưu trữ lượng lớn dữ liệu phi cấu trúc (text hoặc binary data).",
+            ref: "Azure Cloud Overview - Storage"
+        },
+        {
+            q: "Azure Files cung cấp tính năng gì?",
+            options: ["Lưu trữ object", "Chia sẻ file (File shares) được quản lý hoàn toàn, truy cập qua giao thức SMB", "Lưu trữ máy ảo", "Lưu trữ email"],
+            a: 1,
+            explain: "Azure Files cung cấp file shares trên cloud, có thể truy cập thông qua giao thức Server Message Block (SMB) tiêu chuẩn.",
+            ref: "Azure Cloud Overview - Storage"
+        },
+        {
+            q: "Lớp lưu trữ (Access Tier) nào của Blob Storage có chi phí lưu trữ thấp nhất nhưng chi phí truy cập cao nhất, dành cho dữ liệu hiếm khi dùng?",
+            options: ["Hot", "Cool", "Archive", "Premium"],
+            a: 2,
+            explain: "Archive tier có chi phí lưu trữ thấp nhất nhưng chi phí truy xuất cao nhất và độ trễ cao, dành cho dữ liệu lưu trữ dài hạn.",
+            ref: "Azure Cloud Overview - Storage"
+        },
+        {
+            q: "Azure Disk Storage được sử dụng chủ yếu cho mục đích gì?",
+            options: ["Lưu trữ web tĩnh", "Làm ổ đĩa ảo (virtual hard disks) gắn vào máy ảo Azure", "Lưu trữ backup lâu dài", "Chia sẻ file qua mạng"],
+            a: 1,
+            explain: "Azure Disk Storage cung cấp block storage bền vững hiệu năng cao để sử dụng với Azure Virtual Machines.",
+            ref: "Azure Cloud Overview - Storage"
+        },
+        {
+            q: "Công cụ AzCopy dùng để làm gì?",
+            options: ["Sao chép văn bản", "Sao chép dữ liệu vào/ra tài khoản lưu trữ Azure bằng dòng lệnh", "Sao lưu máy tính", "Tạo bản sao máy ảo"],
+            a: 1,
+            explain: "AzCopy là công cụ dòng lệnh (command-line utility) để copy dữ liệu đến hoặc đi từ Azure Storage.",
+            ref: "Azure Cloud Overview - Storage Tools"
+        },
+
+        // --- PHẦN 6: DATABASE (Cơ sở dữ liệu) ---
+        {
+            q: "Azure Cosmos DB là loại cơ sở dữ liệu nào?",
+            options: ["Quan hệ truyền thống", "NoSQL đa mô hình (multi-model), phân tán toàn cầu", "Chỉ lưu trữ key-value", "In-memory database"],
+            a: 1,
+            explain: "Cosmos DB là dịch vụ cơ sở dữ liệu NoSQL đa mô hình, phân tán toàn cầu của Microsoft.",
+            ref: "Azure Cloud Overview - Databases"
+        },
+        {
+            q: "Azure SQL Database là dịch vụ thuộc loại nào?",
+            options: ["IaaS", "PaaS (Managed Relational Database)", "SaaS", "On-premises"],
+            a: 1,
+            explain: "Azure SQL Database là dịch vụ cơ sở dữ liệu quan hệ được quản lý hoàn toàn (managed service) dựa trên engine SQL Server.",
+            ref: "Azure Cloud Overview - Databases"
+        },
+        {
+            q: "Dịch vụ nào giúp di chuyển cơ sở dữ liệu on-premises lên Azure?",
+            options: ["Azure Migrate", "Azure Database Migration Service", "Azure Connect", "Azure Move"],
+            a: 1,
+            explain: "Azure Database Migration Service là công cụ được quản lý hoàn toàn để di chuyển database lên Azure.",
+            ref: "Azure Cloud Overview - Migration"
+        },
+        {
+            q: "Azure SQL Managed Instance nhắm đến đối tượng nào?",
+            options: ["Người dùng MySQL", "Khách hàng muốn di chuyển ứng dụng SQL Server on-prem lên cloud với sự tương thích cao nhất", "Ứng dụng NoSQL", "Lưu trữ file"],
+            a: 1,
+            explain: "SQL Managed Instance cung cấp khả năng tương thích gần như 100% với SQL Server on-premises mới nhất.",
+            ref: "Azure Cloud Overview - Databases"
+        },
+
+        // --- PHẦN 7: IDENTITY & SECURITY (Định danh & Bảo mật) ---
+        {
+            q: "Microsoft Entra ID (trước đây là Azure Active Directory - Azure AD) là gì?",
+            options: ["Phần mềm quản lý nhân sự", "Dịch vụ quản lý danh tính và quyền truy cập (Identity and Access Management - IAM) dựa trên đám mây", "Dịch vụ DNS", "Dịch vụ máy chủ"],
+            a: 1,
+            explain: "Entra ID (Azure AD cũ) là dịch vụ quản lý identity và access dựa trên cloud của Microsoft.",
+            ref: "Azure Cloud Overview - Identity"
+        },
+        {
+            q: "Multi-Factor Authentication (MFA) yêu cầu gì?",
+            options: ["Chỉ mật khẩu", "Hai hoặc nhiều phương thức xác thực (như mật khẩu + mã từ điện thoại)", "Chỉ vân tay", "Không cần xác thực"],
+            a: 1,
+            explain: "MFA yêu cầu người dùng cung cấp thêm hình thức nhận dạng ngoài mật khẩu để tăng cường bảo mật.",
+            ref: "Azure Cloud Overview - Identity"
+        },
+        {
+            q: "Conditional Access (Truy cập có điều kiện) dùng để làm gì?",
+            options: ["Chặn tất cả truy cập", "Sử dụng các tín hiệu (vị trí, thiết bị, user) để ra quyết định cấp quyền truy cập (ví dụ: bắt buộc MFA nếu đăng nhập từ lạ)", "Tăng tốc mạng", "Lưu trữ log"],
+            a: 1,
+            explain: "Conditional Access là công cụ của Entra ID để đưa ra quyết định truy cập dựa trên các tín hiệu (signals).",
+            ref: "Azure Cloud Overview - Identity"
+        },
+        {
+            q: "Zero Trust là mô hình bảo mật dựa trên nguyên tắc nào?",
+            options: ["Tin tưởng mọi người trong mạng nội bộ", "Không bao giờ tin tưởng, luôn luôn xác minh (Never trust, always verify)", "Chỉ tin tưởng Admin", "Không cần mật khẩu"],
+            a: 1,
+            explain: "Zero Trust giả định rằng mọi truy cập (dù bên trong hay bên ngoài) đều là mối đe dọa cho đến khi được xác minh đầy đủ.",
+            ref: "Azure Cloud Overview - Security"
+        },
+        {
+            q: "Azure Key Vault dùng để làm gì?",
+            options: ["Lưu trữ file word", "Lưu trữ và quản lý an toàn các bí mật (secrets), khóa (keys) và chứng chỉ (certificates)", "Tạo máy ảo", "Quản lý code"],
+            a: 1,
+            explain: "Key Vault giúp bảo vệ các khóa mã hóa và bí mật (như connection strings, passwords) được sử dụng bởi ứng dụng và dịch vụ.",
+            ref: "Azure Cloud Overview - Security"
+        },
+        {
+            q: "Azure DDoS Protection bảo vệ khỏi tấn công nào?",
+            options: ["Mất điện", "Tấn công từ chối dịch vụ phân tán (Distributed Denial of Service)", "Virus", "Phishing"],
+            a: 1,
+            explain: "Azure DDoS Protection bảo vệ ứng dụng khỏi các cuộc tấn công DDoS nhằm làm quá tải hệ thống.",
+            ref: "Azure Cloud Overview - Security"
+        },
+        {
+            q: "Network Security Group (NSG) hoạt động như thế nào?",
+            options: ["Như một phần mềm diệt virus", "Lọc lưu lượng mạng (cho phép hoặc từ chối) đến và đi từ tài nguyên Azure trong VNet", "Mã hóa dữ liệu", "Tăng tốc độ mạng"],
+            a: 1,
+            explain: "NSG chứa các quy tắc bảo mật cho phép hoặc từ chối lưu lượng mạng inbound/outbound.",
+            ref: "Azure Cloud Overview - Networking"
+        },
+
+        // --- PHẦN 8: MANAGEMENT & GOVERNANCE (Quản lý & Quản trị) ---
+        {
+            q: "Azure Policy dùng để làm gì?",
+            options: ["Đặt mật khẩu", "Tạo, gán và quản lý các chính sách để thực thi các quy tắc và tuân thủ cho tài nguyên (ví dụ: chỉ cho phép tạo VM ở vùng US)", "Tạo máy ảo", "Giám sát mạng"],
+            a: 1,
+            explain: "Azure Policy giúp thực thi các tiêu chuẩn tổ chức và đánh giá sự tuân thủ (compliance) trên quy mô lớn.",
+            ref: "Azure Cloud Overview - Governance"
+        },
+        {
+            q: "Role-Based Access Control (RBAC) giúp bạn làm gì?",
+            options: ["Quản lý chi phí", "Kiểm soát ai có thể truy cập tài nguyên Azure và họ có thể làm gì với tài nguyên đó (Fine-grained access management)", "Tạo mạng ảo", "Lưu trữ dữ liệu"],
+            a: 1,
+            explain: "RBAC là hệ thống cấp quyền cho phép quản lý truy cập chi tiết vào tài nguyên Azure.",
+            ref: "Azure Cloud Overview - Identity"
+        },
+        {
+            q: "Resource Locks (Khóa tài nguyên) ngăn chặn điều gì?",
+            options: ["Truy cập trái phép", "Vô tình xóa hoặc sửa đổi các tài nguyên quan trọng", "Virus", "Tấn công DDoS"],
+            a: 1,
+            explain: "Locks ngăn chặn người dùng vô tình xóa hoặc sửa đổi các tài nguyên quan trọng.",
+            ref: "Azure Cloud Overview - Governance"
+        },
+        {
+            q: "Azure Blueprints giúp gì cho việc triển khai môi trường?",
+            options: ["Vẽ sơ đồ mạng", "Xác định một tập hợp các tài nguyên Azure có thể lặp lại (bao gồm Policy, RBAC, Template) để thiết lập môi trường tuân thủ nhanh chóng", "In bản vẽ kỹ thuật", "Tạo logo"],
+            a: 1,
+            explain: "Blueprints cho phép định nghĩa một gói các artifact (Policy, Role, ARM templates) để triển khai môi trường chuẩn.",
+            ref: "Azure Cloud Overview - Governance"
+        },
+        {
+            q: "Tags (Thẻ) trong Azure thường được dùng để làm gì?",
+            options: ["Trang trí giao diện", "Phân loại tài nguyên để quản lý và tính toán chi phí (billing) theo phòng ban/dự án", "Tăng tốc độ", "Bảo mật"],
+            a: 1,
+            explain: "Tags là các cặp name-value dùng để phân loại tài nguyên, rất hữu ích cho việc quản lý chi phí và tổ chức.",
+            ref: "Azure Cloud Overview - Governance"
+        },
+        {
+            q: "Azure Cost Management + Billing dùng để làm gì?",
+            options: ["Thanh toán tiền điện", "Theo dõi, phân bổ và tối ưu hóa chi phí đám mây", "Quản lý nhân sự", "Tạo database"],
+            a: 1,
+            explain: "Dịch vụ này giúp giám sát chi tiêu, lập ngân sách và tối ưu hóa chi phí Azure.",
+            ref: "Azure Cloud Overview - Cost Management"
+        },
+        {
+            q: "Azure Advisor cung cấp khuyến nghị về các lĩnh vực nào?",
+            options: ["Chỉ bảo mật", "Reliability, Security, Performance, Cost, và Operational Excellence", "Chỉ chi phí", "Cách viết code"],
+            a: 1,
+            explain: "Advisor phân tích cấu hình và đưa ra khuyến nghị để tối ưu hóa tài nguyên theo 5 trụ cột của Well-Architected Framework.",
+            ref: "Azure Cloud Overview - Management Tools"
+        },
+        {
+            q: "Azure Service Health thông báo về điều gì?",
+            options: ["Sức khỏe của bạn", "Các sự cố dịch vụ Azure, bảo trì định kỳ, và tư vấn sức khỏe ảnh hưởng đến tài nguyên của bạn", "Tin tức thế giới", "Giá cổ phiếu"],
+            a: 1,
+            explain: "Service Health cung cấp thông tin cá nhân hóa về tình trạng các dịch vụ Azure và các khu vực bạn đang sử dụng.",
+            ref: "Azure Cloud Overview - Monitoring"
+        },
+        {
+            q: "Azure Monitor dùng để làm gì?",
+            options: ["Xem phim", "Thu thập, phân tích và hành động dựa trên dữ liệu telemetry (metrics, logs) từ môi trường Azure và on-premise", "Tắt máy tính", "Quản lý user"],
+            a: 1,
+            explain: "Azure Monitor giúp tối đa hóa tính sẵn sàng và hiệu suất bằng cách thu thập và phân tích telemetry từ ứng dụng và hạ tầng.",
+            ref: "Azure Cloud Overview - Monitoring"
+        },
+
+        // --- PHẦN 9: TOOLS & DEPLOYMENT (Công cụ & Triển khai) ---
+        {
+            q: "Azure Portal là gì?",
+            options: ["Một game online", "Giao diện web thống nhất để quản lý các tài nguyên Azure", "Công cụ dòng lệnh", "Phần mềm cài trên máy"],
+            a: 1,
+            explain: "Azure Portal là giao diện người dùng dựa trên web để xây dựng, quản lý và giám sát mọi thứ từ ứng dụng web đơn giản đến triển khai cloud phức tạp.",
+            ref: "Azure Cloud Overview - Management Tools"
+        },
+        {
+            q: "Azure PowerShell và Azure CLI là gì?",
+            options: ["Trình duyệt web", "Các công cụ dòng lệnh (Command-line tools) để quản lý tài nguyên Azure", "Phần mềm đồ họa", "Hệ điều hành"],
+            a: 1,
+            explain: "Đây là các công cụ cross-platform cho phép quản lý tài nguyên Azure thông qua dòng lệnh hoặc script.",
+            ref: "Azure Cloud Overview - Management Tools"
+        },
+        {
+            q: "Azure Cloud Shell là gì?",
+            options: ["Vỏ máy tính", "Môi trường dòng lệnh tương tác chạy trên trình duyệt, được xác thực sẵn", "Phần mềm diệt virus", "Dịch vụ lưu trữ"],
+            a: 1,
+            explain: "Cloud Shell là môi trường shell tương tác, được xác thực, chạy trực tiếp trong trình duyệt, hỗ trợ cả Bash và PowerShell.",
+            ref: "Azure Cloud Overview - Management Tools"
+        },
+        {
+            q: "Azure ARM Templates (Azure Resource Manager Templates) sử dụng định dạng nào?",
+            options: ["JSON", "XML", "HTML", "TXT"],
+            a: 0,
+            explain: "ARM Templates sử dụng định dạng JSON để định nghĩa hạ tầng và cấu hình cho dự án (Infrastructure as Code).",
+            ref: "Azure Cloud Overview - Management Tools"
+        },
+        {
+            q: "Azure Arc dùng để làm gì?",
+            options: ["Vẽ đường cong", "Mở rộng sự quản lý và các dịch vụ của Azure đến bất kỳ hạ tầng nào (on-premises, edge, cloud khác)", "Chơi game", "Lưu trữ nhạc"],
+            a: 1,
+            explain: "Azure Arc cho phép quản lý các tài nguyên (servers, Kubernetes clusters) nằm bên ngoài Azure như thể chúng đang chạy trong Azure.",
+            ref: "Azure Cloud Overview - Hybrid"
+        },
+
+        // --- PHẦN 10: OTHER SERVICES & CONCEPTS (Dịch vụ khác) ---
+        {
+            q: "Azure IoT Hub dùng để làm gì?",
+            options: ["Kết nối Internet", "Trung tâm quản lý kết nối hai chiều bảo mật giữa hàng tỷ thiết bị IoT và giải pháp Azure", "Lưu trữ file", "Tạo máy ảo"],
+            a: 1,
+            explain: "IoT Hub là dịch vụ quản lý giúp kết nối, giám sát và quản lý hàng tỷ tài sản IoT.",
+            ref: "Azure Cloud Overview - IoT"
+        },
+        {
+            q: "Azure Sphere là giải pháp gì?",
+            options: ["Hình cầu 3D", "Giải pháp bảo mật toàn diện cho các thiết bị vi điều khiển (MCU) kết nối Internet", "Phần mềm vẽ", "Database"],
+            a: 1,
+            explain: "Azure Sphere tạo ra một môi trường an toàn cao cho các thiết bị MCU (vi điều khiển) kết nối Internet.",
+            ref: "Azure Cloud Overview - IoT"
+        },
+        {
+            q: "Azure Synapse Analytics là dịch vụ gì?",
+            options: ["Dịch vụ phân tích tích hợp kết hợp giữa data warehousing và phân tích Big Data", "Chỉ lưu trữ file", "Dịch vụ email", "Công cụ chat"],
+            a: 0,
+            explain: "Synapse Analytics là dịch vụ phân tích không giới hạn, kết hợp kho dữ liệu doanh nghiệp và phân tích Big Data.",
+            ref: "Azure Cloud Overview - Analytics"
+        },
+        {
+            q: "Azure HDInsight là gì?",
+            options: ["Dịch vụ phân tích nguồn mở (open-source) được quản lý như Hadoop, Spark, Kafka", "Màn hình HD", "Dịch vụ web", "Lưu trữ ảnh"],
+            a: 0,
+            explain: "HDInsight là dịch vụ cloud quản lý hoàn toàn cho các framework phân tích mã nguồn mở phổ biến.",
+            ref: "Azure Cloud Overview - Analytics"
+        },
+        {
+            q: "Azure Databricks dựa trên nền tảng nào?",
+            options: ["Apache Spark", "Hadoop", "SQL Server", "MySQL"],
+            a: 0,
+            explain: "Azure Databricks là nền tảng phân tích dựa trên Apache Spark nhanh chóng, dễ dàng và hợp tác.",
+            ref: "Azure Cloud Overview - Analytics"
+        },
+        {
+            q: "Azure Machine Learning giúp bạn làm gì?",
+            options: ["Học tiếng Anh", "Xây dựng, huấn luyện và triển khai các mô hình máy học (ML models)", "Sửa máy tính", "Tạo website"],
+            a: 1,
+            explain: "Azure Machine Learning là môi trường đám mây để đào tạo, triển khai, tự động hóa, quản lý và theo dõi các mô hình ML.",
+            ref: "Azure Cloud Overview - AI/ML"
+        },
+        {
+            q: "Azure Cognitive Services cung cấp gì?",
+            options: ["Dịch vụ nhận thức (AI) được xây dựng sẵn (như nhận diện khuôn mặt, giọng nói) thông qua API", "Dịch vụ lưu trữ", "Dịch vụ mạng", "Dịch vụ máy ảo"],
+            a: 0,
+            explain: "Cognitive Services là các API, SDK giúp thêm các tính năng nhận thức (thị giác, ngôn ngữ, giọng nói) vào ứng dụng mà không cần kiến thức AI sâu.",
+            ref: "Azure Cloud Overview - AI/ML"
+        },
+        {
+            q: "Azure Bot Service dùng để làm gì?",
+            options: ["Tạo robot vật lý", "Phát triển các bot thông minh (chatbot) tương tác với người dùng", "Chạy script tự động", "Quản lý server"],
+            a: 1,
+            explain: "Bot Service cung cấp môi trường để xây dựng, kiểm thử và triển khai các bot chất lượng cao.",
+            ref: "Azure Cloud Overview - AI/ML"
+        },
+        {
+            q: "Serverless logic trong Azure được thực hiện bởi dịch vụ nào (ngoài Functions)?",
+            options: ["Azure Logic Apps", "Azure VMs", "Azure Disk", "Azure Monitor"],
+            a: 0,
+            explain: "Logic Apps là dịch vụ serverless để tự động hóa quy trình làm việc (workflows) và tích hợp ứng dụng/dữ liệu.",
+            ref: "Azure Cloud Overview - Compute"
+        },
+        {
+            q: "Azure DevOps cung cấp gì?",
+            options: ["Dịch vụ phát triển phần mềm cộng tác (Repos, Pipelines, Boards...)", "Chỉ hosting code", "Dịch vụ sửa lỗi", "Dịch vụ email"],
+            a: 0,
+            explain: "Azure DevOps cung cấp các dịch vụ cho developer để lập kế hoạch, cộng tác code, build và deploy ứng dụng.",
+            ref: "Azure Cloud Overview - DevOps"
+        },
+        {
+            q: "GitHub và GitHub Actions liên quan gì đến Azure?",
+            options: ["Là đối thủ", "Microsoft sở hữu GitHub, và GitHub Actions giúp tự động hóa CI/CD để deploy lên Azure", "Không liên quan", "GitHub là database"],
+            a: 1,
+            explain: "GitHub thuộc Microsoft, cung cấp kho lưu trữ code và công cụ CI/CD (Actions) tích hợp chặt chẽ với Azure.",
+            ref: "Azure Cloud Overview - DevOps"
+        },
+        {
+            q: "SLA (Service Level Agreement) cam kết điều gì?",
+            options: ["Giá rẻ nhất", "Thời gian hoạt động (Uptime) và tính sẵn sàng của dịch vụ", "Tốc độ Internet", "Dung lượng lưu trữ"],
+            a: 1,
+            explain: "SLA là cam kết của Microsoft về thời gian hoạt động và khả năng kết nối của dịch vụ.",
+            ref: "Azure Cloud Overview - SLA"
+        },
+        {
+            q: "Preview Features (Tính năng xem trước) trong Azure có đặc điểm gì?",
+            options: ["Luôn ổn định", "Đang thử nghiệm (Beta), không có SLA, dùng để lấy phản hồi, không nên dùng cho Production", "Đã hoàn thiện", "Giá đắt hơn"],
+            a: 1,
+            explain: "Preview features được cung cấp để dùng thử và phản hồi, thường không có SLA và không khuyến nghị cho môi trường sản xuất.",
+            ref: "Azure Cloud Overview - Lifecycle"
+        },
+        {
+            q: "General Availability (GA) nghĩa là gì?",
+            options: ["Dịch vụ đã phát hành chính thức, ổn định, có SLA và hỗ trợ đầy đủ", "Dịch vụ đang thử nghiệm", "Dịch vụ đã ngừng hoạt động", "Dịch vụ nội bộ"],
+            a: 0,
+            explain: "GA là trạng thái khi dịch vụ được phát hành rộng rãi cho mọi khách hàng, cam kết SLA và hỗ trợ.",
+            ref: "Azure Cloud Overview - Lifecycle"
+        },
+        {
+            q: "Azure Marketplace là gì?",
+            options: ["Chợ bán đồ cũ", "Cửa hàng trực tuyến cung cấp các ứng dụng và dịch vụ được chứng nhận để chạy trên Azure", "Nơi bán máy tính", "Siêu thị"],
+            a: 1,
+            explain: "Azure Marketplace kết nối bạn với hàng nghìn sản phẩm/dịch vụ của đối tác đã được chứng nhận để chạy trên Azure.",
+            ref: "Azure Cloud Overview - General"
+        },
+        {
+            q: "Total Cost of Ownership (TCO) Calculator giúp gì?",
+            options: ["Tính toán chi phí tiết kiệm được khi di chuyển từ on-premises lên Azure", "Tính tiền điện", "Tính lương nhân viên", "Tính thuế"],
+            a: 0,
+            explain: "TCO Calculator giúp ước tính chi phí tiết kiệm được bằng cách so sánh chi phí chạy on-premise với chạy trên Azure.",
+            ref: "Azure Cloud Overview - Cost Management"
+        },
+        {
+            q: "Để bảo mật thông tin đăng nhập trong code, bạn KHÔNG nên làm gì?",
+            options: ["Sử dụng Azure Key Vault", "Sử dụng Managed Identities", "Lưu hardcode (ghi cứng) password trong source code", "Sử dụng biến môi trường"],
+            a: 2,
+            explain: "Không bao giờ được hardcode credentials trong source code. Nên dùng Key Vault hoặc Managed Identities.",
+            ref: "Azure Cloud Overview - Security Best Practices"
+        },
+        {
+            q: "Managed Identity (Danh tính được quản lý) giúp giải quyết vấn đề gì?",
+            options: ["Quản lý mật khẩu", "Loại bỏ nhu cầu quản lý credentials (mật khẩu/key) trong code bằng cách cung cấp danh tính tự động cho tài nguyên Azure", "Tạo user mới", "Đăng nhập máy tính"],
+            a: 1,
+            explain: "Managed Identities cung cấp cho dịch vụ Azure một danh tính trong Entra ID để xác thực mà không cần lưu credentials trong code.",
+            ref: "Azure Cloud Overview - Identity"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Load saved state
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
