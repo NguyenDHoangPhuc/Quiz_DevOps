@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Git & GitHub (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fdf6f2; /* Light orange tint */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 850px;
+            padding: 35px;
+            overflow: hidden;
+            border-top: 6px solid #F05032; /* Git Orange */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #fff;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        .option-item:hover {
+            background-color: #fff0eb;
+            border-color: #F05032;
+        }
+        .option-item.correct {
+            background-color: #dff6dd;
+            border-color: #107c10;
+            color: #107c10;
+        }
+        .option-item.wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            background-color: #dff6dd;
+            color: #107c10;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #fde7e9;
+            color: #a80000;
+            border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+        .btn-prev:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #adb5bd;
+        }
+        .btn-next {
+            background-color: #F05032; /* Git Orange */
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #c44128;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #F05032;
+        }
+        .section-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>Git & GitHub Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span id="section-tag" class="section-tag">GIT BASICS</span>
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Quay lại</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- PHẦN 1: KHÁI NIỆM CƠ BẢN (INTRODUCTION & CONCEPTS) ---
+        {
+            category: "CONCEPTS",
+            q: "Git là gì?",
+            options: ["Một ngôn ngữ lập trình", "Hệ thống quản lý phiên bản phân tán (Distributed Version Control System - DVCS)", "Một dịch vụ lưu trữ đám mây", "Một trình soạn thảo văn bản"],
+            a: 1,
+            explain: "Git là hệ thống quản lý phiên bản phân tán cho phép theo dõi thay đổi mã nguồn và phối hợp làm việc nhóm.",
+            ref: "GiT for Beginers.pdf - Page 4; Git & GitHub Handbook.pdf - Page 4"
+        },
+        {
+            q: "Ai là người tạo ra Git?",
+            options: ["Bill Gates", "Linus Torvalds", "Steve Jobs", "Mark Zuckerberg"],
+            a: 1,
+            explain: "Git được tạo ra bởi Linus Torvalds vào năm 2005 để quản lý mã nguồn Linux kernel.",
+            ref: "GiT for Beginers.pdf - Page 18"
+        },
+        {
+            q: "Sự khác biệt chính giữa Git (DVCS) và SVN (CVCS) là gì?",
+            options: ["Git cần kết nối mạng liên tục", "Git chậm hơn SVN", "Trong Git, mỗi client sở hữu một bản sao đầy đủ của repository (full backup), không phụ thuộc server trung tâm", "Git không hỗ trợ nhánh"],
+            a: 2,
+            explain: "Trong DVCS như Git, mỗi người dùng có bản sao đầy đủ của lịch sử dự án, cho phép làm việc offline và giảm rủi ro mất dữ liệu.",
+            ref: "GiT for Beginers.pdf - Page 6-13"
+        },
+        {
+            q: "GitHub là gì?",
+            options: ["Là một tên gọi khác của Git", "Nền tảng hosting dựa trên web cho Git repositories, cung cấp thêm các công cụ cộng tác", "Một trình biên dịch code", "Một mạng xã hội không liên quan đến code"],
+            a: 1,
+            explain: "GitHub là nền tảng cloud để host Git repositories và hỗ trợ quy trình làm việc nhóm (Pull Requests, Issues...).",
+            ref: "Git & GitHub Handbook.pdf - Page 6"
+        },
+        {
+            q: "Ba trạng thái chính của file trong Git là gì?",
+            options: ["New, Old, Deleted", "Modified, Staged, Committed", "Local, Remote, Server", "Draft, Final, Published"],
+            a: 1,
+            explain: "Git có 3 trạng thái: Modified (đã sửa nhưng chưa lưu vào staging), Staged (đã đánh dấu để commit), Committed (đã lưu vào database).",
+            ref: "Git & GitHub Handbook.pdf - Page 11"
+        },
+
+        // --- PHẦN 2: CÀI ĐẶT & CẤU HÌNH (SETUP) ---
+        {
+            category: "SETUP",
+            q: "Lệnh nào dùng để kiểm tra phiên bản Git đang cài đặt?",
+            options: ["git --version", "git check version", "git info", "git -v"],
+            a: 0,
+            explain: "Sử dụng `git --version` để xem phiên bản hiện tại.",
+            ref: "Git & GitHub Handbook.pdf - Page 8"
+        },
+        {
+            q: "Lệnh nào dùng để cấu hình tên người dùng cho toàn cục (global)?",
+            options: ["git config --global user.name 'Name'", "git setup user 'Name'", "git user.name = 'Name'", "git name 'Name'"],
+            a: 0,
+            explain: "`git config --global user.name` thiết lập tên người dùng cho tất cả repo trên máy.",
+            ref: "Git & GitHub Handbook.pdf - Page 9"
+        },
+        {
+            q: "Lệnh nào dùng để khởi tạo một repository mới trong thư mục hiện tại?",
+            options: ["git start", "git new", "git init", "git create"],
+            a: 2,
+            explain: "`git init` tạo một thư mục con `.git` mới, khởi đầu một repository.",
+            ref: "Git & GitHub Handbook.pdf - Page 10"
+        },
+        {
+            q: "Thư mục `.git` chứa cái gì?",
+            options: ["Source code của bạn", "Toàn bộ metadata và cơ sở dữ liệu object của Git repository", "File rác", "Cấu hình VS Code"],
+            a: 1,
+            explain: "Thư mục `.git` chứa toàn bộ lịch sử, config và metadata của dự án.",
+            ref: "GiT for Beginers.pdf - Page 28"
+        },
+
+        // --- PHẦN 3: CÁC LỆNH CƠ BẢN (BASIC COMMANDS) ---
+        {
+            category: "BASICS",
+            q: "Lệnh `git status` dùng để làm gì?",
+            options: ["Xem lịch sử commit", "Xem trạng thái của các file (đã thay đổi, đã stage, hay chưa được track)", "Gửi code lên server", "Xóa file"],
+            a: 1,
+            explain: "`git status` hiển thị trạng thái của working directory và staging area.",
+            ref: "Git & GitHub Handbook.pdf - Page 12"
+        },
+        {
+            q: "Để đưa một file có tên `file.txt` vào khu vực Staging (Staging Area), ta dùng lệnh gì?",
+            options: ["git commit file.txt", "git add file.txt", "git push file.txt", "git stage file.txt"],
+            a: 1,
+            explain: "`git add` chuyển thay đổi từ working directory vào staging area.",
+            ref: "Git & GitHub Handbook.pdf - Page 13"
+        },
+        {
+            q: "Lệnh `git add .` có tác dụng gì?",
+            options: ["Thêm file hiện tại", "Thêm tất cả các file thay đổi trong thư mục hiện tại vào Staging Area", "Xóa tất cả file", "Tạo commit ngay lập tức"],
+            a: 1,
+            explain: "`git add .` thêm tất cả các file thay đổi (modified/new) trong thư mục hiện hành vào staging.",
+            ref: "Git & GitHub Handbook.pdf - Page 13"
+        },
+        {
+            q: "Lệnh nào dùng để lưu các thay đổi từ Staging Area vào lịch sử Git?",
+            options: ["git save", "git upload", "git commit", "git record"],
+            a: 2,
+            explain: "`git commit` ghi lại các thay đổi trong staging area vào repository.",
+            ref: "Git & GitHub Handbook.pdf - Page 14"
+        },
+        {
+            q: "Flag `-m` trong lệnh `git commit -m 'message'` dùng để làm gì?",
+            options: ["Sửa đổi commit", "Viết thông điệp (message) mô tả cho commit ngay trên dòng lệnh", "Di chuyển commit", "Merge commit"],
+            a: 1,
+            explain: "Flag `-m` cho phép bạn nhập commit message trực tiếp mà không cần mở text editor.",
+            ref: "Git & GitHub Handbook.pdf - Page 14"
+        },
+        {
+            q: "Lệnh `git log` dùng để làm gì?",
+            options: ["Đăng nhập vào Git", "Xem lịch sử các commit", "Ghi log lỗi", "Thoát khỏi Git"],
+            a: 1,
+            explain: "`git log` hiển thị danh sách các commit đã thực hiện theo trình tự thời gian.",
+            ref: "Git & GitHub Handbook.pdf - Page 16"
+        },
+        {
+            q: "Lệnh `git log --oneline` hiển thị gì?",
+            options: ["Chỉ một commit cuối cùng", "Lịch sử commit nhưng rút gọn mỗi commit trên một dòng", "Trạng thái online", "Danh sách file"],
+            a: 1,
+            explain: "`--oneline` hiển thị mã hash rút gọn và tiêu đề commit, mỗi cái trên 1 dòng.",
+            ref: "Git & GitHub Handbook.pdf - Page 16"
+        },
+        {
+            q: "File `.gitignore` dùng để làm gì?",
+            options: ["Ghi chú các file quan trọng", "Liệt kê các file/thư mục mà Git cần bỏ qua (không theo dõi/track)", "Lưu mật khẩu", "Cấu hình user"],
+            a: 1,
+            explain: "File `.gitignore` chứa danh sách pattern các file mà Git sẽ lờ đi (không track).",
+            ref: "Git & GitHub Handbook.pdf - Page 45"
+        },
+
+        // --- PHẦN 4: BRANCHING & MERGING (NHÁNH & GỘP) ---
+        {
+            category: "BRANCHING",
+            q: "Lệnh nào dùng để tạo một nhánh mới tên là `feature`?",
+            options: ["git branch feature", "git checkout feature", "git new feature", "git create feature"],
+            a: 0,
+            explain: "`git branch <tên_nhánh>` tạo một nhánh mới nhưng không chuyển sang nhánh đó.",
+            ref: "Git & GitHub Handbook.pdf - Page 18"
+        },
+        {
+            q: "Lệnh nào dùng để chuyển sang nhánh `main`?",
+            options: ["git branch main", "git checkout main", "git move main", "git go main"],
+            a: 1,
+            explain: "`git checkout <tên_nhánh>` (hoặc `git switch`) dùng để chuyển đổi nhánh.",
+            ref: "Git & GitHub Handbook.pdf - Page 19"
+        },
+        {
+            q: "Lệnh `git checkout -b feature` làm gì?",
+            options: ["Xóa nhánh feature", "Tạo nhánh `feature` mới VÀ chuyển sang nhánh đó ngay lập tức", "Chỉ chuyển sang nhánh feature", "Liệt kê nhánh"],
+            a: 1,
+            explain: "Flag `-b` kết hợp cả việc tạo nhánh (`git branch`) và chuyển nhánh (`git checkout`).",
+            ref: "Git & GitHub Handbook.pdf - Page 19"
+        },
+        {
+            q: "Để gộp (merge) nhánh `feature` vào nhánh hiện tại, ta dùng lệnh gì?",
+            options: ["git merge feature", "git pull feature", "git join feature", "git combine feature"],
+            a: 0,
+            explain: "`git merge <tên_nhánh>` gộp các thay đổi từ nhánh chỉ định vào nhánh hiện tại.",
+            ref: "Git & GitHub Handbook.pdf - Page 20"
+        },
+        {
+            q: "Khi nào xảy ra xung đột (Merge Conflict)?",
+            options: ["Khi hai nhánh sửa đổi cùng một dòng trong cùng một file và Git không thể tự quyết định", "Khi mạng bị rớt", "Khi tên file quá dài", "Khi commit message trống"],
+            a: 0,
+            explain: "Conflict xảy ra khi Git không thể tự động hợp nhất các thay đổi do sự chồng chéo nội dung.",
+            ref: "Git & GitHub Handbook.pdf - Page 23"
+        },
+        {
+            q: "Lệnh nào dùng để xóa một nhánh đã merge?",
+            options: ["git branch -d <tên_nhánh>", "git remove <tên_nhánh>", "git erase <tên_nhánh>", "git delete <tên_nhánh>"],
+            a: 0,
+            explain: "`git branch -d` (delete) xóa nhánh an toàn (chỉ xóa nếu đã merge).",
+            ref: "Git & GitHub Handbook.pdf - Page 22"
+        },
+        {
+            q: "HEAD trong Git là gì?",
+            options: ["Người quản lý dự án", "Con trỏ tham chiếu đến commit mới nhất của nhánh đang làm việc hiện tại", "Header của file code", "Server trung tâm"],
+            a: 1,
+            explain: "HEAD là con trỏ đặc biệt trỏ tới local branch hiện tại bạn đang checkout.",
+            ref: "GiT for Beginers.pdf - Page 60"
+        },
+        {
+            q: "Lệnh `git branch` (không tham số) hiển thị gì?",
+            options: ["Tạo nhánh mới", "Liệt kê tất cả các nhánh local", "Xóa nhánh", "Gộp nhánh"],
+            a: 1,
+            explain: "`git branch` liệt kê danh sách các nhánh và đánh dấu sao (*) ở nhánh hiện tại.",
+            ref: "Git & GitHub Handbook.pdf - Page 18"
+        },
+
+        // --- PHẦN 5: LÀM VIỆC VỚI REMOTE (REMOTE REPOSITORIES) ---
+        {
+            category: "REMOTE",
+            q: "Lệnh `git clone <url>` dùng để làm gì?",
+            options: ["Tạo repo mới rỗng", "Sao chép (tải về) một remote repository về máy local", "Copy file", "Upload code"],
+            a: 1,
+            explain: "`git clone` tạo bản sao cục bộ của một repository từ server từ xa.",
+            ref: "Git & GitHub Handbook.pdf - Page 29"
+        },
+        {
+            q: "Để liên kết một local repo với một remote repo, lệnh nào đúng?",
+            options: ["git remote add origin <url>", "git connect <url>", "git link <url>", "git sync <url>"],
+            a: 0,
+            explain: "`git remote add <name> <url>` thêm một remote mới (thường đặt tên là origin).",
+            ref: "Git & GitHub Handbook.pdf - Page 30"
+        },
+        {
+            q: "Lệnh `git push -u origin main` làm gì?",
+            options: ["Tải code về", "Đẩy các commit từ nhánh main local lên nhánh main của remote `origin` và thiết lập upstream", "Xóa remote", "Gộp code"],
+            a: 1,
+            explain: "`git push` upload code. Flag `-u` thiết lập tracking relationship để lần sau chỉ cần gõ `git push`.",
+            ref: "Git & GitHub Handbook.pdf - Page 31"
+        },
+        {
+            q: "Lệnh `git pull` thực chất là sự kết hợp của hai lệnh nào?",
+            options: ["git clone + git push", "git fetch + git merge", "git add + git commit", "git remote + git checkout"],
+            a: 1,
+            explain: "`git pull` tự động `fetch` dữ liệu mới từ remote và `merge` vào nhánh hiện tại.",
+            ref: "Git & GitHub Handbook.pdf - Page 32"
+        },
+        {
+            q: "Lệnh `git fetch` làm gì?",
+            options: ["Tải các thay đổi mới nhất từ remote về nhưng KHÔNG tự động merge vào code hiện tại", "Tải và merge ngay lập tức", "Gửi code lên server", "Xóa remote"],
+            a: 0,
+            explain: "`git fetch` cập nhật thông tin từ remote repo nhưng không thay đổi working directory của bạn.",
+            ref: "Git & GitHub Handbook.pdf - Page 32"
+        },
+        {
+            q: "`origin` thường ám chỉ điều gì?",
+            options: ["Nhánh chính", "Tên mặc định (alias) của remote repository", "Máy tính cá nhân", "Thư mục gốc"],
+            a: 1,
+            explain: "Khi clone, Git mặc định đặt tên cho remote server là `origin`.",
+            ref: "GiT for Beginers.pdf - Page 116"
+        },
+
+        // --- PHẦN 6: UNDOING CHANGES (HOÀN TÁC) ---
+        {
+            category: "UNDO",
+            q: "Lệnh `git reset` dùng để làm gì?",
+            options: ["Khởi động lại máy", "Di chuyển con trỏ HEAD về một commit trước đó (có thể làm mất lịch sử sau đó)", "Tạo commit mới đảo ngược thay đổi", "Xóa toàn bộ repo"],
+            a: 1,
+            explain: "`git reset` dời HEAD về quá khứ. Có 3 chế độ: --soft, --mixed (mặc định), --hard.",
+            ref: "Git & GitHub Handbook.pdf - Page 36"
+        },
+        {
+            q: "Sự khác biệt giữa `git reset --soft` và `git reset --hard`?",
+            options: ["--soft giữ thay đổi trong staging area, --hard xóa sạch mọi thay đổi (working directory & staging)", "--soft xóa file, --hard giữ file", "--soft dùng cho Windows, --hard cho Linux", "Không khác gì"],
+            a: 0,
+            explain: "`--soft` chỉ dời HEAD (giữ staged). `--hard` dời HEAD và reset luôn working directory (mất dữ liệu chưa commit).",
+            ref: "Git & GitHub Handbook.pdf - Page 36"
+        },
+        {
+            q: "Lệnh `git revert <commit_hash>` làm gì?",
+            options: ["Xóa commit đó khỏi lịch sử", "Tạo một commit MỚI với nội dung đảo ngược lại thay đổi của commit được chỉ định (an toàn cho public history)", "Reset về commit đó", "Sửa nội dung commit"],
+            a: 1,
+            explain: "`git revert` không xóa lịch sử mà tạo commit mới để undo, an toàn khi làm việc nhóm.",
+            ref: "Git & GitHub Handbook.pdf - Page 37"
+        },
+        {
+            q: "Lệnh `git checkout -- file.txt` (hoặc `git restore file.txt`) dùng để làm gì?",
+            options: ["Xóa file", "Hủy bỏ các thay đổi của file trong Working Directory (quay về trạng thái commit gần nhất)", "Commit file", "Tạo file mới"],
+            a: 1,
+            explain: "Dùng để loại bỏ các thay đổi chưa được stage (discard changes in working directory).",
+            ref: "Git & GitHub Handbook.pdf - Page 35"
+        },
+        {
+            q: "Nếu bạn lỡ commit sai message, lệnh nào giúp sửa lại commit gần nhất?",
+            options: ["git commit --amend", "git fix", "git reset", "git rebase"],
+            a: 0,
+            explain: "`git commit --amend` cho phép sửa đổi commit cuối cùng (thêm file quên add hoặc sửa message).",
+            ref: "GiT for Beginers.pdf - Page 155"
+        },
+
+        // --- PHẦN 7: ADVANCED GIT (NÂNG CAO) ---
+        {
+            category: "ADVANCED",
+            q: "Lệnh `git stash` dùng để làm gì?",
+            options: ["Xóa vĩnh viễn thay đổi", "Lưu tạm thời các thay đổi đang làm dở (chưa commit) vào một stack để làm việc khác (chuyển nhánh)", "Gộp nhánh", "Tạo tag"],
+            a: 1,
+            explain: "`git stash` cất các thay đổi chưa commit đi để working directory sạch sẽ, sau này có thể lấy lại (`stash pop`).",
+            ref: "GiT for Beginers.pdf - Page 179"
+        },
+        {
+            q: "Lệnh `git cherry-pick <commit_hash>` dùng để làm gì?",
+            options: ["Chọn quả cherry", "Áp dụng (copy) một commit cụ thể từ nhánh khác vào nhánh hiện tại", "Xóa commit", "Xem commit"],
+            a: 1,
+            explain: "`cherry-pick` lấy thay đổi của một commit bất kỳ và apply vào nhánh hiện tại.",
+            ref: "GiT for Beginers.pdf - Page 179"
+        },
+        {
+            q: "Lệnh `git rebase main` (khi đang ở nhánh feature) làm gì?",
+            options: ["Xóa nhánh main", "Gộp nhánh main vào feature bằng cách viết lại lịch sử (di chuyển base của feature lên đầu main)", "Tạo nhánh mới", "Upload code"],
+            a: 1,
+            explain: "Rebase apply lại các commit của nhánh hiện tại lên trên đỉnh của nhánh đích, tạo lịch sử thẳng hàng.",
+            ref: "Git & GitHub Handbook.pdf - Page 39"
+        },
+        {
+            q: "Tại sao nên cẩn thận khi dùng `git rebase` trên public branch?",
+            options: ["Nó làm chậm máy", "Nó viết lại lịch sử commit (thay đổi hash), gây xung đột cho người khác đang pull về", "Nó tốn dung lượng", "Git cấm dùng"],
+            a: 1,
+            explain: "Rebase thay đổi lịch sử. Nếu người khác đang làm việc trên nhánh đó, họ sẽ gặp rắc rối lớn.",
+            ref: "Git & GitHub Handbook.pdf - Page 39"
+        },
+        {
+            q: "Lệnh `git diff` dùng để làm gì?",
+            options: ["So sánh sự khác biệt giữa các file (ví dụ: working directory vs staging)", "Tải file", "Xóa file", "Gộp file"],
+            a: 0,
+            explain: "`git diff` hiển thị nội dung thay đổi cụ thể giữa các trạng thái.",
+            ref: "Git & GitHub Handbook.pdf - Page 41"
+        },
+        {
+            q: "Lệnh `git tag v1.0` dùng để làm gì?",
+            options: ["Tạo nhánh v1.0", "Gắn nhãn (tag) cho commit hiện tại (thường dùng để đánh dấu phiên bản release)", "Xóa commit", "Gửi tin nhắn"],
+            a: 1,
+            explain: "Tag dùng để đánh dấu các điểm quan trọng trong lịch sử như các phiên bản phát hành.",
+            ref: "Git & GitHub Handbook.pdf - Page 42"
+        },
+
+        // --- PHẦN 8: GITHUB WORKFLOW ---
+        {
+            category: "GITHUB",
+            q: "Forking một repository trên GitHub nghĩa là gì?",
+            options: ["Xóa repo", "Tạo một bản sao của repo người khác về tài khoản GitHub của mình để đóng góp độc lập", "Tải về máy tính", "Hack repo"],
+            a: 1,
+            explain: "Fork tạo bản sao phía server để bạn tự do sửa đổi mà không ảnh hưởng repo gốc.",
+            ref: "Git & GitHub Handbook.pdf - Page 28"
+        },
+        {
+            q: "Pull Request (PR) là gì?",
+            options: ["Yêu cầu tải code", "Cơ chế đề xuất thay đổi: thông báo cho chủ repo gốc biết bạn đã đẩy thay đổi lên và muốn họ review/merge vào", "Một lỗi hệ thống", "Lệnh git pull"],
+            a: 1,
+            explain: "Pull Request là cách contributor thông báo và thảo luận về thay đổi trước khi merge vào nhánh chính.",
+            ref: "Git & GitHub Handbook.pdf - Page 33"
+        },
+        {
+            q: "GitHub Issues dùng để làm gì?",
+            options: ["Gây rắc rối", "Theo dõi công việc, báo lỗi (bugs), yêu cầu tính năng (feature requests)", "Viết code", "Chạy CI/CD"],
+            a: 1,
+            explain: "Issues là công cụ quản lý dự án tích hợp để track bugs và tasks.",
+            ref: "Git & GitHub Handbook.pdf - Page 43"
+        },
+        {
+            q: "File `README.md` thường dùng để làm gì?",
+            options: ["Chứa cấu hình bảo mật", "Cung cấp thông tin giới thiệu, hướng dẫn cài đặt và sử dụng dự án (hiển thị trang chủ repo)", "Chứa mã nguồn chính", "Chứa danh sách user"],
+            a: 1,
+            explain: "README là bộ mặt của dự án, cung cấp thông tin thiết yếu cho người xem.",
+            ref: "Git & GitHub Handbook.pdf - Page 45"
+        },
+        {
+            q: "Markdown (.md) là gì?",
+            options: ["Một ngôn ngữ lập trình", "Ngôn ngữ đánh dấu nhẹ dùng để định dạng văn bản (như trong README)", "Một database", "Một công cụ nén"],
+            a: 1,
+            explain: "Markdown là định dạng văn bản đơn giản để viết tài liệu trên web.",
+            ref: "Git & GitHub Handbook.pdf - Page 45"
+        },
+
+        // --- CÁC CÂU HỎI THÊM ĐỂ ĐỦ 70 CÂU ---
+        {
+            category: "MISC",
+            q: "Lệnh `git show <commit_hash>` dùng để làm gì?",
+            options: ["Chạy slide show", "Xem chi tiết nội dung thay đổi và metadata của một commit cụ thể", "Xóa commit", "Ẩn commit"],
+            a: 1,
+            explain: "`git show` hiển thị chi tiết về một object (thường là commit).",
+            ref: "GiT for Beginers.pdf - Page 51"
+        },
+        {
+            q: "Lệnh `git rm file.txt` làm gì?",
+            options: ["Chỉ xóa file khỏi thư mục", "Xóa file khỏi working directory VÀ đưa vào staging area để chuẩn bị commit việc xóa", "Đổi tên file", "Sao chép file"],
+            a: 1,
+            explain: "`git rm` xóa file khỏi hệ thống và stage việc xóa đó.",
+            ref: "GiT for Beginers.pdf - Page 44"
+        },
+        {
+            q: "Lệnh `git mv old.txt new.txt` làm gì?",
+            options: ["Xóa file", "Đổi tên hoặc di chuyển file và tự động stage thay đổi đó", "Tạo file mới", "Copy file"],
+            a: 1,
+            explain: "`git mv` là lệnh tắt của: mv file, git rm old, git add new.",
+            ref: "GiT for Beginers.pdf - Page 44"
+        },
+        {
+            q: "Branch `master` (hoặc `main`) là gì?",
+            options: ["Nhánh quản lý", "Nhánh mặc định (default branch) khi khởi tạo repo, thường chứa code ổn định", "Nhánh nháp", "Nhánh bị lỗi"],
+            a: 1,
+            explain: "Đây là nhánh chính mặc định.",
+            ref: "Git & GitHub Handbook.pdf - Page 18"
+        },
+        {
+            q: "Detached HEAD state là gì?",
+            options: ["Đầu bị lìa khỏi cổ", "Trạng thái khi HEAD trỏ trực tiếp vào một commit cụ thể thay vì trỏ vào một nhánh", "Lỗi phần mềm", "Trạng thái bình thường"],
+            a: 1,
+            explain: "Xảy ra khi bạn checkout một commit hash cụ thể. Các commit mới tại đây sẽ không thuộc nhánh nào.",
+            ref: "GiT for Beginers.pdf - Page 60"
+        },
+        {
+            q: "Lệnh `git clean -n` dùng để làm gì?",
+            options: ["Xóa tất cả file", "Hiển thị (dry-run) những file untracked nào sẽ bị xóa nếu chạy clean thật", "Dọn dẹp virus", "Xóa lịch sử"],
+            a: 1,
+            explain: "`git clean` xóa file untracked. Flag `-n` để xem trước (safe mode).",
+            ref: "GiT for Beginers.pdf - Page 179"
+        },
+        {
+            q: "Lệnh `git bisect` hữu ích cho việc gì?",
+            options: ["Tạo nhánh", "Tìm kiếm commit gây ra lỗi (bug) bằng thuật toán tìm kiếm nhị phân", "Gộp code", "Đẩy code"],
+            a: 1,
+            explain: "`bisect` giúp tìm commit lỗi nhanh chóng bằng cách chia đôi lịch sử commit.",
+            ref: "GiT for Beginers.pdf - Page 179"
+        },
+        {
+            q: "`origin/main` đại diện cho cái gì?",
+            options: ["Nhánh main trên máy local", "Trạng thái của nhánh main trên remote repo (origin) lần cuối cùng được fetch", "Một file", "Một thư mục"],
+            a: 1,
+            explain: "Đây là remote-tracking branch, cho biết vị trí của nhánh trên server.",
+            ref: "GiT for Beginers.pdf - Page 119"
+        },
+        {
+            q: "Lệnh `git reflog` dùng để làm gì?",
+            options: ["Xem log tham chiếu, giúp cứu các commit bị mất (do reset hard hoặc xóa nhánh)", "Xem log web", "Refactor code", "Login"],
+            a: 0,
+            explain: "Reflog ghi lại mọi sự di chuyển của HEAD, là phao cứu sinh khi lỡ tay xóa nhầm.",
+            ref: "Git & GitHub Handbook.pdf (Advanced Concept)"
+        },
+        {
+            q: "Để bỏ qua thay đổi quyền hạn file (file mode) nhưng giữ nội dung, ta cấu hình gì?",
+            options: ["git config core.fileMode false", "git ignore mode", "git chmod 777", "Không thể làm được"],
+            a: 0,
+            explain: "Cấu hình này hữu ích khi chuyển code giữa Windows và Linux/Mac.",
+            ref: "General Git Knowledge"
+        },
+        {
+            q: "Lệnh `git config --list` dùng để làm gì?",
+            options: ["Tạo cấu hình", "Liệt kê tất cả các cài đặt cấu hình hiện tại của Git", "Xóa cấu hình", "Reset cấu hình"],
+            a: 1,
+            explain: "Hiển thị các settings hiện tại.",
+            ref: "Git & GitHub Handbook.pdf - Page 9"
+        },
+        {
+            q: "Nếu muốn sửa commit message của một commit CŨ (không phải cái mới nhất), ta dùng lệnh gì?",
+            options: ["git commit --amend", "git rebase -i (interactive)", "git reset", "git change"],
+            a: 1,
+            explain: "Interactive rebase cho phép sửa đổi các commit cũ hơn trong lịch sử.",
+            ref: "GiT for Beginers.pdf - Page 181 (Implied by rewriting history)"
+        },
+        {
+            q: "Fast-forward merge là gì?",
+            options: ["Merge nhanh bằng cách di chuyển con trỏ nhánh hiện tại lên commit mới nhất của nhánh được merge (không tạo commit merge mới)", "Merge chậm", "Merge bị lỗi", "Merge tự động"],
+            a: 0,
+            explain: "Xảy ra khi không có sự phân nhánh dòng lịch sử, chỉ cần tịnh tiến con trỏ.",
+            ref: "GiT for Beginers.pdf - Page 84"
+        },
+        {
+            q: "Lệnh `git branch -m <old> <new>` dùng để làm gì?",
+            options: ["Xóa nhánh", "Đổi tên nhánh", "Di chuyển nhánh", "Merge nhánh"],
+            a: 1,
+            explain: "Flag `-m` (move/rename) dùng để đổi tên nhánh.",
+            ref: "General Git Knowledge"
+        },
+        {
+            q: "Giao thức nào Git KHÔNG hỗ trợ để truyền tải dữ liệu?",
+            options: ["HTTP/HTTPS", "SSH", "Git protocol", "FTP (hiện đại ít dùng nhưng có hỗ trợ dumb protocol)", "SMTP"],
+            a: 4,
+            explain: "Git không dùng SMTP để transfer data repo (SMTP dùng gửi patch qua email).",
+            ref: "GiT for Beginers.pdf (Implied protocols)"
+        },
+        {
+            q: "Git Tree object đại diện cho cái gì?",
+            options: ["Nội dung file", "Cấu trúc thư mục", "Commit message", "Tag"],
+            a: 1,
+            explain: "Blob là file, Tree là thư mục, Commit là snapshot.",
+            ref: "GiT for Beginers.pdf - Page 37"
+        },
+        {
+            q: "Git Blob object đại diện cho cái gì?",
+            options: ["Nội dung của một file", "Tên file", "Thư mục", "Nhánh"],
+            a: 0,
+            explain: "Blob (Binary Large Object) chứa nội dung file.",
+            ref: "GiT for Beginers.pdf - Page 37"
+        },
+        {
+            q: "Khi clone một repo, Git mặc định tải về nhánh nào?",
+            options: ["Tất cả các nhánh", "Chỉ nhánh mặc định (thường là main/master)", "Không tải nhánh nào", "Nhánh cũ nhất"],
+            a: 1,
+            explain: "Git clone tải toàn bộ lịch sử nhưng checkout nhánh mặc định (HEAD của remote).",
+            ref: "General Git Knowledge"
+        },
+        {
+            q: "Lệnh `git push origin --delete <branch_name>` dùng để làm gì?",
+            options: ["Xóa nhánh trên local", "Xóa nhánh trên remote repository", "Tạo nhánh remote", "Đổi tên remote"],
+            a: 1,
+            explain: "Đây là lệnh để xóa một nhánh trên server.",
+            ref: "General Git Knowledge"
+        },
+        {
+            q: "Để gõ lệnh git ngắn hơn (ví dụ `git st` thay vì `git status`), ta dùng tính năng gì?",
+            options: ["Git Alias", "Git Short", "Git Mini", "Git Fast"],
+            a: 0,
+            explain: "Git Alias cho phép đặt tên tắt cho lệnh.",
+            ref: "General Git Knowledge"
+        },
+        {
+            q: "Lệnh `git blame <file>` dùng để làm gì?",
+            options: ["Đổ lỗi cho người khác", "Xem ai đã sửa dòng nào của file trong commit nào", "Xóa file", "Sửa file"],
+            a: 1,
+            explain: "Hiển thị tác giả và commit hash cho từng dòng của file.",
+            ref: "General Git Knowledge"
+        },
+        {
+            q: "Git LFS (Large File Storage) dùng để làm gì?",
+            options: ["Lưu trữ file text", "Quản lý các file nhị phân lớn (ảnh, video) hiệu quả hơn bằng cách lưu con trỏ trong Git và file thực ở server riêng", "Nén file", "Mã hóa file"],
+            a: 1,
+            explain: "Git không giỏi quản lý file binary lớn, LFS là giải pháp mở rộng.",
+            ref: "General Git Knowledge"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const sectionTagEl = document.getElementById('section-tag');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        // Update Tag
+        sectionTagEl.textContent = qData.category;
+
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Load saved state
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
