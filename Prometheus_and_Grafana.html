@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Grafana & Prometheus (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #161719; /* Grafana Dark Background */
+            color: #c7d0d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #1f2125; /* Panel Background */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 850px;
+            padding: 35px;
+            overflow: hidden;
+            border-top: 4px solid #FF9900; /* Grafana Orange */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 26px;
+            color: #FF9900;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8e8e8e;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .section-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+            text-transform: uppercase;
+        }
+        .tag-grafana { background-color: #FF9900; color: #000; }
+        .tag-prometheus { background-color: #e6522c; /* Prometheus Red */ }
+        .tag-concept { background-color: #3274d9; /* Blue */ }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #2c2e33;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            color: #d8d9da;
+        }
+        .option-item:hover {
+            background-color: #3a3c42;
+            border-color: #FF9900;
+        }
+        .option-item.correct {
+            background-color: #1f3a23;
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        .option-item.wrong {
+            background-color: #3e2020;
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #3e2020;
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.4;
+        }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 4px;
+            display: none;
+            background-color: #262626;
+            border-left: 4px solid #888;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            border-left-color: #2ecc71;
+        }
+        .feedback-wrong {
+            border-left-color: #e74c3c;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+            line-height: 1.5;
+            color: #aaa;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: block;
+            color: #666;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 35px;
+        }
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #444;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #555;
+        }
+        .btn-prev:disabled {
+            background-color: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .btn-next {
+            background-color: #FF9900;
+            color: #000;
+        }
+        .btn-next:hover {
+            background-color: #e68a00;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #FF9900;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>Grafana & Prometheus Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span id="section-tag" class="section-tag tag-concept">CONCEPTS</span>
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Quay lại</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- PHẦN 1: MONITORING CONCEPTS (GRAFANA & PROMETHEUS) ---
+        {
+            category: "CONCEPTS",
+            q: "Sự khác biệt giữa 'Monitoring' và 'Observability' là gì theo Baron Schwartz?",
+            options: ["Giống nhau hoàn toàn", "Monitoring cho biết hệ thống có hoạt động không, Observability cho phép bạn hỏi tại sao nó không hoạt động", "Monitoring dùng cho dev, Observability dùng cho ops", "Monitoring rẻ hơn"],
+            a: 1,
+            explain: "\"Monitoring tells you whether the system works. Observability lets you ask why it's not working.\"",
+            ref: "Monitoring with Grafana.pdf - Page 6"
+        },
+        {
+            q: "Tại sao chúng ta cần giám sát (monitor)?",
+            options: ["Để làm đẹp dashboard", "Để đảm bảo hệ thống hoạt động như dự định và sửa lỗi trước khi khách hàng báo cáo", "Để tăng dung lượng ổ cứng", "Để giảm lương nhân viên"],
+            a: 1,
+            explain: "Mục đích là đảm bảo hệ thống hoạt động, có insight về cách sử dụng, và sửa lỗi trước khi khách hàng phàn nàn",
+            ref: "Monitoring with Grafana.pdf - Page 7"
+        },
+        {
+            q: "Logs (Nhật ký) khác Metrics (Chỉ số) như thế nào?",
+            options: ["Logs là dữ liệu có cấu trúc, Metrics là văn bản", "Logs ghi lại các sự kiện rời rạc (discrete events), Metrics là dữ liệu số đo lường theo thời gian có thể tổng hợp được", "Logs chiếm ít dung lượng hơn Metrics", "Metrics dùng để debug chi tiết từng request"],
+            a: 1,
+            explain: "Logs are discrete events (vd: 'User logged in'). Metrics are aggregatable numbers measured over time (vd: 'Requests per second')",
+            ref: "Monitoring with Grafana.pdf - Page 9-10"
+        },
+        {
+            q: "Mô hình 'Whitebox Monitoring' là gì?",
+            options: ["Giám sát từ bên ngoài (như user)", "Giám sát dựa trên thông tin nội bộ của hệ thống (logs, metrics từ ứng dụng)", "Giám sát hộp đen", "Giám sát phần cứng"],
+            a: 1,
+            explain: "Whitebox monitoring dựa trên thông tin được phơi bày bởi nội bộ hệ thống (logs, metrics, profiling)",
+            ref: "Monitoring With Prometheus .pdf - Page 7"
+        },
+        {
+            q: "Mô hình 'Blackbox Monitoring' là gì?",
+            options: ["Giám sát từ bên ngoài, kiểm tra các hành vi có thể nhìn thấy (ví dụ: ping, HTTP check)", "Giám sát code", "Giám sát database", "Giám sát CPU"],
+            a: 0,
+            explain: "Blackbox monitoring kiểm tra hành vi hướng ngoại (externally visible behavior) như user trải nghiệm",
+            ref: "Monitoring With Prometheus .pdf - Page 7"
+        },
+
+        // --- PHẦN 2: PROMETHEUS ARCHITECTURE & BASICS ---
+        {
+            category: "PROMETHEUS",
+            q: "Prometheus sử dụng mô hình thu thập dữ liệu nào?",
+            options: ["Push-based (Đẩy)", "Pull-based (Kéo)", "Hybrid", "Streaming"],
+            a: 1,
+            explain: "Prometheus là hệ thống 'Pull-based', server chủ động kết nối tới các target để lấy metrics",
+            ref: "Monitoring With Prometheus .pdf - Page 6"
+        },
+        {
+            q: "Thành phần nào trong Prometheus chịu trách nhiệm lưu trữ dữ liệu?",
+            options: ["Alertmanager", "TSDB (Time Series Database)", "Pushgateway", "Grafana"],
+            a: 1,
+            explain: "TSDB (Time Series Database) là nơi lưu trữ metrics cục bộ trên đĩa",
+            ref: "Monitoring With Prometheus .pdf - Page 10"
+        },
+        {
+            q: "Service Discovery trong Prometheus dùng để làm gì?",
+            options: ["Tìm kiếm file log", "Tự động phát hiện các mục tiêu (targets) cần giám sát thay vì cấu hình tĩnh", "Tìm lỗi code", "Phát hiện virus"],
+            a: 1,
+            explain: "Service Discovery giúp Prometheus tự động tìm các targets cần scrape trong môi trường động (như Kubernetes, AWS)",
+            ref: "Monitoring With Prometheus .pdf - Page 10"
+        },
+        {
+            q: "Thành phần 'Alertmanager' có chức năng gì?",
+            options: ["Thu thập metrics", "Hiển thị biểu đồ", "Xử lý cảnh báo (deduplication, grouping, routing) gửi từ Prometheus Server", "Lưu trữ log"],
+            a: 2,
+            explain: "Alertmanager xử lý alerts được gửi từ Prometheus server: gộp nhóm, chống lặp, và gửi thông báo (email, slack...)",
+            ref: "Monitoring With Prometheus .pdf - Page 10"
+        },
+        {
+            q: "Pushgateway được sử dụng trong trường hợp nào?",
+            options: ["Thay thế hoàn toàn Pull model", "Dành cho các 'short-lived jobs' (tác vụ ngắn hạn) không tồn tại đủ lâu để được scrape", "Dành cho database", "Dành cho web server"],
+            a: 1,
+            explain: "Pushgateway là metrics cache trung gian, dùng cho các short-lived jobs (batch jobs) push metrics vào trước khi thoát",
+            ref: "Monitoring With Prometheus .pdf - Page 11"
+        },
+        {
+            q: "Exporters trong hệ sinh thái Prometheus là gì?",
+            options: ["Công cụ xuất file PDF", "Các phần mềm chạy trên máy đích để thu thập metrics và phơi bày (expose) chúng dưới định dạng Prometheus", "Công cụ xóa dữ liệu", "Database"],
+            a: 1,
+            explain: "Exporter là các thư viện/agent giúp expose metrics từ hệ thống bên thứ 3 (như Linux, MySQL) sang định dạng Prometheus hiểu",
+            ref: "Monitoring With Prometheus .pdf - Page 10"
+        },
+        {
+            q: "Node Exporter dùng để giám sát cái gì?",
+            options: ["Java Application", "Database MySQL", "Thông số hệ điều hành (OS metrics) như CPU, RAM, Disk của máy chủ Linux", "Docker Container"],
+            a: 2,
+            explain: "Node Exporter là exporter tiêu chuẩn để lấy metrics phần cứng và OS của máy *NIX",
+            ref: "Prometheus.pdf - Page 15"
+        },
+        {
+            q: "Blackbox Exporter dùng để làm gì?",
+            options: ["Giám sát bên trong code", "Thực hiện các kiểm tra từ bên ngoài (probing) như ICMP (ping), HTTP, DNS, TCP", "Lưu trữ log đen", "Giám sát container"],
+            a: 1,
+            explain: "Blackbox exporter cho phép probing endpoints qua HTTP, HTTPS, DNS, TCP và ICMP",
+            ref: "Prometheus.pdf - Page 18"
+        },
+        {
+            q: "Prometheus scrape (thu thập) metrics thông qua giao thức nào?",
+            options: ["FTP", "HTTP", "SSH", "SNMP"],
+            a: 1,
+            explain: "Prometheus thu thập metrics bằng cách gọi HTTP request tới các endpoint `/metrics`",
+            ref: "Monitoring With Prometheus .pdf - Page 10"
+        },
+
+        // --- PHẦN 3: METRICS & PROMQL ---
+        {
+            category: "PROMETHEUS",
+            q: "Loại metric 'Counter' có đặc điểm gì?",
+            options: ["Có thể tăng hoặc giảm", "Chỉ có thể tăng lên (monotonic) hoặc reset về 0 khi restart", "Lưu trữ dạng text", "Dùng cho nhiệt độ"],
+            a: 1,
+            explain: "Counter là metric tích lũy (cumulative), chỉ tăng đơn điệu. Dùng đếm số request, lỗi, task hoàn thành",
+            ref: "Monitoring With Prometheus .pdf - Page 24"
+        },
+        {
+            q: "Loại metric 'Gauge' dùng cho dữ liệu nào?",
+            options: ["Dữ liệu chỉ tăng", "Dữ liệu có thể tăng hoặc giảm (ví dụ: nhiệt độ, dung lượng RAM đang dùng)", "Dữ liệu dạng chuỗi", "Dữ liệu log"],
+            a: 1,
+            explain: "Gauge biểu thị một giá trị số có thể đi lên hoặc xuống tùy ý",
+            ref: "Monitoring With Prometheus .pdf - Page 25"
+        },
+        {
+            q: "Loại metric 'Histogram' dùng để làm gì?",
+            options: ["Vẽ biểu đồ tròn", "Đo lường phân bố của các quan sát (như request duration) vào các nhóm (buckets) và tính toán quantile", "Đếm số user", "Lưu log lỗi"],
+            a: 1,
+            explain: "Histogram lấy mẫu các quan sát và đếm chúng vào các bucket có thể cấu hình, dùng để tính toán percentiles/quantiles",
+            ref: "Monitoring With Prometheus .pdf - Page 26"
+        },
+        {
+            q: "Hàm `rate()` trong PromQL dùng để làm gì?",
+            options: ["Tính tổng", "Tính tốc độ trung bình trên giây (per-second average rate) của time series trong một khoảng thời gian", "Tính giá tiền", "Dự đoán tương lai"],
+            a: 1,
+            explain: "`rate()` tính toán tốc độ tăng trung bình mỗi giây của counter trong khoảng thời gian range vector",
+            ref: "Monitoring With Prometheus .pdf - Page 37"
+        },
+        {
+            q: "Sự khác biệt giữa `rate()` và `irate()`?",
+            options: ["`irate` dùng cho Gauge", "`rate` tính trung bình mượt hơn (smooth), `irate` tính tốc độ tức thời dựa trên 2 điểm dữ liệu cuối cùng (nhạy cảm với thay đổi đột ngột)", "`rate` nhanh hơn", "Không khác gì"],
+            a: 1,
+            explain: "`irate` (instant rate) tính toán dựa trên 2 điểm dữ liệu cuối cùng, tốt cho việc bắt các đỉnh (spikes) nhanh chóng",
+            ref: "Monitoring With Prometheus .pdf - Page 39"
+        },
+        {
+            q: "Label (nhãn) trong Prometheus dùng để làm gì?",
+            options: ["Trang trí", "Phân loại và lọc metrics (ví dụ: method='get', status='500')", "Đặt tên biến", "Ghi chú"],
+            a: 1,
+            explain: "Labels cung cấp mô hình dữ liệu đa chiều, cho phép lọc và tổng hợp metrics theo các cặp key-value",
+            ref: "Monitoring With Prometheus .pdf - Page 18"
+        },
+        {
+            q: "Endpoint mặc định để Prometheus scrape metrics từ một ứng dụng thường là gì?",
+            options: ["/admin", "/stats", "/metrics", "/monitor"],
+            a: 2,
+            explain: "Theo quy ước, metrics thường được expose tại đường dẫn `/metrics`",
+            ref: "Monitoring With Prometheus .pdf - Page 13"
+        },
+        {
+            q: "Instrumentation (Gắn đo lường) là gì?",
+            options: ["Cài đặt nhạc cụ", "Việc thêm code vào ứng dụng để ghi lại và phơi bày metrics", "Cài đặt Prometheus", "Cấu hình mạng"],
+            a: 1,
+            explain: "Instrumentation là quá trình thêm thư viện client vào code để thu thập metrics tùy chỉnh",
+            ref: "Monitoring With Prometheus .pdf - Page 46"
+        },
+
+        // --- PHẦN 4: GRAFANA BASICS ---
+        {
+            category: "GRAFANA",
+            q: "Grafana là gì?",
+            options: ["Cơ sở dữ liệu", "Nền tảng mã nguồn mở để trực quan hóa (visualization) và phân tích metrics", "Hệ điều hành", "Công cụ chat"],
+            a: 1,
+            explain: "Grafana là nền tảng phân tích và trực quan hóa metrics mã nguồn mở",
+            ref: "Monitoring with Grafana.pdf - General Context"
+        },
+        {
+            q: "Grafana hỗ trợ Data Source nào?",
+            options: ["Chỉ Prometheus", "Chỉ Graphite", "Nhiều loại như Prometheus, Graphite, InfluxDB, MySQL, Elasticsearch...", "Chỉ file Excel"],
+            a: 2,
+            explain: "Grafana hỗ trợ nhiều data sources thông qua plugins (Prometheus, Graphite, InfluxDB, v.v.)",
+            ref: "Monitoring with Grafana.pdf - Page 13"
+        },
+        {
+            q: "Trong Grafana, 'Dashboard' là gì?",
+            options: ["Một biểu đồ đơn lẻ", "Tập hợp các Panels được sắp xếp trong các Rows để hiển thị thông tin", "Trang quản trị", "Cơ sở dữ liệu"],
+            a: 1,
+            explain: "Dashboard chứa nhiều Panels được tổ chức trong các Rows",
+            ref: "Monitoring with Grafana.pdf - Page 23"
+        },
+        {
+            q: "Thành phần cơ bản nhất để hiển thị dữ liệu trong Grafana gọi là gì?",
+            options: ["Brick", "Panel", "Window", "View"],
+            a: 1,
+            explain: "Panel là khối xây dựng cơ bản của dashboard, chịu trách nhiệm vẽ biểu đồ",
+            ref: "Monitoring with Grafana.pdf - Page 23"
+        },
+        {
+            q: "'Graph Panel' dùng để hiển thị gì?",
+            options: ["Văn bản", "Dữ liệu chuỗi thời gian (Time series data) dưới dạng biểu đồ đường/cột", "Log file", "Danh sách user"],
+            a: 1,
+            explain: "Graph panel là panel phổ biến nhất để vẽ time series data",
+            ref: "Monitoring with Grafana.pdf - Page 25"
+        },
+        {
+            q: "'Singlestat Panel' (hoặc Stat Panel) dùng để làm gì?",
+            options: ["Hiển thị một giá trị tổng hợp đơn lẻ (ví dụ: tổng số request, uptime hiện tại)", "Hiển thị nhiều đường biểu đồ", "Hiển thị bản đồ", "Hiển thị log"],
+            a: 0,
+            explain: "Singlestat panel hiển thị một giá trị duy nhất (như current value, min, max)",
+            ref: "Monitoring with Grafana.pdf - Page 26"
+        },
+        {
+            q: "'Gauge Panel' mô phỏng cái gì?",
+            options: ["Đồng hồ đo tốc độ (speedometer)", "Biểu đồ tròn", "Bảng tính", "Văn bản"],
+            a: 0,
+            explain: "Gauge panel hiển thị giá trị giống như đồng hồ đo tốc độ xe",
+            ref: "Monitoring with Grafana.pdf - Page 27"
+        },
+        {
+            q: "'Heatmap Panel' hữu ích cho việc gì?",
+            options: ["Xem nhiệt độ CPU", "Hiển thị phân bố của dữ liệu theo thời gian (ví dụ: histogram buckets)", "Xem log", "Xem danh sách server"],
+            a: 1,
+            explain: "Heatmap panel tuyệt vời để hiển thị phân bố (histogram) theo thời gian",
+            ref: "Monitoring with Grafana.pdf - Page 30"
+        },
+
+        // --- PHẦN 5: GRAFANA ADVANCED FEATURES ---
+        {
+            category: "GRAFANA",
+            q: "Variables (Biến) trong Grafana dùng để làm gì?",
+            options: ["Lưu mật khẩu", "Tạo các dropdown menu trên dashboard để lọc dữ liệu động (ví dụ: chọn server, chọn vùng)", "Lập trình game", "Tăng tốc độ"],
+            a: 1,
+            explain: "Variables cho phép tạo dashboards tương tác và năng động hơn (templating)",
+            ref: "Monitoring with Grafana.pdf - Page 67"
+        },
+        {
+            q: "Annotations trong Grafana là gì?",
+            options: ["Ghi chú bên lề", "Đánh dấu các sự kiện quan trọng (ví dụ: deploy, error spike) trực tiếp trên biểu đồ", "Tên của panel", "Tiêu đề dashboard"],
+            a: 1,
+            explain: "Annotations hiển thị các sự kiện (events) đè lên các graph panel để tương quan dữ liệu",
+            ref: "Monitoring with Grafana.pdf - Page 71"
+        },
+        {
+            q: "Tính năng 'Query Inspector' giúp gì?",
+            options: ["Kiểm tra lỗi chính tả", "Xem request và response raw của truy vấn gửi đến data source để debug", "Quản lý user", "Tạo query tự động"],
+            a: 1,
+            explain: "Query Inspector giúp debug bằng cách hiển thị request và response JSON từ data source",
+            ref: "Monitoring with Grafana.pdf - Page 51"
+        },
+        {
+            q: "Transformations trong Grafana dùng để làm gì?",
+            options: ["Biến hình robot", "Chế biến/sửa đổi dữ liệu (ví dụ: rename field, calculate, merge) trước khi hiển thị mà không cần sửa query gốc", "Xóa dữ liệu", "Lưu dữ liệu"],
+            a: 1,
+            explain: "Transformations cho phép rename, combine, calculate trên dữ liệu query result trước khi render",
+            ref: "Monitoring with Grafana.pdf - Page 60"
+        },
+        {
+            q: "Notification Channels trong Grafana Alerting là gì?",
+            options: ["Kênh tivi", "Nơi gửi thông báo khi alert kích hoạt (ví dụ: Slack, Email, PagerDuty)", "Kênh chat nội bộ", "Cổng kết nối"],
+            a: 1,
+            explain: "Notification channels định nghĩa nơi gửi alert (Email, Slack, etc.)",
+            ref: "Monitoring with Grafana.pdf - Page 78"
+        },
+
+        // --- PHẦN 6: ADVANCED PROMETHEUS & BEST PRACTICES ---
+        {
+            category: "PROMETHEUS",
+            q: "Federation trong Prometheus dùng để làm gì?",
+            options: ["Kết nối các hành tinh", "Cho phép một Prometheus server scrape metrics từ một Prometheus server khác (mô hình phân cấp)", "Thay thế Alertmanager", "Bảo mật"],
+            a: 1,
+            explain: "Federation cho phép Prometheus server scrape dữ liệu từ server khác, dùng để scale hoặc gom dữ liệu phân cấp",
+            ref: "Prometheus.pdf - Page 25"
+        },
+        {
+            q: "Hierarchical Federation (Liên bang phân cấp) hữu ích khi nào?",
+            options: ["Khi muốn sao lưu dữ liệu", "Khi muốn scale Prometheus bằng cách chia nhỏ các Prometheus 'con' (slave) và một Prometheus 'tổng' (master) chỉ thu thập metrics tổng hợp", "Khi chỉ có 1 server", "Khi không có mạng"],
+            a: 1,
+            explain: "Hierarchical Federation dùng để scale, master prometheus chỉ scrape metrics quan trọng/tổng hợp từ slaves",
+            ref: "Prometheus.pdf - Page 26"
+        },
+        {
+            q: "Để chạy Prometheus ở chế độ High Availability (HA), cách đơn giản nhất là gì?",
+            options: ["Dùng cluster phức tạp", "Chạy hai server Prometheus giống hệt nhau, độc lập, cùng scrape các mục tiêu giống nhau", "Dùng RAID", "Không thể chạy HA"],
+            a: 1,
+            explain: "Cách đơn giản nhất là chạy 2 server Prometheus song song với cấu hình giống nhau (Duplicate data)",
+            ref: "Prometheus.pdf - Page 30"
+        },
+        {
+            q: "Prometheus có tích hợp sẵn xác thực (Authentication) và mã hóa (TLS) không?",
+            options: ["Có, mặc định bật", "Không, Prometheus không có auth/TLS tích hợp sẵn (cần dùng reverse proxy như Nginx hoặc cấu hình phức tạp)", "Chỉ có TLS", "Chỉ có Basic Auth"],
+            a: 1,
+            explain: "Prometheus không có native user auth, thường phải dùng reverse proxy hoặc trusted network để bảo mật",
+            ref: "Prometheus.pdf - Page 34"
+        },
+        {
+            q: "VictoriaMetrics hoặc InfluxDB thường được dùng kết hợp với Prometheus để làm gì?",
+            options: ["Thay thế Alertmanager", "Lưu trữ dữ liệu dài hạn (Long-term storage) vì Prometheus local storage có giới hạn", "Làm đẹp dashboard", "Tăng tốc độ query"],
+            a: 1,
+            explain: "InfluxDB hoặc VictoriaMetrics dùng để lưu trữ dữ liệu lâu dài (long term retention)",
+            ref: "Prometheus.pdf - Page 32"
+        },
+        {
+            q: "Best Practice: Khi thiết kế Dashboard, màu đỏ nên dùng cho cái gì?",
+            options: ["Mọi thứ", "Những thứ bình thường", "Những vấn đề nghiêm trọng cần chú ý (Critical things)", "Màu nền"],
+            a: 2,
+            explain: "Red indicates something bad, grabs attention, and should be used for critical things",
+            ref: "Monitoring with Grafana.pdf - Page 81"
+        },
+        {
+            q: "Best Practice: Về việc sử dụng màu sắc trong Dashboard?",
+            options: ["Dùng càng nhiều màu càng tốt", "Tránh lạm dụng màu sắc, màu sắc phải có ý nghĩa (ví dụ: Xanh = tốt, Đỏ = xấu)", "Luôn dùng màu ngẫu nhiên", "Chỉ dùng màu đen trắng"],
+            a: 1,
+            explain: "Avoid overusing colors. Colors have meaning (e.g., Traffic lights)",
+            ref: "Monitoring with Grafana.pdf - Page 81"
+        },
+
+        // --- CÁC CÂU HỎI BỔ SUNG ĐỂ ĐỦ 70 CÂU ---
+        {
+            category: "GRAFANA",
+            q: "Grafana Plugins bao gồm các loại nào?",
+            options: ["Data sources, Panels, Apps", "Input, Output, Filter", "Frontend, Backend, Database", "Themes, Icons, Fonts"],
+            a: 0,
+            explain: "Three types of plugins: Data sources, Panels, Apps",
+            ref: "Monitoring with Grafana.pdf - Page 86"
+        },
+        {
+            q: "Explore View trong Grafana dùng để làm gì?",
+            options: ["Duyệt web", "Truy vấn dữ liệu ngẫu nhiên (ad-hoc query) để debug mà không cần tạo Dashboard", "Quản lý file", "Xem log hệ thống OS"],
+            a: 1,
+            explain: "Explore view cho phép chạy ad-hoc queries để khám phá dữ liệu",
+            ref: "Monitoring with Grafana.pdf - Page 21"
+        },
+        {
+            q: "Để gộp các Panel liên quan lại với nhau trên Dashboard, ta dùng gì?",
+            options: ["Group", "Row", "Folder", "Section"],
+            a: 1,
+            explain: "Rows are logical dividers that group panels together",
+            ref: "Monitoring with Grafana.pdf - Page 24"
+        },
+        {
+            q: "Dashboard Links dùng để làm gì?",
+            options: ["Kết nối internet", "Tạo lối tắt (shortcut) đến các dashboard khác hoặc đường dẫn web bên ngoài", "Liên kết database", "Chia sẻ file"],
+            a: 1,
+            explain: "Dashboard links allow placing links to other dashboards or URLs at the top",
+            ref: "Monitoring with Grafana.pdf - Page 73"
+        },
+        {
+            q: "Panel Links (Data Links) cho phép làm gì?",
+            options: ["Kết nối dây mạng", "Khi click vào một điểm dữ liệu trên biểu đồ, nó sẽ dẫn đến một dashboard khác hoặc URL với ngữ cảnh (context) của điểm đó", "Tải dữ liệu", "Xóa panel"],
+            a: 1,
+            explain: "Panel links allow drilling down from a data point to another dashboard",
+            ref: "Monitoring with Grafana.pdf - Page 74"
+        },
+        {
+            q: "Grafana Alerting: State 'Pending' nghĩa là gì?",
+            options: ["Alert đã được gửi", "Alert bị lỗi", "Điều kiện alert đã thỏa mãn nhưng chưa đủ thời gian quy định (for duration)", "Alert đã tắt"],
+            a: 2,
+            explain: "Pending: Threshold met but not for long enough",
+            ref: "Monitoring with Grafana.pdf - Page 76"
+        },
+        {
+            q: "Grafana Alerting: State 'Alerting' nghĩa là gì?",
+            options: ["Hệ thống bình thường", "Điều kiện alert đã thỏa mãn đủ thời gian và thông báo đang được gửi", "Đang chờ xử lý", "Không có dữ liệu"],
+            a: 1,
+            explain: "Alerting: Threshold met for long enough, notification sent",
+            ref: "Monitoring with Grafana.pdf - Page 76"
+        },
+        {
+            q: "Cấu trúc thư mục (Folders) trong Grafana giúp ích gì?",
+            options: ["Tăng dung lượng", "Tổ chức và quản lý quyền truy cập (permissions) cho các Dashboards", "Lưu trữ log", "Chứa plugins"],
+            a: 1,
+            explain: "Folders allow organizing dashboards and managing permissions",
+            ref: "Monitoring with Grafana.pdf - Page 64"
+        },
+
+        // --- CÁC CÂU HỎI BỔ SUNG PROMETHEUS ---
+        {
+            category: "PROMETHEUS",
+            q: "Metric `up` trong Prometheus có ý nghĩa gì?",
+            options: ["Server đang khởi động", "Giá trị 1 nghĩa là target đang hoạt động (scrape thành công), 0 nghĩa là down", "Thời gian uptime", "Số lượng request"],
+            a: 1,
+            explain: "`up` là metric tự động: 1 = success, 0 = fail [Common Prometheus Knowledge]",
+            ref: "Monitoring With Prometheus .pdf (Implicit)"
+        },
+        {
+            q: "cAdvisor là công cụ dùng để làm gì?",
+            options: ["Tư vấn viên", "Exporter của Google để giám sát metrics của Docker Containers", "Quản lý Kubernetes", "Database"],
+            a: 1,
+            explain: "cAdvisor monitors and records metrics relating to docker/containers",
+            ref: "Prometheus.pdf - Page 32"
+        },
+        {
+            q: "Trong PromQL, 'Instant Vector' là gì?",
+            options: ["Một giá trị duy nhất tại thời điểm hiện tại cho mỗi time series", "Một dải giá trị theo thời gian", "Một vector vẽ hình", "Một lỗi"],
+            a: 0,
+            explain: "Instant vector: a set of time series containing a single sample for each time series",
+            ref: "Monitoring With Prometheus .pdf - Page 34"
+        },
+        {
+            q: "Trong PromQL, 'Range Vector' là gì?",
+            options: ["Một giá trị duy nhất", "Một tập hợp các giá trị mẫu trong một khoảng thời gian (ví dụ: [5m])", "Vector khoảng cách", "Vector 3 chiều"],
+            a: 1,
+            explain: "Range vector: a set of time series containing a range of data points over time",
+            ref: "Monitoring With Prometheus .pdf - Page 35"
+        },
+        {
+            q: "Cú pháp `[5m]` trong PromQL biểu thị điều gì?",
+            options: ["5 mét", "Khoảng thời gian 5 phút (Time duration)", "5 megabytes", "5 months"],
+            a: 1,
+            explain: "Duration specifier: s - seconds, m - minutes, h - hours",
+            ref: "Monitoring With Prometheus .pdf - Page 35"
+        },
+        {
+            q: "Toán tử `by` trong PromQL dùng để làm gì?",
+            options: ["Chia dữ liệu", "Gom nhóm (Group by) các kết quả tổng hợp theo label cụ thể (ví dụ: sum by (job))", "Sắp xếp", "Lọc dữ liệu"],
+            a: 1,
+            explain: "Aggregation operators like `sum` can be grouped `by` labels",
+            ref: "Monitoring With Prometheus .pdf - Page 41"
+        },
+        {
+            q: "Client Library của Prometheus hỗ trợ ngôn ngữ nào?",
+            options: ["Chỉ Go", "Chỉ Java", "Hầu hết các ngôn ngữ phổ biến (Go, Java, Python, Ruby...)", "Không hỗ trợ"],
+            a: 2,
+            explain: "Prometheus có client libraries cho nhiều ngôn ngữ",
+            ref: "Monitoring With Prometheus .pdf - Page 46"
+        },
+        {
+            q: "Decorator `@INPROGRESS.track_inprogress()` trong Python client dùng cho metric loại nào?",
+            options: ["Counter", "Gauge", "Histogram", "Summary"],
+            a: 1,
+            explain: "Gauge tracks values that go up and down, like in-progress requests",
+            ref: "Monitoring With Prometheus .pdf - Page 50"
+        },
+        {
+            q: "Decorator `@LATENCY.time()` trong Python client dùng để đo lường gì?",
+            options: ["Đếm số request", "Đo thời gian thực thi (Latency/Duration) và ghi vào Histogram/Summary", "Đo RAM", "Đo CPU"],
+            a: 1,
+            explain: "Histogram timer decorator measures duration",
+            ref: "Monitoring With Prometheus .pdf - Page 51"
+        },
+        {
+            q: "Cross-service federation là gì?",
+            options: ["Kết nối các dịch vụ", "Một Prometheus server scrape các metrics được chọn lọc từ server khác để có cái nhìn tổng quan", "Backup dữ liệu", "Chia sẻ cấu hình"],
+            a: 1,
+            explain: "Cross-service federation allows enabling alerting on aggregated data from different services",
+            ref: "Prometheus.pdf - Page 27"
+        },
+        {
+            q: "Dữ liệu trong Prometheus được lưu giữ trong bao lâu mặc định?",
+            options: ["Mãi mãi", "15 ngày (thường là mặc định, có thể cấu hình)", "1 năm", "1 giờ"],
+            a: 1,
+            explain: "Prometheus local storage is not for long term (default 15 days usually)",
+            ref: "Prometheus.pdf - Page 32"
+        },
+        {
+            q: "Tại sao `pull` model được cho là dễ scale hơn `push` trong một số trường hợp?",
+            options: ["Vì nó chậm hơn", "Prometheus server kiểm soát tốc độ scrape, tránh bị quá tải bởi traffic từ hàng nghìn client push cùng lúc", "Vì nó dùng ít RAM", "Vì nó bảo mật hơn"],
+            a: 1,
+            explain: "Pull scales better because the server decides when to pull, avoiding DDOS from push agents",
+            ref: "Monitoring With Prometheus .pdf - Page 6"
+        },
+        {
+            q: "Nagios thuộc thế hệ monitoring nào so với Prometheus?",
+            options: ["Mới hơn", "Cũ hơn (Check-based monitoring)", "Cùng thời", "Nagios là Prometheus"],
+            a: 1,
+            explain: "Nagios is mentioned as a traditional check-based system vs Prometheus metric-based",
+            ref: "Monitoring With Prometheus .pdf - Page 6"
+        },
+        {
+            q: "Metric `process_resident_memory_bytes` đo lường cái gì?",
+            options: ["Dung lượng ổ cứng", "Bộ nhớ RAM thực tế (RSS) mà process đang sử dụng", "Bộ nhớ ảo", "Cache"],
+            a: 1,
+            explain: "Đây là metric tiêu chuẩn của client library đo RAM usage [Common Knowledge/Context]",
+            ref: "Monitoring With Prometheus .pdf - Page 25 (Gauge example)"
+        },
+        {
+            q: "Trong Grafana, `Table Panel` phù hợp nhất để hiển thị gì?",
+            options: ["Biểu đồ đường", "Danh sách chi tiết các bản ghi, logs hoặc thông tin dạng bảng", "Bản đồ nhiệt", "Đồng hồ"],
+            a: 1,
+            explain: "Table panel displays data in a table format",
+            ref: "Monitoring with Grafana.pdf - Page 29"
+        },
+        {
+            q: "Bar Gauge Panel khác gì với Gauge Panel?",
+            options: ["Giống hệt nhau", "Hiển thị giá trị dưới dạng thanh (bar) ngang hoặc dọc thay vì đồng hồ tròn", "Hiển thị văn bản", "Hiển thị video"],
+            a: 1,
+            explain: "Bar Gauge displays values as bars (horizontal/vertical)",
+            ref: "Monitoring with Grafana.pdf - Page 28"
+        },
+        {
+            q: "Logs Panel trong Grafana dùng để làm gì?",
+            options: ["Viết nhật ký", "Xem và tìm kiếm logs từ các data source như Loki hoặc Elasticsearch", "Xem metrics", "Vẽ biểu đồ"],
+            a: 1,
+            explain: "Logs panel allows viewing and searching logs",
+            ref: "Monitoring with Grafana.pdf - Page 31"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const sectionTagEl = document.getElementById('section-tag');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        // Update Tag Color
+        let tagClass = 'tag-concept';
+        if (qData.category === 'GRAFANA') tagClass = 'tag-grafana';
+        if (qData.category === 'PROMETHEUS') tagClass = 'tag-prometheus';
+        
+        sectionTagEl.textContent = qData.category;
+        sectionTagEl.className = `section-tag ${tagClass}`;
+
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Load saved state
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
