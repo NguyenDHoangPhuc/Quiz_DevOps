@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm ArgoCD (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 850px;
+            padding: 35px;
+            overflow: hidden;
+            border-top: 6px solid #0D9099; /* ArgoCD Teal */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 26px;
+            color: #0D9099;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .section-tag {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+            background-color: #EF7B4D; /* ArgoCD Orange */
+            text-transform: uppercase;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            color: #444;
+        }
+        .option-item:hover {
+            background-color: #f0fdfe;
+            border-color: #0D9099;
+        }
+        .option-item.correct {
+            background-color: #dff6dd;
+            border-color: #107c10;
+            color: #107c10;
+        }
+        .option-item.wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.5;
+        }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+            background-color: #f8f9fa;
+            border-left: 5px solid #ccc;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            border-left-color: #107c10;
+            background-color: #f0fff4;
+        }
+        .feedback-wrong {
+            border-left-color: #a80000;
+            background-color: #fff5f5;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+            line-height: 1.5;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: block;
+            color: #666;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 35px;
+        }
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+        .btn-prev:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #adb5bd;
+        }
+        .btn-next {
+            background-color: #0D9099;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #087077;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #0D9099;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>ArgoCD Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span id="section-tag" class="section-tag">GITOPS & BASICS</span>
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Quay lại</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- PHẦN 1: GITOPS & ARGOCD BASICS ---
+        {
+            category: "GITOPS & BASICS",
+            q: "Nguyên lý cốt lõi của GitOps là gì?",
+            options: ["Sử dụng Jenkins để deploy", "Sử dụng Git làm 'nguồn sự thật duy nhất' (single source of truth) cho hạ tầng và ứng dụng", "Chỉ sử dụng Docker container", "Viết code bằng Python"],
+            a: 1,
+            explain: "GitOps sử dụng Git repository làm nguồn sự thật duy nhất cho định nghĩa hạ tầng và ứng dụng.",
+            ref: "ArgoCD.pdf - Page 22"
+        },
+        {
+            q: "Mô hình triển khai (Deployment Model) nào mà ArgoCD sử dụng?",
+            options: ["Push Model", "Pull Model", "Manual Model", "Hybrid Model"],
+            a: 1,
+            explain: "ArgoCD là công cụ GitOps-based CD sử dụng thiết kế Pull Model, tự động kéo thay đổi từ Git về Cluster.",
+            ref: "ArgoCD.pdf - Page 13"
+        },
+        {
+            q: "Lợi ích về bảo mật (Security) của GitOps Pull Model so với Push Model là gì?",
+            options: ["Không cần mật khẩu", "Cluster không cần mở kết nối inbound cho hệ thống CI/CD, hệ thống CD nằm trong cluster và pull changes", "Sử dụng blockchain", "Mã hóa toàn bộ dữ liệu"],
+            a: 1,
+            explain: "Trong Pull Model, ArgoCD nằm trong cluster, không cần mở quyền truy cập (kubectl/kubeconfig) cho hệ thống CI bên ngoài.",
+            ref: "ArgoCD.pdf - Page 18-19"
+        },
+        {
+            q: "ArgoCD là gì?",
+            options: ["Một công cụ CI (Continuous Integration)", "Một công cụ CD (Continuous Delivery) theo phong cách GitOps dành cho Kubernetes", "Một hệ điều hành", "Một Database"],
+            a: 1,
+            explain: "ArgoCD là công cụ GitOps continuous delivery cho Kubernetes. Nó không phải là CI tool.",
+            ref: "ArgoCD.pdf - Page 15-16"
+        },
+        {
+            q: "ArgoCD thực hiện việc 'Sync' như thế nào?",
+            options: ["Tải code lên Git", "Biến trạng thái mong muốn (Desired State trong Git) thành trạng thái thực tế (Actual State trong Cluster)", "Xóa cluster", "Backup dữ liệu"],
+            a: 1,
+            explain: "Sync là quá trình làm cho Actual State khớp với Desired State được định nghĩa trong Git.",
+            ref: "ArgoCD.pdf - Page 34"
+        },
+        {
+            q: "Trạng thái 'OutOfSync' nghĩa là gì?",
+            options: ["Ứng dụng đã bị xóa", "Có sự khác biệt giữa trạng thái mong muốn trong Git và trạng thái thực tế trong Cluster", "ArgoCD bị lỗi", "Mạng bị ngắt"],
+            a: 1,
+            explain: "OutOfSync xảy ra khi ArgoCD phát hiện sự khác biệt (diff) giữa Git và Live state.",
+            ref: "ArgoCD.pdf - Page 20"
+        },
+        {
+            q: "Tại sao rollback trong GitOps lại dễ dàng?",
+            options: ["Vì có nút Undo", "Chỉ cần dùng lệnh `git revert` để quay lại phiên bản commit trước đó trong Git", "ArgoCD tự động backup mỗi giờ", "Không thể rollback"],
+            a: 1,
+            explain: "Rollback đơn giản bằng cách revert commit trong Git, ArgoCD sẽ tự động sync lại trạng thái cũ.",
+            ref: "ArgoCD.pdf - Page 10"
+        },
+        {
+            q: "Theo tài liệu, đâu là một 'bad practice' (thực hành xấu) khi triển khai ứng dụng?",
+            options: ["Sử dụng Git", "Tạo và cấu hình tài nguyên thủ công (Manually creating resources)", "Sử dụng Docker", "Sử dụng CI/CD"],
+            a: 1,
+            explain: "Tạo tài nguyên thủ công khiến việc tái tạo môi trường trở nên khó khăn và không đồng nhất.",
+            ref: "ArgoCD.pdf - Page 6"
+        },
+
+        // --- PHẦN 2: ARCHITECTURE & COMPONENTS ---
+        {
+            category: "ARCHITECTURE",
+            q: "Ba thành phần chính của ArgoCD là gì?",
+            options: ["API Server, Database, Agent", "ArgoCD Server, Repo Server, Application Controller", "Master, Worker, Etcd", "GitLab, Jenkins, Docker"],
+            a: 1,
+            explain: "ArgoCD gồm 3 thành phần chính: Server (API/UI), Repo Server, và Application Controller.",
+            ref: "ArgoCD.pdf - Page 24"
+        },
+        {
+            q: "Vai trò của 'Repo Server' là gì?",
+            options: ["Lưu trữ database", "Clone git repo và tạo ra (generate) các Kubernetes manifests (YAML)", "Điều khiển cluster", "Gửi email"],
+            a: 1,
+            explain: "Repo Server là internal service chịu trách nhiệm clone git repo và generate k8s manifests.",
+            ref: "ArgoCD.pdf - Page 26"
+        },
+        {
+            q: "Vai trò của 'Application Controller' là gì?",
+            options: ["Giao diện web", "Kubernetes controller giám sát ứng dụng đang chạy và so sánh trạng thái thực tế với trạng thái đích", "Lưu trữ log", "Quản lý user"],
+            a: 1,
+            explain: "Application Controller liên tục monitor và so sánh live state với target state, phát hiện OutOfSync.",
+            ref: "ArgoCD.pdf - Page 27"
+        },
+        {
+            q: "ArgoCD sử dụng thành phần nào để lưu trữ cache?",
+            options: ["MySQL", "Redis", "MongoDB", "PostgreSQL"],
+            a: 1,
+            explain: "Redis được sử dụng để caching trong kiến trúc ArgoCD.",
+            ref: "ArgoCD.pdf - Page 28"
+        },
+        {
+            q: "Thành phần 'Dex' trong ArgoCD dùng để làm gì?",
+            options: ["Quản lý database", "Identity service để tích hợp với các External Identity Providers (OIDC, SAML...)", "Build docker image", "Test code"],
+            a: 1,
+            explain: "Dex là identity service để tích hợp xác thực với bên thứ 3.",
+            ref: "ArgoCD.pdf - Page 28"
+        },
+        {
+            q: "ArgoCD Server (API Server) giao tiếp thông qua giao thức nào?",
+            options: ["FTP", "gRPC/REST", "SSH", "Telnet"],
+            a: 1,
+            explain: "ArgoCD Server là gRPC/REST server cung cấp API cho Web UI và CLI.",
+            ref: "ArgoCD.pdf - Page 25"
+        },
+        {
+            q: "Để cài đặt ArgoCD ở chế độ High Availability (HA), bạn cần tối thiểu bao nhiêu worker node?",
+            options: ["1", "2", "3", "5"],
+            a: 2,
+            explain: "HA setup khuyến nghị tối thiểu 3 worker nodes.",
+            ref: "ArgoCD.pdf - Page 38"
+        },
+
+        // --- PHẦN 3: APPLICATION & SOURCE ---
+        {
+            category: "APPLICATION & SOURCE",
+            q: "Một 'Application' trong ArgoCD được định nghĩa bởi hai thông tin chính nào?",
+            options: ["User & Password", "Source (Git repo) & Destination (Cluster/Namespace)", "Image & Tag", "CPU & RAM"],
+            a: 1,
+            explain: "Application được định nghĩa bởi Source (Git repo path) và Destination (Cluster/Namespace).",
+            ref: "ArgoCD.pdf - Page 30"
+        },
+        {
+            q: "Công cụ nào sau đây KHÔNG được ArgoCD hỗ trợ làm source mặc định?",
+            options: ["Helm Charts", "Kustomize", "Terraform", "Jsonnet"],
+            a: 2,
+            explain: "ArgoCD hỗ trợ Helm, Kustomize, Directory of YAMLs, Jsonnet. Terraform không được hỗ trợ native.",
+            ref: "ArgoCD.pdf - Page 31"
+        },
+        {
+            q: "Làm thế nào ArgoCD tự động phát hiện source là 'Helm'?",
+            options: ["Nếu có file Chart.yaml", "Nếu có file kustomization.yaml", "Nếu có file main.jsonnet", "Luôn phải chỉ định thủ công"],
+            a: 0,
+            explain: "Nếu thư mục chứa file `Chart.yaml`, ArgoCD tự động nhận diện là Helm.",
+            ref: "ArgoCD.pdf - Page 67"
+        },
+        {
+            q: "Trong Helm Application, tham số `valuesFiles` dùng để làm gì?",
+            options: ["Chứa code", "Chỉ định file values.yaml tùy chỉnh (ví dụ: values-prod.yaml)", "Lưu mật khẩu", "Đặt tên release"],
+            a: 1,
+            explain: "`valuesFiles` cho phép override values mặc định bằng các file values cụ thể.",
+            ref: "ArgoCD.pdf - Page 75"
+        },
+        {
+            q: "Với Kustomize, tùy chọn `namePrefix` dùng để làm gì?",
+            options: ["Xóa tên resource", "Thêm tiền tố vào tên tất cả các resources được tạo ra", "Đổi tên namespace", "Thêm hậu tố"],
+            a: 1,
+            explain: "`namePrefix` thêm tiền tố vào resource names (ví dụ: `staging-`).",
+            ref: "ArgoCD.pdf - Page 88"
+        },
+        {
+            q: "Khi dùng Directory source, tùy chọn `recurse: true` có ý nghĩa gì?",
+            options: ["Xóa thư mục", "Bao gồm tất cả các file trong các thư mục con (sub-directories)", "Chỉ đọc file gốc", "Chạy đệ quy vô hạn"],
+            a: 1,
+            explain: "`recurse: true` giúp ArgoCD đọc manifest trong cả các thư mục con.",
+            ref: "ArgoCD.pdf - Page 82"
+        },
+        {
+            q: "Helm Charts có thể được deploy từ nguồn nào?",
+            options: ["Chỉ Git Repo", "Chỉ Helm Repo", "Cả Git Repo và Helm Repo", "Docker Hub"],
+            a: 2,
+            explain: "Helm application có thể deploy từ Git Repo chứa chart hoặc từ Helm Repository.",
+            ref: "ArgoCD.pdf - Page 70"
+        },
+
+        // --- PHẦN 4: PROJECTS & SECURITY ---
+        {
+            category: "PROJECTS & SECURITY",
+            q: "Khái niệm 'Project' trong ArgoCD dùng để làm gì?",
+            options: ["Quản lý code", "Nhóm các Application lại với nhau một cách logic và quản lý quyền truy cập (Access Restrictions)", "Tạo container", "Build ứng dụng"],
+            a: 1,
+            explain: "Project cung cấp logical grouping cho applications và thiết lập các giới hạn truy cập (source repos, destinations, resource whitelist).",
+            ref: "ArgoCD.pdf - Page 32"
+        },
+        {
+            q: "Bạn có thể giới hạn Application chỉ được deploy vào một Namespace cụ thể thông qua đâu?",
+            options: ["Application Manifest", "Project configuration (destinations)", "Git Repo", "Helm Chart"],
+            a: 1,
+            explain: "Trong Project, bạn cấu hình `destinations` để whitelist các server và namespace được phép deploy.",
+            ref: "ArgoCD.pdf - Page 97"
+        },
+        {
+            q: "Để cấp quyền cho một hệ thống CI thực hiện sync, bạn nên dùng tính năng nào?",
+            options: ["Chia sẻ mật khẩu admin", "Project Roles và tạo JWT Token", "Tạo user mới trên Linux", "Mở cổng firewall"],
+            a: 1,
+            explain: "Project Roles cho phép tạo role với policy cụ thể và generate JWT token cho CI system sử dụng.",
+            ref: "ArgoCD.pdf - Page 98"
+        },
+        {
+            q: "Mặc định, khi cài đặt ArgoCD, project nào được tạo sẵn?",
+            options: ["system", "admin", "default", "public"],
+            a: 2,
+            explain: "ArgoCD tạo sẵn `default` project khi cài đặt.",
+            ref: "ArgoCD.pdf - Page 99"
+        },
+        {
+            q: "Credentials của Private Git Repo được lưu trữ ở đâu trong Kubernetes?",
+            options: ["Trong ConfigMap", "Trong Secret (k8s secret)", "Trong Pod", "Trong file text"],
+            a: 1,
+            explain: "Credentials của Private repos được lưu trong k8s secrets với label `argocd.argoproj.io/secret-type: repository`.",
+            ref: "ArgoCD.pdf - Page 131"
+        },
+        {
+            q: "Credential Templates dùng để làm gì?",
+            options: ["Tạo mật khẩu ngẫu nhiên", "Sử dụng chung một bộ credential cho nhiều repositories có cùng prefix URL (ví dụ cùng tổ chức GitHub)", "Lưu template HTML", "Xóa credential"],
+            a: 1,
+            explain: "Credential Templates giúp chia sẻ credential cho nhiều repos matching prefix URL.",
+            ref: "ArgoCD.pdf - Page 151"
+        },
+
+        // --- PHẦN 5: SYNC POLICIES & STRATEGIES ---
+        {
+            category: "SYNC POLICIES",
+            q: "Mặc định, ArgoCD kiểm tra thay đổi trên Git bao lâu một lần?",
+            options: ["1 phút", "3 phút", "5 phút", "10 phút"],
+            a: 1,
+            explain: "ArgoCD polls Git repositories mỗi 3 phút để phát hiện thay đổi.",
+            ref: "ArgoCD.pdf - Page 158"
+        },
+        {
+            q: "Tính năng 'Automated Sync' làm gì?",
+            options: ["Tự động commit code", "Tự động sync khi phát hiện sự khác biệt giữa Git và Cluster (OutOfSync)", "Tự động restart server", "Tự động gửi email"],
+            a: 1,
+            explain: "Automated Sync tự động apply thay đổi khi phát hiện trạng thái OutOfSync.",
+            ref: "ArgoCD.pdf - Page 159"
+        },
+        {
+            q: "Tùy chọn 'Prune' trong Automated Sync có tác dụng gì?",
+            options: ["Tự động xóa các tài nguyên trong Cluster nếu chúng không còn tồn tại trong Git", "Xóa toàn bộ database", "Dọn dẹp log", "Tăng tốc độ sync"],
+            a: 0,
+            explain: "Prune cho phép ArgoCD xóa các resource trong cluster nếu file manifest của nó đã bị xóa khỏi Git.",
+            ref: "ArgoCD.pdf - Page 168"
+        },
+        {
+            q: "Tính năng 'Self Heal' giải quyết vấn đề gì?",
+            options: ["Tự động sửa lỗi code", "Tự động khôi phục trạng thái nếu ai đó thay đổi trực tiếp (manual change) trên Cluster (drift detection)", "Tự động restart pod khi crash", "Tự động scale"],
+            a: 1,
+            explain: "Self Heal phát hiện thay đổi trực tiếp trên cluster (live state deviation) và tự động sync lại theo Git.",
+            ref: "ArgoCD.pdf - Page 176"
+        },
+        {
+            q: "Tùy chọn Sync `ApplyOutOfSyncOnly=true` (Selective Sync) dùng để làm gì?",
+            options: ["Chỉ sync những resource đang bị OutOfSync thay vì apply toàn bộ", "Chỉ sync khi có lỗi", "Chỉ sync file YAML", "Tắt sync"],
+            a: 0,
+            explain: "Selective Sync chỉ apply các resource bị thay đổi, giúp giảm tải cho API server khi có hàng nghìn resource.",
+            ref: "ArgoCD.pdf - Page 191"
+        },
+        {
+            q: "Tùy chọn `Prune=false` (No Prune) dùng để làm gì?",
+            options: ["Luôn xóa resource", "Ngăn chặn việc xóa resource ngay cả khi nó không còn trong Git", "Xóa resource nhanh hơn", "Chỉ xóa Pod"],
+            a: 1,
+            explain: "No Prune ngăn resource bị xóa (pruned) dù app đang OutOfSync do mất file trong Git.",
+            ref: "ArgoCD.pdf - Page 186"
+        },
+        {
+            q: "Tùy chọn `Replace=true` dùng khi nào?",
+            options: ["Khi muốn đổi tên app", "Khi resource cần được xóa và tạo lại (Recreate) thay vì `kubectl apply` (ví dụ: thay đổi trường immutable)", "Khi muốn copy app", "Khi muốn backup"],
+            a: 1,
+            explain: "Replace dùng để xóa và tạo lại resource khi không thể update bằng apply.",
+            ref: "ArgoCD.pdf - Page 198"
+        },
+        {
+            q: "`FailOnSharedResource=true` giúp ngăn chặn điều gì?",
+            options: ["Chia sẻ file", "Ngăn chặn việc ArgoCD quản lý một resource đã thuộc về một Application khác (tránh conflict)", "Ngăn chặn user login", "Ngăn chặn tạo project"],
+            a: 1,
+            explain: "FailOnSharedResource ngăn sync nếu resource đó đã được quản lý bởi một Application khác.",
+            ref: "ArgoCD.pdf - Page 202"
+        },
+
+        // --- PHẦN 6: ADVANCED FEATURES (HOOKS, WAVES, DIFFING) ---
+        {
+            category: "ADVANCED FEATURES",
+            q: "Resource Hook `PreSync` chạy khi nào?",
+            options: ["Sau khi sync xong", "Trước khi apply các manifest chính của ứng dụng", "Khi sync thất bại", "Bất cứ lúc nào"],
+            a: 1,
+            explain: "PreSync hook chạy trước khi application manifests được apply (ví dụ: database migration).",
+            ref: "ArgoCD.pdf - Page 256"
+        },
+        {
+            q: "Resource Hook `PostSync` chạy khi nào?",
+            options: ["Trước khi sync", "Sau khi tất cả Sync hooks và application manifests đã apply thành công", "Khi xóa app", "Khi tạo app"],
+            a: 1,
+            explain: "PostSync chạy sau khi sync thành công (ví dụ: gửi notification, health check).",
+            ref: "ArgoCD.pdf - Page 256"
+        },
+        {
+            q: "Sync Waves dùng để làm gì?",
+            options: ["Tạo sóng biển", "Sắp xếp thứ tự apply các resource (Order of execution)", "Tăng tốc độ sync", "Mã hóa dữ liệu"],
+            a: 1,
+            explain: "Sync Waves (dùng annotation `sync-wave`) giúp sắp xếp thứ tự apply resource. Wave thấp chạy trước.",
+            ref: "ArgoCD.pdf - Page 264"
+        },
+        {
+            q: "Giá trị Sync Wave mặc định là bao nhiêu?",
+            options: ["-1", "0", "1", "100"],
+            a: 1,
+            explain: "Mặc định tất cả manifest có wave là 0.",
+            ref: "ArgoCD.pdf - Page 265"
+        },
+        {
+            q: "Tính năng 'Ignore Differences' (Diffing Customization) dùng để làm gì?",
+            options: ["Bỏ qua lỗi sync", "Cấu hình ArgoCD bỏ qua sự khác biệt ở một số trường cụ thể (ví dụ: `replicas` do HPA quản lý)", "Xóa resource", "Tắt ArgoCD"],
+            a: 1,
+            explain: "Ignore Differences giúp bỏ qua diff ở các field hay bị thay đổi bởi controller khác (như HPA đổi replicas) để tránh OutOfSync giả.",
+            ref: "ArgoCD.pdf - Page 237"
+        },
+        {
+            q: "Để theo dõi một Helm Chart version cụ thể (ví dụ: 1.16.1), bạn cấu hình `targetRevision` như thế nào?",
+            options: ["HEAD", "master", "1.16.1", "latest"],
+            a: 2,
+            explain: "Với Helm, `targetRevision` chính là version của chart.",
+            ref: "ArgoCD.pdf - Page 224"
+        },
+        {
+            q: "Để theo dõi phiên bản mới nhất (Latest) của Helm Chart, bạn đặt `targetRevision` là gì?",
+            options: ["latest", "HEAD", "*", "0.0.0"],
+            a: 2,
+            explain: "Sử dụng ký tự `*` để track phiên bản mới nhất của Helm chart.",
+            ref: "ArgoCD.pdf - Page 225"
+        },
+
+        // --- PHẦN 7: APPLICATIONSET & BEST PRACTICES ---
+        {
+            category: "APPLICATIONSET & BEST PRACTICES",
+            q: "ApplicationSet dùng để làm gì?",
+            options: ["Tạo một app duy nhất", "Tự động hóa việc sinh ra (generate) nhiều ArgoCD Applications (ví dụ: deploy cùng app lên nhiều cluster)", "Thay thế Kubernetes", "Quản lý user"],
+            a: 1,
+            explain: "ApplicationSet tự động generate applications dựa trên generators, hỗ trợ multitenancy và multi-cluster management.",
+            ref: "ArgoCD.pdf - Page 284"
+        },
+        {
+            q: "Loại Generator nào cho phép tạo app dựa trên danh sách các cluster đã add vào ArgoCD?",
+            options: ["List Generator", "Cluster Generator", "Git Generator", "Merge Generator"],
+            a: 1,
+            explain: "Cluster Generator tạo app cho mỗi cluster được quản lý bởi ArgoCD.",
+            ref: "ArgoCD.pdf - Page 298"
+        },
+        {
+            q: "Loại Generator nào tạo app dựa trên cấu trúc thư mục trong Git repo?",
+            options: ["List Generator", "Cluster Generator", "Git Generator (Directory)", "Pull Request Generator"],
+            a: 2,
+            explain: "Git Directory Generator quét cấu trúc thư mục git và tạo app tương ứng.",
+            ref: "ArgoCD.pdf - Page 305"
+        },
+        {
+            q: "Mô hình 'App of Apps' là gì?",
+            options: ["Một app chứa nhiều container", "Một ArgoCD Application 'gốc' có nhiệm vụ quản lý và tạo ra các ArgoCD Applications khác", "App chạy trên điện thoại", "App quản lý database"],
+            a: 1,
+            explain: "App of Apps pattern dùng một root app để trỏ tới thư mục chứa manifest của các apps khác, giúp quản lý đồng loạt.",
+            ref: "ArgoCD.pdf - Page 356"
+        },
+        {
+            q: "Best Practice: Tại sao nên tách biệt App Code Repo và App Config Repo?",
+            options: ["Để code đẹp hơn", "Để lịch sử Git sạch hơn, tách biệt quyền truy cập (Dev vs Ops), và giảm tải cho CI/CD", "Bắt buộc phải làm thế", "Để tăng dung lượng"],
+            a: 1,
+            explain: "Tách repo giúp Git history rõ ràng, phân quyền access tốt hơn và giảm overhead.",
+            ref: "ArgoCD.pdf - Page 342"
+        },
+        {
+            q: "Best Practice: Nên quản lý Secrets như thế nào trong GitOps?",
+            options: ["Lưu plain text trong Git", "Không lưu trong Git mà dùng các giải pháp như Sealed Secrets, Vault, hoặc External Secrets", "Gửi qua email", "Lưu trong Docker image"],
+            a: 1,
+            explain: "Không bao giờ lưu plain secrets trong Git. Dùng Sealed Secrets, SOPS, Vault hoặc External Secrets.",
+            ref: "ArgoCD.pdf - Page 370"
+        },
+        {
+            q: "Nếu sử dụng HPA (Horizontal Pod Autoscaler), bạn KHÔNG nên làm gì?",
+            options: ["Sử dụng ArgoCD", "Định nghĩa trường `replicas` trong Git manifest của Deployment", "Sử dụng Kubernetes", "Sử dụng Helm"],
+            a: 1,
+            explain: "Nếu dùng HPA, không nên hardcode `replicas` trong Git vì sẽ gây xung đột (thrashing) giữa HPA và ArgoCD.",
+            ref: "ArgoCD.pdf - Page 369"
+        },
+        {
+            q: "Best Practice: Nên sử dụng 'Immutable tags' (ví dụ: v1.0.1) thay vì 'latest' hoặc 'HEAD' cho Production vì sao?",
+            options: ["Để biết chính xác phiên bản nào đang chạy và đảm bảo tính nhất quán (reproducibility)", "Để chạy nhanh hơn", "Để tiết kiệm dung lượng", "Vì ArgoCD yêu cầu"],
+            a: 0,
+            explain: "Sử dụng immutable tags hoặc commit SHA đảm bảo bạn biết chính xác phiên bản nào đang chạy và tránh thay đổi ngầm.",
+            ref: "ArgoCD.pdf - Page 368"
+        },
+
+        // --- CÁC CÂU HỎI BỔ SUNG (CHO ĐỦ 70 CÂU) ---
+        {
+            category: "ADDITIONAL",
+            q: "Lệnh CLI để login vào ArgoCD là gì?",
+            options: ["argocd signin", "argocd login <SERVER>", "argocd connect", "kubectl login"],
+            a: 1,
+            explain: "`argocd login <ARGOCD_SERVER>` dùng để đăng nhập.",
+            ref: "ArgoCD.pdf - Page 60"
+        },
+        {
+            q: "Lệnh CLI để thêm một cluster mới vào ArgoCD là gì?",
+            options: ["argocd cluster add <CONTEXT>", "argocd add cluster", "kubectl apply cluster", "argocd cluster create"],
+            a: 0,
+            explain: "`argocd cluster add <context>` thêm cluster từ kubeconfig hiện tại vào ArgoCD.",
+            ref: "ArgoCD.pdf - Page 281"
+        },
+        {
+            q: "Lệnh CLI để tạo một ứng dụng mới?",
+            options: ["argocd create app", "argocd app create <APP_NAME> ...", "argocd new app", "kubectl create app"],
+            a: 1,
+            explain: "`argocd app create` là lệnh tạo app qua CLI.",
+            ref: "ArgoCD.pdf - Page 67"
+        },
+        {
+            q: "Để expose ArgoCD Server ra ngoài bằng Service, kiểu Service nào thường dùng (trên Cloud)?",
+            options: ["ClusterIP", "LoadBalancer", "ExternalName", "Headless"],
+            a: 1,
+            explain: "Thay đổi service type thành LoadBalancer để expose server.",
+            ref: "ArgoCD.pdf - Page 53"
+        },
+        {
+            q: "Port-forwarding để truy cập ArgoCD UI cục bộ dùng lệnh nào?",
+            options: ["kubectl port-forward svc/argocd-server -n argocd 8080:443", "kubectl proxy", "docker run", "argocd proxy"],
+            a: 0,
+            explain: "Sử dụng `kubectl port-forward` để map port local vào service argocd-server.",
+            ref: "ArgoCD.pdf - Page 54"
+        },
+        {
+            q: "Mật khẩu admin mặc định ban đầu được lưu ở đâu?",
+            options: ["Trong log", "Trong Secret `argocd-initial-admin-secret`", "Trong ConfigMap", "Không có mật khẩu"],
+            a: 1,
+            explain: "Mật khẩu ban đầu nằm trong secret `argocd-initial-admin-secret`.",
+            ref: "ArgoCD.pdf - Page 52"
+        },
+        {
+            q: "ArgoCD hỗ trợ Jsonnet không?",
+            options: ["Có", "Không", "Chỉ bản Enterprise", "Sắp hỗ trợ"],
+            a: 0,
+            explain: "Jsonnet là một trong những công cụ được hỗ trợ.",
+            ref: "ArgoCD.pdf - Page 34"
+        },
+        {
+            q: "Matrix Generator trong ApplicationSet dùng để làm gì?",
+            options: ["Tạo ma trận số", "Kết hợp (Combine) các tham số từ hai generator khác nhau (ví dụ: Cluster và Git)", "Xóa app", "Tính toán"],
+            a: 1,
+            explain: "Matrix generator kết hợp output của 2 generator.",
+            ref: "ArgoCD.pdf - Page 314"
+        },
+        {
+            q: "Merge Generator dùng để làm gì?",
+            options: ["Gộp code Git", "Gộp (Merge) các tham số từ nhiều generator, cho phép override giá trị", "Tách app", "Không có generator này"],
+            a: 1,
+            explain: "Merge generator gộp params từ nhiều nguồn, cho phép override.",
+            ref: "ArgoCD.pdf - Page 315"
+        },
+        {
+            q: "Resource `ApplicationSet` là loại resource gì trong K8s?",
+            options: ["Pod", "Deployment", "Custom Resource Definition (CRD)", "Service"],
+            a: 2,
+            explain: "ApplicationSet là một CRD và controller.",
+            ref: "ArgoCD.pdf - Page 284"
+        },
+        {
+            q: "Trong Helm, `releaseName` mặc định là gì nếu không chỉ định?",
+            options: ["Tên của Application", "helm-release", "default", "Rỗng"],
+            a: 0,
+            explain: "Mặc định release name lấy theo Application name.",
+            ref: "ArgoCD.pdf - Page 86"
+        },
+        {
+            q: "Annotation `argocd.argoproj.io/hook-delete-policy: HookSucceeded` nghĩa là gì?",
+            options: ["Xóa hook khi tạo", "Xóa resource hook sau khi nó chạy thành công", "Không xóa hook", "Xóa khi thất bại"],
+            a: 1,
+            explain: "HookSucceeded xóa resource sau khi hook chạy xong và thành công.",
+            ref: "ArgoCD.pdf - Page 258"
+        },
+        {
+            q: "Annotation `argocd.argoproj.io/hook-delete-policy: BeforeHookCreation` nghĩa là gì?",
+            options: ["Xóa hook cũ trước khi tạo hook mới (Mặc định)", "Xóa sau khi chạy", "Không xóa", "Xóa ngay lập tức"],
+            a: 0,
+            explain: "Đây là policy mặc định: xóa resource cũ trước khi tạo cái mới.",
+            ref: "ArgoCD.pdf - Page 259"
+        },
+        {
+            q: "ArgoCD Web UI có thể dùng để làm gì?",
+            options: ["Chỉ xem", "Quản lý toàn bộ Application, Project, Settings, Logs, Terminal", "Chỉ tạo app", "Chỉ xóa app"],
+            a: 1,
+            explain: "Web UI cung cấp giao diện quản lý đầy đủ.",
+            ref: "ArgoCD.pdf - Page 23"
+        },
+        {
+            q: "GitOps giúp giải quyết vấn đề 'Configuration Drift' như thế nào?",
+            options: ["Bằng cách restart server", "Bằng cách liên tục so sánh và đồng bộ trạng thái thực tế về trạng thái mong muốn trong Git", "Bằng cách khóa cluster", "Không giải quyết được"],
+            a: 1,
+            explain: "ArgoCD liên tục monitor và sync để loại bỏ drift.",
+            ref: "ArgoCD.pdf - Page 176"
+        },
+        {
+            q: "Để kết nối HTTPS private repo mà bỏ qua kiểm tra SSL, dùng cờ nào?",
+            options: ["--insecure", "--force", "--skip", "--ignore"],
+            a: 0,
+            explain: "Cờ `insecure: true` (hoặc `--insecure-skip-server-verification`) dùng để bỏ qua SSL check.",
+            ref: "ArgoCD.pdf - Page 136"
+        },
+        {
+            q: "ArgoCD Project Whitelist `clusterResourceWhitelist` dùng để làm gì?",
+            options: ["Cho phép tạo các tài nguyên cấp Cluster (Cluster-scoped resources) như Namespace, ClusterRole", "Cho phép tạo Pod", "Cho phép tạo Service", "Cho phép tạo Ingress"],
+            a: 0,
+            explain: "Whitelist này kiểm soát việc tạo các resource global (cluster-scoped).",
+            ref: "ArgoCD.pdf - Page 116"
+        },
+        {
+            q: "ArgoCD Project `sourceRepos` dùng để làm gì?",
+            options: ["Lưu code", "Giới hạn chỉ cho phép tạo Application từ các Git URL được liệt kê", "Tạo repo mới", "Clone repo"],
+            a: 1,
+            explain: "sourceRepos whitelist các repo được phép sử dụng trong project.",
+            ref: "ArgoCD.pdf - Page 116"
+        },
+        {
+            q: "Để deploy vào cùng cluster mà ArgoCD đang chạy, địa chỉ server là gì?",
+            options: ["localhost", "https://kubernetes.default.svc", "127.0.0.1", "argocd.server"],
+            a: 1,
+            explain: "URL nội bộ của k8s api server là `https://kubernetes.default.svc`.",
+            ref: "ArgoCD.pdf - Page 67"
+        },
+        {
+            q: "Lệnh `argocd app sync <APP_NAME>` làm gì?",
+            options: ["Xóa app", "Kích hoạt quá trình đồng bộ (sync) thủ công cho ứng dụng", "Tạo app", "Xem log"],
+            a: 1,
+            explain: "Lệnh này trigger manual sync.",
+            ref: "ArgoCD.pdf - Page 23"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const sectionTagEl = document.getElementById('section-tag');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        // Update Tag
+        sectionTagEl.textContent = qData.category;
+
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Load saved state
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
