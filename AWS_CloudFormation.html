@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm AWS CloudFormation (70 câu)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fcf7f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 850px;
+            padding: 35px;
+            overflow: hidden;
+            border-top: 6px solid #FF9900; /* AWS CloudFormation Orange */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 26px;
+            color: #232F3E; /* AWS Dark Blue */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
+        .question-box {
+            margin-bottom: 25px;
+        }
+        .section-tag {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+            background-color: #FF9900;
+            text-transform: uppercase;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #232F3E;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            color: #444;
+        }
+        .option-item:hover {
+            background-color: #fff9f0;
+            border-color: #FF9900;
+        }
+        .option-item.correct {
+            background-color: #dff6dd;
+            border-color: #107c10;
+            color: #107c10;
+        }
+        .option-item.wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.user-selected-wrong {
+            background-color: #fde7e9;
+            border-color: #a80000;
+            color: #a80000;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .options-list.answered .option-item:not(.correct):not(.user-selected-wrong) {
+            opacity: 0.5;
+        }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+            background-color: #f8f9fa;
+            border-left: 5px solid #ccc;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback-correct {
+            border-left-color: #107c10;
+            background-color: #f0fff4;
+        }
+        .feedback-wrong {
+            border-left-color: #a80000;
+            background-color: #fff5f5;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+            line-height: 1.5;
+        }
+        .source-ref {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: block;
+            color: #666;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 35px;
+        }
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+        .btn-prev:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #adb5bd;
+        }
+        .btn-next {
+            background-color: #232F3E;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #1a232e;
+        }
+        .score-board {
+            text-align: right;
+            font-weight: bold;
+            color: #FF9900;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">
+        <h1>AWS CloudFormation Quiz</h1>
+        <div style="text-align: right;">
+            <div class="progress" id="progress">Câu 1/70</div>
+            <div class="score-board" id="score-display">Điểm: 0</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span id="section-tag" class="section-tag">BASICS & CONCEPTS</span>
+        <div class="question-text" id="question">Đang tải câu hỏi...</div>
+        <ul class="options-list" id="options">
+            </ul>
+        <div class="feedback" id="feedback">
+            <div id="feedback-msg"></div>
+            <div class="explanation" id="explanation"></div>
+            <span class="source-ref" id="source"></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>Quay lại</button>
+        <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // --- PHẦN 1: BASICS & CONCEPTS ---
+        {
+            category: "BASICS & CONCEPTS",
+            q: "AWS CloudFormation là gì?",
+            options: ["Dịch vụ lưu trữ dữ liệu", "Dịch vụ Infrastructure as Code (IaC) giúp mô hình hóa và thiết lập tài nguyên AWS", "Dịch vụ máy chủ ảo", "Công cụ giám sát mạng"],
+            a: 1,
+            explain: "CloudFormation cho phép bạn mô hình hóa, cung cấp và quản lý tài nguyên AWS và bên thứ ba bằng cách coi cơ sở hạ tầng như mã nguồn (IaC).",
+            ref: "AWS-CloudFormation.pdf - Page 2-3"
+        },
+        {
+            q: "Lợi ích chính của việc sử dụng Infrastructure as Code (IaC) là gì?",
+            options: ["Tăng chi phí", "Thực hiện thủ công để đảm bảo chính xác", "Tự động hóa, nhất quán (consistency), và kiểm soát phiên bản (version control)", "Không cần lập trình"],
+            a: 2,
+            explain: "IaC giúp tự động hóa việc triển khai, đảm bảo tính nhất quán giữa các môi trường và cho phép quản lý phiên bản template.",
+            ref: "AWS-CloudFormation.pdf - Page 2"
+        },
+        {
+            q: "CloudFormation Template hỗ trợ những định dạng nào?",
+            options: ["XML và JSON", "JSON và YAML", "YAML và HTML", "Java và Python"],
+            a: 1,
+            explain: "CloudFormation Templates có thể được viết bằng định dạng JSON hoặc YAML.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Khái niệm 'Stack' trong CloudFormation là gì?",
+            options: ["Một nhóm các tài nguyên AWS được tạo và quản lý như một đơn vị duy nhất", "Một máy chủ ảo EC2", "Một ngăn xếp bộ nhớ", "Một danh sách lỗi"],
+            a: 0,
+            explain: "Stack là tập hợp các tài nguyên AWS mà bạn có thể quản lý như một đơn vị duy nhất. Bạn tạo, cập nhật và xóa một bộ sưu tập tài nguyên bằng cách tạo, cập nhật và xóa các stack.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Phần nào là BẮT BUỘC duy nhất trong một CloudFormation Template?",
+            options: ["Parameters", "Resources", "Outputs", "Mappings"],
+            a: 1,
+            explain: "Phần `Resources` là phần bắt buộc duy nhất trong template, nơi khai báo các tài nguyên AWS sẽ được tạo.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Trong Template Anatomy, phần 'Parameters' dùng để làm gì?",
+            options: ["Định nghĩa các giá trị output", "Định nghĩa các giá trị đầu vào để tùy chỉnh stack khi runtime (lúc tạo/update stack)", "Ánh xạ key-value", "Định nghĩa phiên bản template"],
+            a: 1,
+            explain: "Parameters cho phép bạn nhập dữ liệu tùy chỉnh vào template mỗi khi bạn tạo hoặc cập nhật stack.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Trong Template Anatomy, phần 'Mappings' dùng để làm gì?",
+            options: ["Lưu trữ các cặp key-value cố định (ví dụ: RegionMap để ánh xạ AMI ID theo Region)", "Tạo điều kiện logic", "Nhập tham số người dùng", "Xuất giá trị"],
+            a: 0,
+            explain: "Mappings khớp một key với một set các giá trị được đặt tên tương ứng. Thường dùng để set giá trị dựa trên Region (ví dụ: AMI ID).",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Trong Template Anatomy, phần 'Outputs' dùng để làm gì?",
+            options: ["Nhập dữ liệu", "Trả về giá trị sau khi tạo stack (ví dụ: IP của EC2) và cho phép Cross-Stack Reference", "Xóa tài nguyên", "Ghi log"],
+            a: 1,
+            explain: "Outputs khai báo các giá trị đầu ra mà bạn có thể import vào các stack khác (Cross-stack reference) hoặc xem trên console.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Trong Template Anatomy, phần 'Conditions' dùng để làm gì?",
+            options: ["Kiểm soát việc tài nguyên có được tạo hay không dựa trên logic (ví dụ: chỉ tạo ProdResource nếu Env=Prod)", "Lặp lại tài nguyên", "Định dạng văn bản", "Mã hóa dữ liệu"],
+            a: 0,
+            explain: "Conditions kiểm soát xem một phần của template (như resource) có được tạo hay không dựa trên giá trị tham số đầu vào.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Phần 'Metadata' trong template thường được dùng để làm gì?",
+            options: ["Lưu trữ dữ liệu ứng dụng", "Cung cấp thêm thông tin về template (ví dụ: nhóm các tham số trên UI hoặc cấu hình cfn-init)", "Tạo database", "Tăng tốc độ stack"],
+            a: 1,
+            explain: "Metadata cung cấp thông tin bổ sung. Ví dụ: `AWS::CloudFormation::Interface` để sắp xếp tham số trên Console, hoặc `AWS::CloudFormation::Init` để cấu hình instance.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+
+        // --- PHẦN 2: INTRINSIC FUNCTIONS ---
+        {
+            category: "INTRINSIC FUNCTIONS",
+            q: "Hàm `Ref` trả về giá trị gì khi tham chiếu đến một Resource?",
+            options: ["Luôn trả về ARN", "Trả về ID vật lý (Physical ID) của tài nguyên đó", "Trả về file JSON", "Trả về tên logical"],
+            a: 1,
+            explain: "`Ref` trả về giá trị của tham số hoặc Physical ID của tài nguyên (ví dụ: InstanceID cho AWS::EC2::Instance).",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::GetAtt` dùng để làm gì?",
+            options: ["Lấy tất cả thuộc tính", "Truy xuất giá trị của một thuộc tính cụ thể từ một tài nguyên (ví dụ: lấy PublicIP của EC2)", "Xóa thuộc tính", "Thêm thuộc tính mới"],
+            a: 1,
+            explain: "`Fn::GetAtt` trả về giá trị của một thuộc tính từ tài nguyên trong template (ví dụ: `!GetAtt MyInstance.PublicIp`).",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::Join` dùng để làm gì?",
+            options: ["Nối các chuỗi lại với nhau bằng một dấu phân cách (delimiter) xác định", "Chia chuỗi", "Mã hóa chuỗi", "So sánh chuỗi"],
+            a: 0,
+            explain: "`Fn::Join` nối một tập hợp các chuỗi thành một chuỗi đơn, ngăn cách bởi delimiter.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::Sub` (Substitute) dùng để làm gì?",
+            options: ["Trừ số học", "Thay thế các biến trong một chuỗi đầu vào (String interpolation)", "Tạo subnet", "Gửi email"],
+            a: 1,
+            explain: "`Fn::Sub` thay thế các biến (dạng `${Variable}`) trong chuỗi đầu vào bằng giá trị tương ứng.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::ImportValue` được sử dụng trong trường hợp nào?",
+            options: ["Import file từ S3", "Lấy giá trị được xuất ra (Export) từ một Stack khác (Cross-Stack Reference)", "Import module Python", "Nhập password"],
+            a: 1,
+            explain: "`Fn::ImportValue` trả về giá trị của một output được export bởi một stack khác.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::Select` dùng để làm gì?",
+            options: ["Chọn dữ liệu từ database", "Chọn một đối tượng từ danh sách dựa trên chỉ số (index)", "Chọn ngẫu nhiên", "Chọn tất cả"],
+            a: 1,
+            explain: "`Fn::Select` trả về một đối tượng đơn lẻ từ danh sách các đối tượng theo index.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::Split` dùng để làm gì?",
+            options: ["Chia stack thành 2 phần", "Chia một chuỗi thành danh sách các chuỗi con dựa trên dấu phân cách", "Gộp file", "Chia tài nguyên"],
+            a: 1,
+            explain: "`Fn::Split` chia một string thành list các string dựa trên delimiter.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::Base64` thường được dùng ở đâu nhất?",
+            options: ["Mã hóa mật khẩu database", "Mã hóa UserData cho EC2 instance", "Nén file", "Tạo key SSH"],
+            a: 1,
+            explain: "`Fn::Base64` trả về chuỗi Base64-encoded, thường dùng để truyền UserData vào EC2 instance.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::GetAZs` trả về cái gì?",
+            options: ["Danh sách các Availability Zones (AZ) trong Region hiện tại", "Danh sách Region", "Danh sách User", "Danh sách Instance"],
+            a: 0,
+            explain: "`Fn::GetAZs` trả về một mảng danh sách các Availability Zones cho region hiện tại.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "Hàm `Fn::FindInMap` dùng để làm gì?",
+            options: ["Tìm kiếm file", "Trả về giá trị tương ứng với keys trong phần Mappings", "Tìm kiếm tài nguyên", "Tìm kiếm đường đi"],
+            a: 1,
+            explain: "`Fn::FindInMap` trả về giá trị từ cấu trúc Mappings dựa trên TopLevelKey và SecondLevelKey.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+
+        // --- PHẦN 3: STACK OPERATIONS & RESOURCES ---
+        {
+            category: "STACK OPERATIONS",
+            q: "Tài nguyên `AWS::EC2::Instance` đại diện cho cái gì?",
+            options: ["Một ổ cứng ảo", "Một máy chủ ảo (Virtual Server) trong AWS Cloud", "Một mạng ảo", "Một cơ sở dữ liệu"],
+            a: 1,
+            explain: "Đây là resource type để tạo một EC2 instance.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Thuộc tính `UserData` trong `AWS::EC2::Instance` dùng để làm gì?",
+            options: ["Lưu dữ liệu người dùng", "Chạy script khởi tạo (bootstrapping) khi instance khởi động lần đầu", "Đặt tên user", "Tạo user IAM"],
+            a: 1,
+            explain: "UserData cho phép truyền script (shell/powershell) để cấu hình instance khi launch.",
+            ref: "AWS-CloudFormation.pdf - Page 35 (User Data Example)"
+        },
+        {
+            q: "Resource `AWS::EC2::SecurityGroup` đóng vai trò gì?",
+            options: ["Tường lửa ảo kiểm soát traffic inbound/outbound cho instance", "Mã hóa dữ liệu", "Quản lý user", "Lưu trữ backup"],
+            a: 0,
+            explain: "Security Group hoạt động như một tường lửa ảo cho instance.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Resource `AWS::IAM::Role` dùng để làm gì?",
+            options: ["Tạo user đăng nhập", "Cấp quyền (permissions) cho các dịch vụ AWS hoặc user đảm nhận (assume role)", "Tạo mạng", "Tạo database"],
+            a: 1,
+            explain: "IAM Role định nghĩa một tập hợp quyền hạn mà thực thể (như EC2, CodeBuild) có thể assume.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Pseudo Parameter `AWS::Region` trả về giá trị gì?",
+            options: ["Tên tài khoản AWS", "Region mà stack đang được tạo (ví dụ: us-east-1)", "Tên stack", "ID của stack"],
+            a: 1,
+            explain: "Pseudo parameters được AWS định nghĩa sẵn. `AWS::Region` trả về region hiện tại.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Pseudo Parameter `AWS::StackName` trả về giá trị gì?",
+            options: ["ID của account", "Tên của Stack hiện tại", "Region hiện tại", "URL template"],
+            a: 1,
+            explain: "`AWS::StackName` trả về tên của stack đang chạy.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Nếu tạo Stack thất bại (Creation Failed), trạng thái mặc định của CloudFormation là gì?",
+            options: ["Giữ nguyên tài nguyên đã tạo để debug", "Tự động Rollback (xóa các tài nguyên đã tạo)", "Thử lại vô hạn", "Gửi email cho admin"],
+            a: 1,
+            explain: "Mặc định, CloudFormation sẽ `ROLLBACK_IN_PROGRESS` và xóa các tài nguyên đã tạo nếu stack creation fail.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Tính năng 'Change Sets' giúp bạn làm gì?",
+            options: ["Thay đổi code ứng dụng", "Xem trước (Preview) các thay đổi sẽ xảy ra với stack trước khi thực thi Update", "Thay đổi region", "Thay đổi mật khẩu"],
+            a: 1,
+            explain: "Change Sets cho phép bạn xem tác động của việc update stack (ví dụ: resource nào sẽ bị replace) trước khi apply.",
+            ref: "AWS-CloudFormation.pdf - Page 188 (Mentioned in pipeline)"
+        },
+        {
+            q: "Tính năng 'Drift Detection' dùng để làm gì?",
+            options: ["Phát hiện sự trôi dạt của lục địa", "Phát hiện sự khác biệt giữa cấu hình thực tế của tài nguyên và cấu hình định nghĩa trong Template (do thay đổi thủ công)", "Phát hiện lỗi code", "Phát hiện virus"],
+            a: 1,
+            explain: "Drift Detection xác định xem cấu hình thực tế của stack có khác (drifted) so với template hay không.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Để xóa một tài nguyên khỏi Stack nhưng vẫn giữ lại nó trong AWS (không xóa hẳn), ta dùng thuộc tính gì?",
+            options: ["DeletionPolicy: Retain", "RetentionPolicy: Keep", "Delete: False", "Preserve: True"],
+            a: 0,
+            explain: "`DeletionPolicy: Retain` bảo CloudFormation giữ lại tài nguyên khi stack bị xóa.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+
+        // --- PHẦN 4: HELPER SCRIPTS & ADVANCED ---
+        {
+            category: "HELPER SCRIPTS",
+            q: "Script `cfn-init` dùng để làm gì?",
+            options: ["Khởi tạo stack", "Lấy và phân tích metadata từ `AWS::CloudFormation::Init` để cài đặt gói, tạo file, và start service trên EC2", "Xóa stack", "Tạo user"],
+            a: 1,
+            explain: "`cfn-init` đọc metadata từ resource để cài packages, viết files, và start services.",
+            ref: "AWS-CloudFormation.pdf - Page 3 (Metadata)"
+        },
+        {
+            q: "Script `cfn-signal` dùng để làm gì?",
+            options: ["Gửi tín hiệu wifi", "Gửi tín hiệu Success hoặc Failure về cho CloudFormation (thường dùng với CreationPolicy/WaitCondition)", "Gửi tín hiệu cho user", "Tắt máy"],
+            a: 1,
+            explain: "`cfn-signal` báo cho CloudFormation biết rằng quá trình setup trên instance đã hoàn tất (hoặc lỗi).",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Script `cfn-hup` dùng để làm gì?",
+            options: ["Tắt máy", "Daemon kiểm tra sự thay đổi trong metadata và chạy các hook tùy chỉnh khi có update", "Backup dữ liệu", "Cập nhật Windows"],
+            a: 1,
+            explain: "`cfn-hup` là daemon chạy trên instance để detect thay đổi trong resource metadata và trigger hành động.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Resource `AWS::CloudFormation::Stack` dùng để làm gì?",
+            options: ["Tạo stack chính", "Tạo Nested Stack (Stack lồng nhau) - gọi một template khác từ trong template chính", "Xóa stack", "Xem stack"],
+            a: 1,
+            explain: "Resource này dùng để tạo Nested Stacks, cho phép tái sử dụng template.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Lợi ích của Nested Stacks là gì?",
+            options: ["Làm template phức tạp hơn", "Vượt quá giới hạn tài nguyên", "Tái sử dụng code (Modularization) và vượt qua giới hạn về kích thước template", "Tăng chi phí"],
+            a: 2,
+            explain: "Nested Stacks giúp chia nhỏ template lớn thành các phần nhỏ có thể tái sử dụng.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Trong phần `AWS::CloudFormation::Init`, key `packages` dùng để làm gì?",
+            options: ["Cài đặt các gói phần mềm (yum, apt, pip...)", "Đóng gói template", "Gửi bưu kiện", "Lưu trữ file"],
+            a: 0,
+            explain: "Phần `packages` trong cfn-init metadata dùng để cài đặt software packages.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Trong phần `AWS::CloudFormation::Init`, key `files` dùng để làm gì?",
+            options: ["Xóa file", "Tạo các file trên instance (với nội dung inline hoặc từ URL)", "Liệt kê file", "Nén file"],
+            a: 1,
+            explain: "Phần `files` dùng để tạo file trên EC2 instance.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Trong phần `AWS::CloudFormation::Init`, key `services` dùng để làm gì?",
+            options: ["Định nghĩa và quản lý trạng thái các dịch vụ (sysvinit, systemd...)", "Tạo dịch vụ AWS", "Tính tiền dịch vụ", "Liên hệ hỗ trợ"],
+            a: 0,
+            explain: "Phần `services` dùng để đảm bảo các service (như httpd) đang chạy và enabled.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Resource `AWS::AutoScaling::AutoScalingGroup` cần thuộc tính nào để xác định cấu hình instance?",
+            options: ["InstanceId", "LaunchConfigurationName hoặc LaunchTemplate", "VPCId", "ImageId"],
+            a: 1,
+            explain: "ASG cần LaunchConfiguration hoặc LaunchTemplate để biết cách tạo instance.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "CreationPolicy thường được dùng với resource nào?",
+            options: ["AWS::S3::Bucket", "AWS::EC2::Instance hoặc AWS::AutoScaling::AutoScalingGroup", "AWS::IAM::User", "AWS::SNS::Topic"],
+            a: 1,
+            explain: "CreationPolicy tạm dừng việc tạo stack cho đến khi nhận được đủ tín hiệu thành công (từ cfn-signal) từ EC2 hoặc ASG.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+
+        // --- PHẦN 5: CI/CD & INTEGRATION ---
+        {
+            category: "CI/CD & INTEGRATION",
+            q: "AWS CodePipeline là dịch vụ gì?",
+            options: ["Dịch vụ lưu trữ code", "Dịch vụ Continuous Delivery (CD) để tự động hóa quy trình release", "Dịch vụ build code", "Dịch vụ máy ảo"],
+            a: 1,
+            explain: "CodePipeline tự động hóa các bước build, test, deploy mỗi khi có thay đổi code.",
+            ref: "AWS-CloudFormation.pdf - Page 2"
+        },
+        {
+            q: "AWS CodeBuild là dịch vụ gì?",
+            options: ["Dịch vụ biên dịch (compile), chạy test và tạo gói phần mềm (artifacts)", "Dịch vụ viết code", "Dịch vụ lưu trữ", "Dịch vụ database"],
+            a: 0,
+            explain: "CodeBuild là dịch vụ build được quản lý hoàn toàn.",
+            ref: "AWS-CloudFormation.pdf - Page 2"
+        },
+        {
+            q: "File cấu hình mặc định cho AWS CodeBuild là gì?",
+            options: ["buildfile.xml", "buildspec.yml", "jenkinsfile", "makefile"],
+            a: 1,
+            explain: "CodeBuild tìm file `buildspec.yml` ở thư mục gốc để biết các bước build.",
+            ref: "AWS-CloudFormation.pdf - Page 189"
+        },
+        {
+            q: "AWS CodeDeploy là dịch vụ gì?",
+            options: ["Dịch vụ viết code", "Dịch vụ tự động hóa việc triển khai code lên EC2, Lambda, hoặc On-premises", "Dịch vụ tạo máy ảo", "Dịch vụ lưu trữ"],
+            a: 1,
+            explain: "CodeDeploy tự động deploy ứng dụng lên các compute services.",
+            ref: "AWS-CloudFormation.pdf - Page 2"
+        },
+        {
+            q: "AWS CodeCommit là dịch vụ gì?",
+            options: ["Dịch vụ lưu trữ Source Control (Git) được quản lý riêng tư", "Dịch vụ commit code tự động", "Dịch vụ chat", "Dịch vụ database"],
+            a: 0,
+            explain: "CodeCommit là dịch vụ source control dựa trên Git của AWS.",
+            ref: "AWS-CloudFormation.pdf - Page 2"
+        },
+        {
+            q: "Resource `AWS::CodePipeline::Pipeline` dùng để làm gì trong CloudFormation?",
+            options: ["Tạo đường ống dẫn nước", "Định nghĩa quy trình CI/CD (các Stages và Actions)", "Tạo EC2", "Tạo VPC"],
+            a: 1,
+            explain: "Resource này định nghĩa cấu trúc của pipeline (Source, Build, Deploy stages).",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Trong CodePipeline, 'ActionTypeId' xác định điều gì?",
+            options: ["Loại hành động (Source, Build, Test, Deploy) và provider (AWS, Third-party)", "ID của user", "ID của region", "Loại instance"],
+            a: 0,
+            explain: "ActionTypeId định nghĩa provider (ví dụ: AWS CodeBuild) và category (Build).",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "File `appspec.yml` được sử dụng bởi dịch vụ nào?",
+            options: ["CloudFormation", "CodeBuild", "CodeDeploy", "CodeCommit"],
+            a: 2,
+            explain: "`appspec.yml` là file cấu hình cho CodeDeploy, định nghĩa cách deploy và hooks.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Trong CloudFormation, làm thế nào để tham chiếu Output của một stack này trong một stack khác?",
+            options: ["Dùng Fn::GetAtt", "Dùng Fn::ImportValue (kết hợp với Export ở stack kia)", "Dùng Fn::Ref", "Copy paste thủ công"],
+            a: 1,
+            explain: "Stack A phải `Export` output, và Stack B dùng `Fn::ImportValue` để lấy giá trị đó.",
+            ref: "AWS-CloudFormation.pdf - Intrinsic Functions"
+        },
+        {
+            q: "ArtifactStore trong CodePipeline dùng để làm gì?",
+            options: ["Lưu trữ code nguồn", "Lưu trữ các file trung gian (artifacts) giữa các stage (thường dùng S3)", "Lưu trữ log", "Lưu trữ user"],
+            a: 1,
+            explain: "ArtifactStore (thường là S3 bucket) lưu trữ input/output artifacts cho pipeline.",
+            ref: "AWS-CloudFormation.pdf - Page 189"
+        },
+
+        // --- CÁC CÂU HỎI BỔ SUNG (CHO ĐỦ 70 CÂU) ---
+        {
+            category: "MISC & SCENARIOS",
+            q: "Resource `AWS::SNS::Topic` dùng để làm gì?",
+            options: ["Tạo chủ đề nói chuyện", "Tạo kênh thông báo (Pub/Sub) để gửi email/SMS", "Tạo database", "Tạo máy ảo"],
+            a: 1,
+            explain: "SNS Topic là kênh liên lạc để gửi thông báo.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Để bảo mật mật khẩu DB trong CloudFormation, nên dùng cách nào?",
+            options: ["Ghi cứng (Hardcode) trong template", "Sử dụng Parameters với NoEcho: true", "Ghi vào file text", "Đặt tên biến là password"],
+            a: 1,
+            explain: "`NoEcho: true` ẩn giá trị tham số trên Console và CLI output.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Resource `AWS::EC2::VPC` dùng để tạo gì?",
+            options: ["Máy ảo", "Virtual Private Cloud (Mạng ảo riêng biệt)", "Ổ cứng", "DNS"],
+            a: 1,
+            explain: "Tạo một VPC mới.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Resource `AWS::EC2::InternetGateway` giúp ích gì cho VPC?",
+            options: ["Kết nối VPC với Internet", "Kết nối VPC với VPN", "Chặn Internet", "Tăng tốc mạng"],
+            a: 0,
+            explain: "Internet Gateway cho phép giao tiếp giữa VPC và Internet.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Resource `AWS::EC2::RouteTable` dùng để làm gì?",
+            options: ["Lưu trữ dữ liệu", "Định nghĩa các quy tắc định tuyến (routing rules) cho network traffic trong VPC", "Tạo bảng tính", "Tạo user"],
+            a: 1,
+            explain: "Route Table chứa các rule để điều hướng traffic từ subnet.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Resource `AWS::EC2::SubnetRouteTableAssociation` dùng để làm gì?",
+            options: ["Liên kết Route Table với Subnet", "Liên kết EC2 với S3", "Liên kết User với Group", "Tạo subnet"],
+            a: 0,
+            explain: "Liên kết một Route Table cụ thể với một Subnet.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Resource `AWS::EC2::VPCGatewayAttachment` dùng để làm gì?",
+            options: ["Gắn ổ cứng", "Gắn Internet Gateway vào VPC", "Gắn Elastic IP", "Gắn Security Group"],
+            a: 1,
+            explain: "Attach một Internet Gateway vào một VPC.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Pseudo Parameter `AWS::AccountId` trả về gì?",
+            options: ["ID của tài khoản AWS hiện tại", "ID của user", "ID của role", "ID của stack"],
+            a: 0,
+            explain: "Trả về AWS Account ID của người đang tạo stack.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Pseudo Parameter `AWS::NoValue` có tác dụng gì?",
+            options: ["Trả về số 0", "Khi dùng trong Fn::If, nó hoạt động như việc loại bỏ thuộc tính đó (không set giá trị)", "Trả về null", "Báo lỗi"],
+            a: 1,
+            explain: "`AWS::NoValue` loại bỏ property tương ứng nếu điều kiện Fn::If trả về nó.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "`DependsOn` attribute dùng để làm gì?",
+            options: ["Tạo phụ thuộc gói", "Chỉ định thứ tự tạo tài nguyên (Resource A phải được tạo xong trước Resource B)", "Tải thư viện", "Kết nối mạng"],
+            a: 1,
+            explain: "`DependsOn` xác định thứ tự tạo resource rõ ràng khi CloudFormation không tự suy luận được.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Cú pháp YAML: `Key: Value` là kiểu dữ liệu gì?",
+            options: ["List (Danh sách)", "Dictionary/Map (Cặp khóa-giá trị)", "String", "Integer"],
+            a: 1,
+            explain: "Trong YAML, `Key: Value` biểu diễn một object hoặc map.",
+            ref: "AWS-CloudFormation.pdf - Page 5"
+        },
+        {
+            q: "Cú pháp YAML: Dấu gạch ngang `-` đầu dòng biểu thị gì?",
+            options: ["Phép trừ", "Phần tử của một List (Danh sách)", "Comment", "Key"],
+            a: 1,
+            explain: "Dấu `-` biểu thị một item trong một array/list.",
+            ref: "AWS-CloudFormation.pdf - Page 5"
+        },
+        {
+            q: "Resource `AWS::EC2::EIP` tạo ra cái gì?",
+            options: ["Elastic IP Address (IP tĩnh public)", "IP nội bộ", "Subnet", "Gateway"],
+            a: 0,
+            explain: "Tạo một Elastic IP.",
+            ref: "AWS-CloudFormation.pdf - Page 4"
+        },
+        {
+            q: "Làm thế nào để cập nhật một Stack?",
+            options: ["Xóa và tạo lại", "Upload template mới và chọn Update Stack", "Sửa trực tiếp trên console resource", "Không thể cập nhật"],
+            a: 1,
+            explain: "Bạn update stack bằng cách submit template đã sửa đổi.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "AWS CloudFormation Designer là gì?",
+            options: ["Công cụ vẽ tranh", "Công cụ đồ họa (Drag-and-drop) để tạo và sửa đổi template CloudFormation", "Công cụ thiết kế web", "Công cụ quản lý user"],
+            a: 1,
+            explain: "Visual tool để thiết kế template.",
+            ref: "AWS-CloudFormation.pdf - Page 3"
+        },
+        {
+            q: "Template validation error xảy ra khi nào?",
+            options: ["Khi tài nguyên không tạo được", "Khi cú pháp (syntax) của template bị sai (ví dụ: thiếu dấu :, sai indent)", "Khi mạng chậm", "Khi hết tiền"],
+            a: 1,
+            explain: "Validation check lỗi cú pháp trước khi stack được tạo.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Resource `AWS::S3::Bucket` dùng để làm gì?",
+            options: ["Tạo máy chủ", "Tạo Bucket lưu trữ object trong S3", "Tạo database", "Tạo mạng"],
+            a: 1,
+            explain: "Tạo S3 bucket.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Trong CodeBuild, `phases` trong buildspec.yml bao gồm những giai đoạn nào?",
+            options: ["Start, Stop", "install, pre_build, build, post_build", "init, run, end", "create, delete"],
+            a: 1,
+            explain: "Các phase chuẩn của CodeBuild.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "Thuộc tính `BlockDeviceMappings` trong EC2 Instance dùng để làm gì?",
+            options: ["Chặn thiết bị", "Cấu hình ổ đĩa (EBS Volumes) gắn vào instance", "Cấu hình mạng", "Cấu hình CPU"],
+            a: 1,
+            explain: "Định nghĩa các ổ đĩa attached vào instance.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        },
+        {
+            q: "CloudFormation có miễn phí không?",
+            options: ["Có, nhưng bạn phải trả tiền cho các tài nguyên AWS mà nó tạo ra (EC2, RDS...)", "Hoàn toàn không", "Chỉ miễn phí 1 năm", "Tốn phí license"],
+            a: 0,
+            explain: "Không tính phí cho dịch vụ CloudFormation, chỉ tính phí tài nguyên được tạo.",
+            ref: "AWS-CloudFormation.pdf - General Knowledge"
+        }
+    ];
+
+    // Trạng thái hiện tại
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const scoreEl = document.getElementById('score-display');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsgEl = document.getElementById('feedback-msg');
+    const explanationEl = document.getElementById('explanation');
+    const sourceEl = document.getElementById('source');
+    const sectionTagEl = document.getElementById('section-tag');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function loadQuestion() {
+        const qData = quizData[currentQuestionIndex];
+        
+        progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        scoreEl.textContent = `Điểm: ${score}`;
+        
+        // Update Tag
+        sectionTagEl.textContent = qData.category;
+
+        questionEl.textContent = qData.q;
+        
+        optionsEl.innerHTML = '';
+        feedbackEl.classList.remove('show');
+        feedbackEl.className = 'feedback'; 
+        optionsEl.className = 'options-list';
+        
+        qData.options.forEach((opt, index) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.textContent = opt;
+            li.onclick = () => checkAnswer(index, li);
+            optionsEl.appendChild(li);
+        });
+
+        // Load saved state
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        if (savedAnswer !== null) {
+            showResultVisuals(savedAnswer);
+        }
+
+        btnPrev.disabled = currentQuestionIndex === 0;
+        btnNext.textContent = currentQuestionIndex === quizData.length - 1 ? "Hoàn thành" : "Tiếp theo";
+    }
+
+    function showResultVisuals(selectedIndex) {
+        const qData = quizData[currentQuestionIndex];
+        const options = optionsEl.children;
+
+        for (let li of options) {
+            li.classList.add('disabled');
+        }
+        
+        optionsEl.classList.add('answered');
+        feedbackEl.classList.add('show');
+
+        if (selectedIndex === qData.a) {
+            options[selectedIndex].classList.add('correct');
+            feedbackEl.classList.add('feedback-correct');
+            feedbackMsgEl.innerHTML = "<strong>✅ Chính xác!</strong>";
+        } else {
+            options[selectedIndex].classList.add('user-selected-wrong');
+            options[qData.a].classList.add('correct');
+            feedbackEl.classList.add('feedback-wrong');
+            feedbackMsgEl.innerHTML = "<strong>❌ Sai rồi!</strong>";
+        }
+
+        explanationEl.textContent = qData.explain;
+        sourceEl.textContent = `(Nguồn: ${qData.ref})`;
+    }
+
+    function checkAnswer(selectedIndex, selectedLi) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+
+        const qData = quizData[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        if (selectedIndex === qData.a) {
+            score++;
+            scoreEl.textContent = `Điểm: ${score}`;
+        }
+
+        showResultVisuals(selectedIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            alert(`Bạn đã hoàn thành bài thi! Tổng điểm: ${score}/${quizData.length}`);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
