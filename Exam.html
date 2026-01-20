@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ôn DevOps – Flashcards + Quiz (Văn phong tự luận)</title>
+  <style>
+    :root{--bd:#ddd;--fg:#111;--m:#555;--soft:#f7f7f7;--ok:#1a7f37;--bad:#c00}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;max-width:1020px;margin:24px auto;padding:0 14px;line-height:1.55;color:var(--fg)}
+    h1{font-size:22px;margin:0 0 8px}
+    .muted{color:var(--m)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+    .tab{border:1px solid var(--bd);border-radius:14px;padding:10px 12px;cursor:pointer;user-select:none;background:#fff}
+    .tab.active{border-color:var(--fg)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+    button{border:1px solid var(--bd);border-radius:14px;padding:10px 12px;background:#fff;cursor:pointer}
+    button:hover{border-color:var(--fg)}
+    .box{border:1px solid var(--bd);border-radius:18px;padding:14px;background:#fff}
+    .front{font-weight:700}
+    .back{margin-top:10px;display:none}
+    .pill{display:inline-block;border:1px solid var(--bd);border-radius:999px;padding:4px 10px;font-size:12px;margin-right:6px;margin-bottom:6px}
+    .hr{height:1px;background:var(--bd);margin:14px 0}
+    .opt{display:block;border:1px solid var(--bd);border-radius:14px;padding:10px 12px;margin:8px 0;cursor:pointer;background:#fff}
+    .opt.correct{border-color:var(--ok)}
+    .opt.wrong{border-color:var(--bad)}
+    .explain{background:var(--soft);border-left:4px solid var(--fg);padding:10px 12px;border-radius:12px;margin-top:10px}
+    textarea{width:100%;min-height:160px;border:1px solid var(--bd);border-radius:14px;padding:12px;font-family:inherit;font-size:14px;line-height:1.55}
+    .small{font-size:13px}
+  </style>
+</head>
+<body>
+  <h1>Ôn DevOps – Flashcards + Quiz</h1>
+  <div class="muted small">
+    Cách học hiệu quả: hãy <b>tự trả lời trước</b> rồi mới bấm “Hiện đáp án”. Ôn theo lịch 1–3–7 ngày để nhớ lâu.
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-view="cards">Flashcards</div>
+    <div class="tab" data-view="quiz">Quiz</div>
+    <div class="tab" data-view="essay">Mẫu đoạn tự luận</div>
+    <div class="tab" data-view="plan">Kế hoạch ôn</div>
+  </div>
+
+  <div id="view"></div>
+
+<script>
+const concepts = [
+  {
+    key:"DevOps",
+    tags:["Khái niệm","CALMS","Văn hoá + Tự động hoá"],
+    cardFront:"DevOps là gì? Nêu bản chất cốt lõi.",
+    cardBack:`
+      <p><b>Khái niệm:</b> DevOps là cách tiếp cận tổ chức công việc nhằm kết nối phát triển (Dev) và vận hành (Ops), để rút ngắn thời gian đưa phần mềm ra môi trường chạy thật, đồng thời nâng cao độ ổn định hệ thống.</p>
+      <p><b>Đặc điểm:</b> Nhấn mạnh văn hoá hợp tác, tự động hoá, đo lường và phản hồi; thường được tóm lược bằng khung <b>CALMS</b> (Culture–Automation–Lean–Measurement–Sharing).</p>
+      <p><b>Ứng dụng:</b> Chuẩn hoá quy trình release; áp dụng CI/CD, IaC, container hoá, monitoring để triển khai nhanh nhưng an toàn.</p>
+      <p><b>Ưu điểm:</b> Tăng tốc phát hành, giảm lỗi do thao tác tay, cải thiện phối hợp liên nhóm.</p>
+      <p><b>Nhược điểm:</b> Thay đổi văn hoá khó; cần đầu tư ban đầu cho test/pipeline/monitoring.</p>
+    `,
+    essay:`Mở bài: DevOps là cách tiếp cận kết nối phát triển phần mềm và vận hành hệ thống nhằm tối ưu đồng thời tốc độ phát hành và độ ổn định.\n\nThân bài: Bản chất của DevOps không chỉ là công cụ, mà là hệ thống gồm văn hoá phối hợp, quy trình và tự động hoá. Theo khung CALMS, DevOps đề cao (1) văn hoá hợp tác giữa các nhóm, (2) tự động hoá triển khai và kiểm thử để giảm lỗi do thao tác thủ công, (3) tư duy tinh gọn nhằm giảm lãng phí và thời gian chờ, (4) đo lường bằng chỉ số để ra quyết định, và (5) chia sẻ phản hồi/bài học sau sự cố để cải tiến liên tục. Nhờ vậy, tổ chức có thể triển khai CI/CD và IaC, đảm bảo môi trường nhất quán, release thường xuyên nhưng có kiểm soát.\n\nKết bài: DevOps giúp doanh nghiệp nâng cao năng lực phát hành nhanh, an toàn và bền vững, tuy nhiên đòi hỏi thay đổi văn hoá và đầu tư nền tảng kỹ thuật ban đầu.`,
+    quiz:{
+      q:"Điểm cốt lõi của DevOps là gì?",
+      options:[
+        {t:"Chỉ cần dùng nhiều công cụ CI/CD là đủ", ok:false},
+        {t:"Kết hợp văn hoá phối hợp, quy trình và tự động hoá để phát hành nhanh nhưng ổn định", ok:true},
+        {t:"Chỉ tập trung vào vận hành (Ops) để giảm lỗi hệ thống", ok:false},
+        {t:"Chỉ tập trung vào phát triển (Dev) để ra tính năng nhanh", ok:false},
+      ],
+      explain:"DevOps là một cách tiếp cận tổng thể: văn hoá hợp tác + quy trình + tự động hoá + đo lường + phản hồi. Công cụ chỉ là phương tiện."
+    }
+  },
+  {
+    key:"Agile",
+    tags:["Vòng lặp ngắn","Phản hồi","Thích ứng"],
+    cardFront:"Agile là gì? Nêu đặc điểm và hạn chế khi áp dụng.",
+    cardBack:`
+      <p><b>Khái niệm:</b> Agile là tư duy phát triển phần mềm linh hoạt: chia nhỏ công việc, giao sản phẩm sớm và thường xuyên, liên tục nhận phản hồi để điều chỉnh.</p>
+      <p><b>Đặc điểm:</b> Làm theo vòng lặp ngắn; đề cao tương tác, sản phẩm chạy được, hợp tác với khách hàng và đáp ứng thay đổi.</p>
+      <p><b>Ứng dụng:</b> Quản lý backlog, user story; áp dụng Scrum/Kanban; review và retrospective để cải tiến.</p>
+      <p><b>Ưu điểm:</b> Giảm rủi ro làm sai yêu cầu; tăng khả năng thích ứng.</p>
+      <p><b>Nhược điểm:</b> Nếu thiếu kỷ luật về “done”, test, review… dễ dẫn đến làm nhanh nhưng rối và chất lượng không ổn định.</p>
+    `,
+    essay:`Mở bài: Agile là tư duy phát triển phần mềm theo hướng linh hoạt, phù hợp môi trường yêu cầu thay đổi nhanh.\n\nThân bài: Agile tổ chức công việc theo các vòng lặp ngắn để mỗi giai đoạn đều tạo ra giá trị có thể kiểm chứng. Thay vì chờ hoàn thiện toàn bộ mới bàn giao, Agile ưu tiên giao sản phẩm sớm, nhận phản hồi sớm và cải tiến liên tục. Nhờ đó, đội dự án giảm rủi ro “làm xong mới biết sai”, đồng thời tăng khả năng đáp ứng thay đổi.\n\nKết bài: Agile đem lại hiệu quả cao khi có kỷ luật quy trình (định nghĩa hoàn thành, kiểm thử, review) và có phản hồi thực tế từ người dùng/khách hàng.`,
+    quiz:{
+      q:"Phát biểu nào phản ánh đúng tinh thần Agile?",
+      options:[
+        {t:"Ưu tiên bám kế hoạch cố định hơn là thay đổi", ok:false},
+        {t:"Giao sản phẩm sớm và liên tục cải tiến dựa trên phản hồi", ok:true},
+        {t:"Tránh chia nhỏ công việc để giảm phân mảnh", ok:false},
+        {t:"Chỉ cần họp nhiều là Agile", ok:false},
+      ],
+      explain:"Agile nhấn mạnh giao hàng sớm, phản hồi sớm và thích ứng. Họp chỉ là công cụ hỗ trợ, không phải bản chất."
+    }
+  },
+  {
+    key:"CI/CD",
+    tags:["Build & Test tự động","Delivery vs Deployment","Pipeline"],
+    cardFront:"CI/CD là gì? Phân biệt Continuous Delivery và Continuous Deployment.",
+    cardBack:`
+      <p><b>Khái niệm:</b> CI/CD là tập thực hành tự động hoá tích hợp–kiểm thử–đóng gói–triển khai để phát hành nhanh và đáng tin cậy.</p>
+      <p><b>CI:</b> Tích hợp thường xuyên; mỗi lần tích hợp được xác minh bằng build tự động kèm kiểm thử.</p>
+      <p><b>CD:</b> <i>Continuous Delivery</i> giữ phần mềm luôn sẵn sàng phát hành; <i>Continuous Deployment</i> tự động đưa mọi thay đổi đạt chuẩn lên production.</p>
+      <p><b>Ưu điểm:</b> Phát hiện lỗi sớm, giảm rủi ro triển khai; rollback nhanh.</p>
+      <p><b>Nhược điểm:</b> Nếu test yếu, CI/CD có thể tự động hoá việc đưa lỗi lên môi trường thật.</p>
+    `,
+    essay:`Mở bài: CI/CD là nền tảng kỹ thuật quan trọng trong DevOps, giúp tăng tốc phát hành nhưng vẫn đảm bảo chất lượng.\n\nThân bài: Continuous Integration (CI) yêu cầu tích hợp code thường xuyên; mỗi lần tích hợp đều được kiểm chứng bởi quy trình build và kiểm thử tự động để phát hiện lỗi sớm. Trên nền CI, Continuous Delivery duy trì phần mềm ở trạng thái luôn có thể phát hành, còn Continuous Deployment là mức cao hơn khi mọi thay đổi vượt qua các cổng chất lượng sẽ tự động triển khai lên production. Để CI/CD thực sự hiệu quả, hệ thống cần bộ kiểm thử và tiêu chuẩn chất lượng đủ mạnh.\n\nKết bài: CI/CD giúp triển khai nhanh, đều và ít lỗi do con người; tuy nhiên đòi hỏi đầu tư nghiêm túc cho kiểm thử và quan sát hệ thống.`,
+    quiz:{
+      q:"Điểm khác nhau then chốt giữa Continuous Delivery và Continuous Deployment là gì?",
+      options:[
+        {t:"Delivery luôn tự động lên production, Deployment thì không", ok:false},
+        {t:"Delivery đảm bảo sẵn sàng phát hành; Deployment tự động triển khai mọi thay đổi lên production", ok:true},
+        {t:"Delivery chỉ áp dụng cho Dev, Deployment chỉ áp dụng cho Ops", ok:false},
+        {t:"Hai khái niệm giống nhau hoàn toàn", ok:false},
+      ],
+      explain:"Continuous Delivery: luôn sẵn sàng phát hành. Continuous Deployment: tự động đưa mọi thay đổi đạt chuẩn lên production."
+    }
+  },
+  {
+    key:"IaC",
+    tags:["Quản lý hạ tầng bằng file","Nhất quán môi trường","Truy vết/rollback"],
+    cardFront:"IaC là gì? Vì sao IaC giúp giảm lỗi triển khai?",
+    cardBack:`
+      <p><b>Khái niệm:</b> IaC là quản lý và cung cấp hạ tầng bằng tệp cấu hình thay vì thao tác thủ công.</p>
+      <p><b>Đặc điểm:</b> Hạ tầng có thể version, review, truy vết và lặp lại; tạo môi trường nhất quán giữa dev–staging–prod.</p>
+      <p><b>Ứng dụng:</b> Dựng nhanh môi trường, mở rộng hạ tầng, hỗ trợ audit tuân thủ.</p>
+      <p><b>Ưu điểm:</b> Nhanh, nhất quán, giảm lỗi do con người.</p>
+      <p><b>Nhược điểm:</b> Sai trong IaC có thể nhân rộng sai; cần quản lý quyền và bí mật cẩn thận.</p>
+    `,
+    essay:`Mở bài: IaC là phương pháp quan trọng giúp chuẩn hoá hạ tầng trong DevOps.\n\nThân bài: Thay vì cấu hình hạ tầng thủ công, IaC mô tả hạ tầng bằng tệp cấu hình có thể lưu trữ trong hệ thống quản lý phiên bản. Nhờ đó, mọi thay đổi đều có thể review, truy vết và rollback. IaC giảm lỗi triển khai chủ yếu vì nó loại bỏ sự khác biệt cấu hình giữa các môi trường và giảm phụ thuộc vào thao tác con người.\n\nKết bài: IaC giúp dựng môi trường nhanh và nhất quán, nhưng cần kiểm soát thay đổi chặt chẽ để tránh “nhân bản sai” trên diện rộng.`,
+    quiz:{
+      q:"Lợi ích quan trọng nhất của IaC trong triển khai là gì?",
+      options:[
+        {t:"Giúp cấu hình thủ công nhanh hơn", ok:false},
+        {t:"Giúp hạ tầng nhất quán, lặp lại và truy vết được nhờ cấu hình dạng file", ok:true},
+        {t:"Chỉ dùng để viết tài liệu", ok:false},
+        {t:"Chỉ áp dụng cho container", ok:false},
+      ],
+      explain:"IaC giúp hạ tầng trở nên lặp lại, nhất quán và có thể kiểm soát như mã nguồn (review/rollback/audit)."
+    }
+  },
+  {
+    key:"DevSecOps",
+    tags:["Bảo mật xuyên suốt SDLC","Security gate","Tự động hoá kiểm tra"],
+    cardFront:"DevSecOps là gì? Nêu ưu điểm và rủi ro khi áp dụng cứng nhắc.",
+    cardBack:`
+      <p><b>Khái niệm:</b> DevSecOps tích hợp bảo mật vào toàn bộ vòng đời phát triển và vận hành phần mềm, không để bảo mật là bước kiểm tra cuối.</p>
+      <p><b>Đặc điểm:</b> Tự động hoá kiểm tra bảo mật trong pipeline (shift-left), đồng thời giám sát khi vận hành (shift-right).</p>
+      <p><b>Ứng dụng:</b> Quét mã/phụ thuộc, kiểm soát secret, quét container image, policy-as-code, bảo vệ chuỗi cung ứng phần mềm.</p>
+      <p><b>Ưu điểm:</b> Giảm nguy cơ phát hành mã có lỗ hổng, tăng tuân thủ.</p>
+      <p><b>Nhược điểm:</b> Nếu đặt quy tắc quá cứng có thể làm pipeline bị nghẽn và giảm tốc độ phát hành.</p>
+    `,
+    essay:`Mở bài: DevSecOps là bước phát triển của DevOps khi yêu cầu bảo mật trở thành yếu tố bắt buộc.\n\nThân bài: DevSecOps đưa bảo mật vào ngay từ đầu bằng cách tích hợp các hoạt động kiểm tra, quét và chính sách bảo mật vào pipeline. Bảo mật vì vậy không còn là công đoạn “kiểm tra cuối” mà là một phần tự động của quy trình build–test–deploy. Tuy nhiên, DevSecOps chỉ hiệu quả khi cân bằng giữa tốc độ và mức độ kiểm soát, tránh đặt tiêu chuẩn gây tắc nghẽn không cần thiết.\n\nKết bài: DevSecOps giúp phát hành nhanh mà vẫn an toàn, nhưng đòi hỏi quy trình, công cụ và chính sách hợp lý.`,
+    quiz:{
+      q:"Mục tiêu đúng của DevSecOps là gì?",
+      options:[
+        {t:"Để bộ phận Security kiểm tra sau cùng thay cho Dev", ok:false},
+        {t:"Tích hợp bảo mật vào quy trình DevOps bằng hợp tác và tự động hoá", ok:true},
+        {t:"Chỉ tập trung firewall và mạng", ok:false},
+        {t:"Chỉ dùng khi hệ thống đã bị hack", ok:false},
+      ],
+      explain:"DevSecOps tích hợp bảo mật xuyên suốt SDLC, dựa trên hợp tác và tự động hoá, thay vì kiểm tra muộn."
+    }
+  },
+  {
+    key:"NoOps",
+    tags:["Tự động hoá rất cao","Managed services","Giảm vận hành thủ công"],
+    cardFront:"NoOps là gì? Vì sao nói NoOps không có nghĩa là không cần con người?",
+    cardBack:`
+      <p><b>Khái niệm:</b> NoOps là định hướng tự động hoá vận hành ở mức rất cao nhằm giảm tối đa thao tác thủ công.</p>
+      <p><b>Đặc điểm:</b> Dựa vào managed services, autoscaling, self-healing, serverless, policy-as-code.</p>
+      <p><b>Ứng dụng:</b> Hệ thống cloud hiện đại, triển khai nhanh và mở rộng tự động.</p>
+      <p><b>Ưu điểm:</b> Giảm toil vận hành, giảm lỗi thao tác tay.</p>
+      <p><b>Nhược điểm:</b> Vẫn cần con người thiết kế, giám sát, tối ưu chi phí và xử lý sự cố lớn; có rủi ro lock-in nền tảng.</p>
+    `,
+    essay:`Mở bài: NoOps là định hướng vận hành nổi lên cùng sự phát triển của cloud và dịch vụ quản lý sẵn.\n\nThân bài: NoOps hướng tới việc tự động hoá phần lớn các hoạt động vận hành, nhờ đó giảm thao tác thủ công và giảm lỗi do con người. Tuy vậy, trên thực tế, NoOps không đồng nghĩa với “không cần vận hành”, mà là chuyển trọng tâm từ thao tác tay sang thiết kế nền tảng, giám sát, tối ưu chi phí và quản trị rủi ro phụ thuộc nhà cung cấp.\n\nKết bài: NoOps giúp tăng hiệu quả vận hành nếu hệ thống phù hợp và nền tảng đủ mạnh, nhưng vẫn cần năng lực kỹ thuật để kiểm soát chất lượng và chi phí.`,
+    quiz:{
+      q:"Hiểu đúng nhất về NoOps là gì?",
+      options:[
+        {t:"Không cần người vận hành trong mọi trường hợp", ok:false},
+        {t:"Tự động hoá vận hành ở mức cao, giảm thao tác thủ công; con người vẫn cần cho thiết kế/giám sát", ok:true},
+        {t:"Chỉ dành cho hệ thống on-premise", ok:false},
+        {t:"Chỉ là một công cụ triển khai", ok:false},
+      ],
+      explain:"NoOps là định hướng tự động hoá mạnh. Con người vẫn cần cho thiết kế, giám sát, tối ưu và ứng phó sự cố."
+    }
+  },
+  {
+    key:"MLOps",
+    tags:["ML in production","Giám sát drift","Pipeline dữ liệu–mô hình"],
+    cardFront:"MLOps là gì? Vì sao ML cần MLOps hơn phần mềm thông thường?",
+    cardBack:`
+      <p><b>Khái niệm:</b> MLOps là tập thực hành triển khai và duy trì mô hình ML trong production một cách đáng tin cậy.</p>
+      <p><b>Đặc điểm:</b> Ngoài code còn có dữ liệu và mô hình; mô hình có thể giảm chất lượng theo thời gian do drift nên cần giám sát và tái huấn luyện.</p>
+      <p><b>Ứng dụng:</b> Pipeline data→training→evaluation→registry→deploy→monitor→retrain.</p>
+      <p><b>Ưu điểm:</b> ML vận hành bền vững, dễ cập nhật, kiểm soát chất lượng tốt.</p>
+      <p><b>Nhược điểm:</b> Phức tạp và tốn chi phí hơn DevOps thường do phải quản trị dữ liệu/metric/drift.</p>
+    `,
+    essay:`Mở bài: Khi doanh nghiệp đưa AI/ML vào hệ thống, yêu cầu vận hành mô hình trong môi trường thật trở nên quan trọng.\n\nThân bài: MLOps mở rộng tư duy DevOps cho bài toán ML, vì ML không chỉ có mã nguồn mà còn có dữ liệu và mô hình. Chất lượng mô hình có thể suy giảm theo thời gian do thay đổi phân phối dữ liệu (drift), vì vậy cần pipeline huấn luyện tái lập, quản lý phiên bản dữ liệu/mô hình, triển khai có kiểm soát và giám sát liên tục. MLOps giúp phối hợp hiệu quả giữa data scientist, engineer và IT để đưa mô hình vào production ổn định.\n\nKết bài: MLOps giúp ML phát huy giá trị thực tế lâu dài, tuy nhiên đòi hỏi nền tảng và quy trình quản trị phức tạp hơn.`,
+    quiz:{
+      q:"Điểm khác biệt khiến MLOps cần thiết là gì?",
+      options:[
+        {t:"ML chỉ cần chạy một lần là xong", ok:false},
+        {t:"Mô hình phụ thuộc dữ liệu và có thể bị drift nên cần giám sát và tái huấn luyện", ok:true},
+        {t:"MLOps chỉ là đổi tên của DevOps", ok:false},
+        {t:"MLOps chỉ áp dụng cho frontend", ok:false},
+      ],
+      explain:"ML phụ thuộc dữ liệu và mô hình có thể suy giảm chất lượng (drift), nên cần quy trình vận hành riêng."
+    }
+  },
+  {
+    key:"Ansible",
+    tags:["Playbook","Tự động hoá tác vụ","Triển khai hàng loạt"],
+    cardFront:"Ansible là gì? Nêu ưu/nhược khi dùng trong dự án lớn.",
+    cardBack:`
+      <p><b>Khái niệm:</b> Ansible là công cụ tự động hoá cho quản lý cấu hình, triển khai ứng dụng và điều phối tác vụ, dựa trên playbook.</p>
+      <p><b>Đặc điểm:</b> Playbook đóng vai trò “bản thiết kế” mô tả tác vụ cần thực hiện trên các máy/thiết bị.</p>
+      <p><b>Ứng dụng:</b> Cài đặt phần mềm, cấu hình, triển khai hàng loạt, chuẩn hoá thao tác lặp lại.</p>
+      <p><b>Ưu điểm:</b> Dễ đọc, nhanh áp dụng, phù hợp tự động hoá tác vụ vận hành.</p>
+      <p><b>Nhược điểm:</b> Nếu tổ chức playbook kém, quy mô lớn dễ khó bảo trì; cần tiêu chuẩn hoá cấu trúc và biến cấu hình.</p>
+    `,
+    essay:`Mở bài: Ansible là công cụ tự động hoá phổ biến hỗ trợ triển khai và quản lý cấu hình.\n\nThân bài: Thông qua playbook, Ansible cho phép mô tả các bước triển khai/cấu hình một cách rõ ràng và có thể tái sử dụng. Công cụ này đặc biệt hữu ích khi cần thực hiện một tác vụ lặp đi lặp lại trên nhiều máy chủ, như cài đặt gói, cập nhật cấu hình và khởi động lại dịch vụ. Tuy nhiên, khi dự án mở rộng, playbook cần được tổ chức theo chuẩn để tránh phình to và khó kiểm soát.\n\nKết bài: Ansible giúp tự động hoá hiệu quả nhiều nhiệm vụ vận hành, nhưng cần tổ chức và chuẩn hoá tốt để dùng bền vững ở quy mô lớn.`,
+    quiz:{
+      q:"Playbook trong Ansible được hiểu đúng nhất là gì?",
+      options:[
+        {t:"Tập lệnh ngẫu nhiên, không cần cấu trúc", ok:false},
+        {t:"Bản thiết kế các tác vụ tự động hoá, mô tả làm gì và làm trên đâu", ok:true},
+        {t:"Chỉ là file log của hệ thống", ok:false},
+        {t:"Chỉ dùng để viết tài liệu", ok:false},
+      ],
+      explain:"Playbook là “blueprint” mô tả tác vụ tự động hoá: làm gì, cho máy nào/nhóm nào."
+    }
+  },
+  {
+    key:"Puppet",
+    tags:["Desired state","Manifest","Duy trì chuẩn cấu hình"],
+    cardFront:"Puppet là gì? Vì sao Puppet mạnh ở quản trị lâu dài?",
+    cardBack:`
+      <p><b>Khái niệm:</b> Puppet là công cụ quản lý cấu hình theo hướng khai báo trạng thái mong muốn (desired state).</p>
+      <p><b>Đặc điểm:</b> Mô tả desired state trong manifest; Puppet tạo catalog và áp dụng để đảm bảo node đúng cấu hình.</p>
+      <p><b>Ứng dụng:</b> Chuẩn hoá cấu hình doanh nghiệp, chống trôi cấu hình theo thời gian.</p>
+      <p><b>Ưu điểm:</b> Kiểm soát cấu hình nhất quán, dễ audit ở quy mô lớn.</p>
+      <p><b>Nhược điểm:</b> Thiết lập/thiết kế ban đầu nặng; cần mô hình hoá cấu hình tốt để tránh rối.</p>
+    `,
+    essay:`Mở bài: Puppet là công cụ quản lý cấu hình nổi bật ở cách tiếp cận khai báo trạng thái mong muốn.\n\nThân bài: Thay vì chạy từng lệnh theo kiểu kịch bản, Puppet cho phép mô tả hệ thống “nên ở trạng thái nào”, ví dụ gói nào phải có, dịch vụ nào phải chạy, tệp cấu hình phải đúng nội dung. Puppet sau đó biên dịch manifest thành catalog và áp dụng lên node để đưa node về đúng chuẩn cấu hình. Do luôn kiểm tra và duy trì trạng thái, Puppet đặc biệt phù hợp với quản trị lâu dài và quy mô lớn, nơi rủi ro “trôi cấu hình” xảy ra thường xuyên.\n\nKết bài: Puppet hỗ trợ chuẩn hoá cấu hình bền vững, nhưng đòi hỏi đầu tư thiết kế và vận hành ban đầu nghiêm túc.`,
+    quiz:{
+      q:"Khái niệm 'desired state' trong Puppet nghĩa là gì?",
+      options:[
+        {t:"Danh sách lệnh phải chạy theo thứ tự cứng", ok:false},
+        {t:"Trạng thái cấu hình mong muốn của hệ thống mà công cụ sẽ đảm bảo duy trì", ok:true},
+        {t:"Trạng thái ngẫu nhiên tuỳ thời điểm", ok:false},
+        {t:"Chỉ là thông tin báo cáo", ok:false},
+      ],
+      explain:"Puppet tập trung vào trạng thái mong muốn (desired state) và cơ chế đưa hệ thống về đúng trạng thái đó."
+    }
+  }
+];
+
+function $(sel){return document.querySelector(sel);}
+function esc(s){return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");}
+
+const view = $("#view");
+const tabs = [...document.querySelectorAll(".tab")];
+tabs.forEach(t=>t.addEventListener("click",()=>{tabs.forEach(x=>x.classList.remove("active"));t.classList.add("active");render(t.dataset.view);}))
+
+let state = {i:0, quizDone:false};
+
+function renderCards(){
+  const c = concepts[state.i];
+  view.innerHTML = `
+    <div class="row">
+      <button onclick="prev()">&larr; Trước</button>
+      <button onclick="next()">Sau &rarr;</button>
+      <span class="muted small">Thẻ ${state.i+1}/${concepts.length}</span>
+      <button onclick="shuffle()">Xáo trộn</button>
+    </div>
+    <div class="box">
+      <div class="front">${esc(c.cardFront)}</div>
+      <div class="row" style="margin-top:10px">
+        ${c.tags.map(t=>`<span class="pill">${esc(t)}</span>`).join("")}
+      </div>
+      <button onclick="toggleBack()">Hiện/Ẩn đáp án</button>
+      <div class="back" id="back">${c.cardBack}</div>
+    </div>
+    <div class="hr"></div>
+    <div class="muted small">
+      Mẹo: Hãy dừng 10 giây, tự trả lời theo 4 ý: <b>khái niệm → đặc điểm → ứng dụng → ưu/nhược</b>, rồi mới xem đáp án.
+    </div>
+  `;
+}
+function toggleBack(){
+  const b = $("#back");
+  b.style.display = (b.style.display==="block") ? "none" : "block";
+}
+function prev(){ state.i = (state.i-1+concepts.length)%concepts.length; render("cards"); }
+function next(){ state.i = (state.i+1)%concepts.length; render("cards"); }
+function shuffle(){
+  for(let i=concepts.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [concepts[i],concepts[j]]=[concepts[j],concepts[i]];
+  }
+  state.i=0; render("cards");
+}
+
+let qState = {idx:0, chosen:null, locked:false};
+function renderQuiz(){
+  const c = concepts[qState.idx];
+  qState.chosen = null; qState.locked=false;
+  view.innerHTML = `
+    <div class="row">
+      <button onclick="qPrev()">&larr; Câu trước</button>
+      <button onclick="qNext()">Câu sau &rarr;</button>
+      <span class="muted small">Câu ${qState.idx+1}/${concepts.length} — ${esc(c.key)}</span>
+      <button onclick="qShuffle()">Xáo trộn câu</button>
+    </div>
+    <div class="box">
+      <div class="front">${esc(c.quiz.q)}</div>
+      <div id="opts">
+        ${c.quiz.options.map((o,k)=>`<div class="opt" onclick="choose(${k})">${esc(o.t)}</div>`).join("")}
+      </div>
+      <div class="row">
+        <button onclick="showExplain()">Hiện giải thích</button>
+      </div>
+      <div class="explain" id="ex" style="display:none">${esc(c.quiz.explain)}</div>
+    </div>
+  `;
+}
+function choose(k){
+  if(qState.locked) return;
+  qState.locked=true;
+  const c=concepts[qState.idx];
+  const opts=[...document.querySelectorAll(".opt")];
+  opts.forEach((el,i)=>{
+    const ok=c.quiz.options[i].ok;
+    if(ok) el.classList.add("correct");
+    if(i===k && !ok) el.classList.add("wrong");
+  });
+}
+function showExplain(){ const ex=$("#ex"); ex.style.display = (ex.style.display==="block")?"none":"block"; }
+function qPrev(){ qState.idx=(qState.idx-1+concepts.length)%concepts.length; render("quiz"); }
+function qNext(){ qState.idx=(qState.idx+1)%concepts.length; render("quiz"); }
+function qShuffle(){
+  for(let i=concepts.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [concepts[i],concepts[j]]=[concepts[j],concepts[i]];
+  }
+  qState.idx=0; render("quiz");
+}
+
+function renderEssay(){
+  const c = concepts[state.i];
+  view.innerHTML = `
+    <div class="row">
+      <button onclick="prev()">&larr; Đổi khái niệm</button>
+      <button onclick="next()">Đổi khái niệm &rarr;</button>
+      <span class="muted small">Đang xem: <b>${esc(c.key)}</b></span>
+      <button onclick="fillEssay()">Sinh đoạn tự luận</button>
+    </div>
+    <div class="box">
+      <div class="front">Mẫu đoạn tự luận (8–12 câu) cho: ${esc(c.key)}</div>
+      <div class="muted small" style="margin:8px 0">
+        Mẹo: Khi thi, viết theo khung <b>Mở bài → Thân bài → Kết bài</b>. Trong thân bài nhớ nêu đủ: <b>khái niệm – đặc điểm – ứng dụng – ưu/nhược</b>.
+      </div>
+      <textarea id="essayArea" placeholder="Bấm “Sinh đoạn tự luận” hoặc tự viết vào đây..."></textarea>
+    </div>
+  `;
+}
+function fillEssay(){
+  const c=concepts[state.i];
+  $("#essayArea").value = c.essay;
+}
+
+function renderPlan(){
+  view.innerHTML = `
+    <div class="box">
+      <div class="front">Kế hoạch ôn để nhớ lâu (gợi ý)</div>
+      <p><b>Nguyên tắc:</b> (1) Tự trả lời trước rồi mới xem đáp án; (2) Ôn cách quãng theo mốc 1–3–7 ngày; (3) Trộn câu hỏi để luyện phân biệt ý.</p>
+      <div class="hr"></div>
+      <p><b>Lịch 7 ngày (25–35 phút/ngày):</b></p>
+      <ul>
+        <li>Ngày 1: DevOps + Agile (flashcard + 1 đoạn tự luận)</li>
+        <li>Ngày 2: CI/CD + IaC</li>
+        <li>Ngày 3: DevSecOps + Ansible</li>
+        <li>Ngày 4: Puppet + NoOps</li>
+        <li>Ngày 5: MLOps + Quiz trộn toàn bộ</li>
+        <li>Ngày 6: Viết 2 bài tự luận hoàn chỉnh (mỗi bài 15–20 phút)</li>
+        <li>Ngày 7: Thi thử: bốc ngẫu nhiên 4 khái niệm, viết 4 đoạn</li>
+      </ul>
+      <p class="muted small">Gợi ý: Mỗi lần ôn, hãy nói to 4 ý (khái niệm–đặc điểm–ứng dụng–ưu/nhược) trước khi mở đáp án. Việc “truy xuất” giúp nhớ lâu hơn đọc lại.</p>
+    </div>
+  `;
+}
+
+function render(which){
+  if(which==="cards") renderCards();
+  else if(which==="quiz") renderQuiz();
+  else if(which==="essay") renderEssay();
+  else renderPlan();
+}
+render("cards");
+</script>
+</body></html>
